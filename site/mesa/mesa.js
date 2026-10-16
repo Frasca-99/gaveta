@@ -583,13 +583,8 @@
     }
     rovingFocus();
     renderBar();
-    const where = `${slide()}|${placement.top}|${placement.height}|${count}|${drawer.open}`;
-    if (where !== guideWhere) {
-      guideWhere = where;
-      guide.place();
-    }
+    guide.update();
   }
-  let guideWhere = "";
 
   /** The selection bar: with nothing chosen it offers to choose everything; with some, to copy them. */
   function renderBar() {
@@ -600,7 +595,7 @@
     barra.dataset.chave = key;
     if (count === 0) {
       barra.innerHTML = total > 1
-        ? `<button class="pilula" type="button" data-acao="todos">${CIRCLE}Selecionar todos</button><span class="espaco"></span><span class="dica">ou use a bolinha</span>`
+        ? `<button class="pilula" type="button" data-acao="todos">${CIRCLE}Selecionar todos</button><span class="espaco"></span><span class="dica">${finger.matches ? "ou toque nos círculos" : "⌘-clique seleciona vários"}</span>`
         : `<span class="dica">Clique para copiar</span><span class="espaco"></span>`;
     } else {
       barra.innerHTML = `<span class="quantos">${count} de ${total}</span><span class="espaco"></span>
@@ -849,7 +844,7 @@
     else drawer.selection.add(id);
     drawer.anchor = id;
     render();
-    guide.chose();
+    guide.update();
   }
 
   function extendSelection(id) {
@@ -862,13 +857,13 @@
     }
     for (const p of list.slice(Math.min(from, to), Math.max(from, to) + 1)) drawer.selection.add(p.id);
     render();
-    guide.chose();
+    guide.update();
   }
 
   function selectAll() {
     for (const p of drawer.prints) drawer.selection.add(p.id);
     render();
-    guide.chose();
+    guide.update();
     announce(`${drawer.prints.length} prints escolhidos.`);
   }
 
@@ -914,7 +909,7 @@
     }
     const one = prints.length === 1;
     announce(one ? "Print copiado. Cole no chamado com ⌘V." : `${prints.length} prints copiados. Um ⌘V no chamado cola todos.`);
-    guide.copied(prints.length);
+    guide.update();
   }
 
   // ── throwing away ───────────────────────────────────────────────────────
@@ -1007,7 +1002,7 @@
       ? "Clique numa janela para fotografá-la. Esc cancela."
       : finger.matches ? "Arraste o dedo sobre o que quer guardar." : "Arraste sobre qualquer coisa. Esc cancela.";
     dica.hidden = false;
-    guide.hide();
+    guide.update();
   }
 
   function leaveMode() {
@@ -1016,7 +1011,7 @@
     for (const button of modos) if (button.hasAttribute("aria-pressed")) button.setAttribute("aria-pressed", "false");
     camada.hidden = true;
     dica.hidden = true;
-    guide.resume();
+    guide.update();
   }
 
   for (const button of modos) {
@@ -1117,6 +1112,7 @@
   function capture(area) {
     Object.assign(flash.style, { left: `${area.x}px`, top: `${area.y}px`, width: `${area.w}px`, height: `${area.h}px` });
     const print = makePrint(area);
+    guide.captured();
     if (!still.matches) {
       flash.animate([{ opacity: 0.85 }, { opacity: 0 }], { duration: 320, easing: "ease-out" });
     }
@@ -1332,6 +1328,7 @@
     return { w: Math.round(w), h: Math.round(h) };
   }
   const onDeskNow = new Map();
+  let deskDrag = false;
 
   /** A print as a file on the desk, its picture centred where it was let go. */
   function putOnDesk(print, x, y) {
@@ -1386,12 +1383,18 @@
         if (!moving && Math.hypot(e.clientX - startX, e.clientY - startY) < 4) return;
         if (!moving) {
           moving = true;
+          deskDrag = true;
           item.classList.add("movendo");
+          guide.update();
         }
         if (!frame) frame = requestAnimationFrame(follow);
       };
       const up = (e) => {
         cancelAnimationFrame(frame);
+        if (deskDrag) {
+          deskDrag = false;
+          queueMicrotask(() => guide.update());
+        }
         lixo.classList.remove("alvo");
         anexos.classList.remove("alvo");
         if (!moving) {
@@ -1426,6 +1429,8 @@
       };
       const cancel = () => {
         cancelAnimationFrame(frame);
+        deskDrag = false;
+        queueMicrotask(() => guide.update());
         lixo.classList.remove("alvo");
         anexos.classList.remove("alvo");
         item.classList.remove("movendo");
@@ -1450,6 +1455,7 @@
     setTimeout(() => entry.item.remove(), 260);
     lixo.classList.add("cheio");
     announce("Print jogado no Lixo.");
+    guide.update();
   }
 
   function backToDrawer(print) {
@@ -1625,155 +1631,195 @@
     }
   });
 
-  // ── the guide: three small steps, the first time ─────────────────────────
+  // ── the guide: a tip that reads the desk and says the next thing to do ──
 
   const guide = (() => {
     const box = $("#guia");
     const step = $("#guia-passo");
     const text = $("#guia-texto");
-    let current = 0;
+    const history = { captured: false, opened: false, pasted: 0 };
+    let started = false;
     let off = false;
-    let paused = false;
+    let anchor = "";
+    let wording = "";
+    let size = { w: 0, h: 0 };
     let hideTimer = 0;
-    let anchor = null;
-    const steps = {
-      1: () => ({
-        passo: "1 de 3",
-        texto: finger.matches
-          ? "<b>Tire um print.</b> Toque em <b>Tela</b>, ou em <b>Seleção</b> e arraste o dedo sobre o que quiser."
-          : "<b>Tire um print.</b> Escolha <b>Seleção</b> e arraste sobre a loja, ou sobre qualquer coisa.",
-        alvo: $(".captura"),
-        seta: "baixo",
-      }),
-      2: () => ({
-        passo: "2 de 3",
-        texto: finger.matches
-          ? "<b>Ele caiu na gaveta.</b> Toque na borda de madeira, à direita, para abrir."
-          : "<b>Ele caiu na gaveta.</b> Encoste o ponteiro na borda direita da tela para abrir.",
-        alvo: corpo,
-        seta: "direita",
-      }),
-      3: () => ({
-        passo: "3 de 3",
-        texto: finger.matches
-          ? "<b>Escolha vários</b> pela bolinha e toque em <b>Copiar todos</b>. Depois, <b>Colar</b> no chamado."
-          : "<b>Escolha vários</b> pela bolinha e clique em <b>Copiar todos</b>. Depois, <b>⌘V</b> no chamado.",
-        alvo: corpo,
-        seta: "direita",
-      }),
-      4: () => ({
-        passo: "Pronto",
-        texto: `${finger.matches ? "Um toque" : "Um ⌘V"}, todos os prints, na ordem em que foram tirados. É isso que a Gaveta faz no seu Mac.`,
-        alvo: chamado,
-        seta: "esquerda",
-      }),
-    };
+    const captura = $(".captura");
+    const touch = () => finger.matches;
 
-    function place() {
-      mesa.classList.toggle("guia-no-inicio", !off && !paused && current === 1);
-      if (off || paused || !current) return;
-      // Step 3 speaks about the open drawer: with the drawer shut again, the tip goes back to saying how to open it.
-      const visibleStep = current === 3 && !drawer.open ? 2 : current;
-      const s = steps[visibleStep]();
-      if (step.textContent !== s.passo) step.textContent = s.passo;
-      if (text.innerHTML !== s.texto) text.innerHTML = s.texto;
+    /** What to say now, and where to point: worked out from the desk as it is, never from a fixed script. */
+    function hint() {
+      if (!started || off) return null;
+      if (mode || drag || deskDrag) return null; // the capture bar and a drag have the stage
+      if (history.pasted) {
+        const n = history.pasted;
+        return {
+          passo: "Pronto",
+          texto: `<b>${n === 1 ? "1 print colado" : `${n} prints colados`} de uma vez</b>, na ordem em que foram tirados. É isso que a Gaveta faz no seu Mac.`,
+          alvo: chamado, onde: "chamado",
+        };
+      }
+      if (narrow() && drawer.open) return null; // on a phone the drawer's own bar says it
+      if (clipboard.length) {
+        const n = clipboard.length;
+        const what = n === 1 ? "<b>Print copiado.</b>" : `<b>${n} prints copiados.</b>`;
+        return {
+          passo: "3 de 3 · Colar",
+          texto: touch()
+            ? `${what} Toque em <b>${n === 1 ? "Colar" : `Colar ${n} prints`}</b> no chamado.`
+            : `${what} Cole no chamado com <b>⌘V</b>${n === 1 ? "." : ", todos de uma vez."}`,
+          alvo: chamado, onde: "chamado", realce: touch() ? colar : anexos,
+        };
+      }
+      if (!drawer.prints.length) {
+        if (onDeskNow.size) {
+          return {
+            passo: "Na mesa",
+            texto: `<b>${onDeskNow.size === 1 ? "Seu print está" : "Seus prints estão"} na mesa.</b> Arraste até o chamado para anexar, ou até a borda direita para guardar de volta na gaveta.`,
+            alvo: chamado, onde: "chamado", realce: anexos,
+          };
+        }
+        return { passo: "1 de 3 · Tirar", texto: "<b>A gaveta está vazia.</b> Tire um print com a barra aqui embaixo.", alvo: captura, onde: "barra-captura" };
+      }
+      if (drawer.open) {
+        const n = drawer.selection.size;
+        if (n === 0) {
+          return {
+            passo: "2 de 3 · Selecionar",
+            texto: touch()
+              ? "<b>Toque num print</b> para copiar só ele. Para selecionar vários, toque no círculo de cada um ou em <b>Selecionar todos</b>."
+              : "<b>Clique num print</b> para copiar só ele. Para selecionar vários, use <b>⌘-clique</b> ou <b>Selecionar todos</b>, lá embaixo.",
+            alvo: corpo, onde: "frente", realce: $("[data-acao='todos']", barra),
+          };
+        }
+        if (n === 1) {
+          return {
+            passo: "2 de 3 · Selecionar",
+            texto: `<b>1 print selecionado.</b> ${touch() ? "Toque no círculo de outros" : "Use <b>⌘-clique</b> em outros"} para selecionar mais, ou ${touch() ? "toque" : "clique"} em <b>Copiar</b>.`,
+            alvo: corpo, onde: "barra", realce: $("[data-acao='copiar']", barra),
+          };
+        }
+        return {
+          passo: "2 de 3 · Copiar",
+          texto: `<b>${n} prints selecionados.</b> ${touch() ? "Toque" : "Clique"} em <b>Copiar todos</b> para levar os ${n} de uma vez.`,
+          alvo: corpo, onde: "barra", realce: $("[data-acao='copiar']", barra),
+        };
+      }
+      if (!history.captured && !history.opened) {
+        return {
+          passo: "1 de 3 · Tirar",
+          texto: touch()
+            ? "<b>Tire um print desta mesa.</b> Toque em <b>Tela</b>, ou em <b>Seleção</b> e arraste o dedo."
+            : "<b>Tire um print desta mesa.</b> Escolha <b>Seleção</b> na barra e arraste sobre a loja, ou sobre qualquer coisa.",
+          alvo: captura, onde: "barra-captura", realce: $(".captura-modo[data-modo='selecao']"),
+        };
+      }
+      const fresh = history.captured && !history.opened;
+      return {
+        passo: "2 de 3 · Abrir",
+        texto: (fresh ? "<b>Seu print caiu na gaveta.</b> " : "<b>Seus prints estão na gaveta.</b> ")
+          + (touch() ? "Toque na borda de madeira, à direita, para abrir." : "Encoste o ponteiro na borda direita da tela para abrir."),
+        alvo: corpo, onde: "frente",
+      };
+    }
+
+    /** Where the tip stands for a hint, and which way its arrow points. */
+    function spot(h, w, hh) {
+      const m = mesaBox();
+      if (h.onde === "barra-captura") {
+        const r = onDesk(captura.getBoundingClientRect());
+        const x = r.x + r.w / 2 - w / 2;
+        const cx = clamp(x, 10, m.width - w - 10);
+        return { x: cx, y: r.y - hh - 14, seta: cx === x ? "baixo" : "nenhuma" };
+      }
+      if (h.onde === "chamado") {
+        if (narrow() || !shown(chamado)) return { x: (m.width - w) / 2, y: onDesk(captura.getBoundingClientRect()).y - hh - 12, seta: "nenhuma" };
+        const r = onDesk(chamado.getBoundingClientRect());
+        const shelf = onDesk(anexos.getBoundingClientRect());
+        return { x: r.x + r.w + 16, y: shelf.y + shelf.h / 2 - hh / 2, seta: "esquerda" };
+      }
+      // Beside the drawer, on its spring: opening it pushes the tip aside, shutting it brings the tip back.
+      const top = (parseFloat(getComputedStyle(gaveta).top) || 28) + placement.top;
+      const scroll = Math.max(0, layout.height - (placement.height - L.rail * 2 - L.footer));
+      const x = m.width - drawerWidth + slide() - w - 16;
+      let y = h.onde === "barra"
+        ? top + placement.height - L.rail - L.footer / 2 - hh / 2
+        : top + L.rail + (layout.tops[drawer.prints.length - 1] ?? 0) - scroll + 24 - hh / 2;
+      // never over the page's words or the capture bar, judged where the open drawer puts it, so the height never jumps
+      const pushed = m.width - drawerWidth - w - 16;
+      for (const el of [$("#palco > .abertura"), captura]) {
+        const r = onDesk(el.getBoundingClientRect());
+        if (overlaps({ x: pushed, y, w, h: hh }, { x: r.x - 12, y: r.y - 12, w: r.w + 24, h: r.h + 24 })) {
+          y = el === captura ? r.y - hh - 14 : r.y + r.h + 14;
+        }
+      }
+      return { x, y, seta: "direita" };
+    }
+
+    let lit = null;
+    function update() {
+      const h = hint();
+      const want = h?.realce || null;
+      if (want !== lit) {
+        lit?.classList.remove("realce");
+        lit = want;
+        // a fresh element each time the bar is redrawn: the light starts over only when the subject changes
+        lit?.classList.add("realce");
+      } else if (lit && !lit.classList.contains("realce")) {
+        lit.classList.add("realce");
+      }
+      mesa.classList.toggle("guia-no-inicio", !!h && h.passo.startsWith("1 de 3"));
+      if (!h) {
+        if (!box.hidden && !box.classList.contains("saindo")) {
+          box.classList.add("saindo");
+          clearTimeout(hideTimer);
+          hideTimer = setTimeout(() => { if (box.classList.contains("saindo")) box.hidden = true; }, 250);
+        }
+        return;
+      }
+      clearTimeout(hideTimer);
       const appearing = box.hidden || box.classList.contains("saindo");
       box.hidden = false;
       box.classList.remove("saindo");
-      box.dataset.seta = s.seta;
-      const m = mesaBox();
-      const target = s.alvo && shown(s.alvo) ? onDesk(s.alvo.getBoundingClientRect()) : null;
-      const w = box.offsetWidth, h = box.offsetHeight;
-      let x, y;
-      if (narrow() && current === 4) {
-        box.dataset.seta = "nenhuma";
-        x = (m.width - w) / 2;
-        y = onDesk($(".captura").getBoundingClientRect()).y - h - 12;
-      } else if (!target) {
-        box.dataset.seta = "nenhuma";
-        x = (m.width - w) / 2;
-        y = m.height - h - 170;
-      } else if (s.seta === "baixo") {
-        x = target.x + target.w / 2 - w / 2;
-        y = target.y - h - 14;
-      } else if (s.seta === "esquerda") {
-        // beside the ticket, level with its attachments
-        const shelf = onDesk(anexos.getBoundingClientRect());
-        x = target.x + target.w + 16;
-        y = shelf.y + shelf.h / 2 - h / 2;
-      } else {
-        // beside the drawer: by its top for the edge, by the front card's circle for choosing
-        const visibleLeft = m.width - drawerWidth + slide();
-        const top = (parseFloat(getComputedStyle(gaveta).top) || 28) + placement.top;
-        const scroll = Math.max(0, layout.height - (placement.height - L.rail * 2 - L.footer));
-        const frontDot = top + L.rail + (layout.tops[drawer.prints.length - 1] ?? 0) - scroll + 24;
-        // Level with the front card's circle whether the drawer is shut or open, so opening only pushes it sideways.
-        x = visibleLeft - w - 16;
-        y = frontDot - h / 2;
-        // Never over the page's own words, judged where the open drawer would push it, so the height never jumps.
-        const pushed = m.width - drawerWidth - w - 16;
-        const words = onDesk($("#palco > .abertura").getBoundingClientRect());
-        if (overlaps({ x: pushed, y, w, h }, { x: words.x - 12, y: words.y - 12, w: words.w + 24, h: words.h + 24 })) {
-          y = words.y + words.h + 14;
-        }
+      const words = h.passo + h.texto;
+      if (words !== wording) {
+        wording = words;
+        step.textContent = h.passo;
+        text.innerHTML = h.texto;
+        size = { w: box.offsetWidth, h: box.offsetHeight };
       }
-      const cx = clamp(x, 10, m.width - w - 10);
-      if (s.seta === "baixo" && cx !== x) box.dataset.seta = "nenhuma";
-      const spot = `translate(${Math.round(cx)}px, ${Math.round(clamp(y, 40, m.height - h - 10))}px)`;
-      // Beside the drawer the tip rides with it, on the drawer's own spring, as if the oak pushed it.
-      // Moving to another thing (the bar, the drawer, the ticket) it does not fly across: it fades in where it goes.
-      const jump = appearing || anchor !== s.alvo;
-      anchor = s.alvo;
-      if (jump) {
+      const m = mesaBox();
+      const where = spot(h, size.w, size.h);
+      box.dataset.seta = where.seta;
+      const place = `translate(${Math.round(clamp(where.x, 10, m.width - size.w - 10))}px, ${Math.round(clamp(where.y, 40, m.height - size.h - 10))}px)`;
+      // A new subject fades in where it belongs; the same subject rides along with what it points at.
+      const key = h.onde;
+      if (appearing || key !== anchor) {
+        anchor = key;
         box.classList.add("sem-mola");
-        box.style.transform = spot;
+        box.style.transform = place;
         void box.offsetWidth;
         box.classList.remove("sem-mola");
         if (!still.matches) box.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 220, easing: "ease-out" });
-      } else if (box.style.transform !== spot) {
-        box.style.transform = spot;
+      } else if (box.style.transform !== place) {
+        box.style.transform = place;
       }
     }
 
-    function go(next) {
-      if (off || next <= current) return;
-      current = next;
-      paused = false;
-      clearTimeout(hideTimer);
-      place();
-      if (next === 4) hideTimer = setTimeout(() => api.hide(true), 8000);
-    }
-
     const api = {
-      start: () => setTimeout(() => go(1), 900),
-      captured: () => {
-        if (!drawer.open) go(2);
-        else if (!narrow()) go(3);
+      start: () => setTimeout(() => { started = true; update(); }, 900),
+      captured: () => { history.captured = true; update(); },
+      drawerOpened: () => { history.opened = true; update(); },
+      pasted: (count) => {
+        if (!count || off) return;
+        history.pasted = count;
+        update();
+        setTimeout(() => { off = true; update(); }, 8000);
       },
-      // On a phone the drawer covers the desk: the bar at its foot says what to do, and the guide waits.
-      drawerOpened: () => {
-        if (narrow()) api.hide();
-        else if (current >= 1 && current < 3) go(3);
-      },
-      chose: () => {},
-      copied: () => {},
-      pasted: (count) => { if (count > 0) go(4); },
-      hide: (forever) => {
-        if (forever) off = true;
-        paused = !forever;
-        mesa.classList.remove("guia-no-inicio");
-        if (box.hidden) return;
-        box.classList.add("saindo");
-        setTimeout(() => { if (off || paused) box.hidden = true; }, 250);
-      },
-      resume: () => {
-        paused = false;
-        place();
-      },
-      place,
+      update,
     };
-    $("#guia-fechar").addEventListener("click", () => api.hide(true));
-    addEventListener("resize", () => place());
+    $("#guia-fechar").addEventListener("click", () => { off = true; update(); });
+    addEventListener("resize", () => update());
     return api;
   })();
 

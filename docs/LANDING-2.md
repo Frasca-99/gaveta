@@ -35,14 +35,14 @@ Mesmas medidas, cores e tempos do app nativo:
 - Fechada, só a borda da frente de carvalho aparece. Encostar o ponteiro na borda direita (ou ⌃⌥G) abre.
 - Print novo: um flash, o print voa do lugar onde foi tirado até a fresta, a gaveta se abre um pouco para receber e dá um tranco.
 - Fichas com aba datilografada ("agora", "há 5 min"), a foto inteira e "Print · 1440 × 900". A mais nova na frente; as de trás viram faixas.
-- Clique copia (carimbo COPIADO). Bolinha, ⌘-clique e ⇧-clique escolhem vários. Barra de baixo: Selecionar todos, Copiar todos.
+- Clique copia (carimbo COPIADO). ⌘-clique e ⇧-clique selecionam vários (o círculo da ficha também). Barra de baixo: Selecionar todos, Copiar todos.
 - ⌘V com o chamado na frente cola tudo de uma vez. Arrastar uma ficha (ou as escolhidas) até o chamado também anexa.
 - X, ou arrastar até o Lixo: a ficha é puxada para fora e cai.
 - Arrastar uma ficha para a mesa: ela sai da gaveta e fica na mesa como arquivo, com a miniatura e o nome. Dali vai para o chamado (é copiada e continua na mesa), para o Lixo ou de volta à gaveta pela borda direita. Clique duplo abre na Pré-Visualização.
 
-## Guia de 3 passos
+## Dicas
 
-Um balão discreto conduz a primeira vez: tirar um print, abrir a gaveta, colar vários no chamado. Dá para fechar.
+Um balão discreto diz o próximo passo, calculado a partir do que está na mesa naquele momento (e não de um roteiro fixo): tirar um print (aponta a barra), abrir a gaveta (encostado na frente de madeira, empurrado por ela quando abre), selecionar vários com ⌘-clique ou Selecionar todos, Copiar todos, colar no chamado com ⌘V, e o que fazer com prints deixados na mesa. O botão de que a dica fala brilha por alguns segundos. Some durante a captura e os arrastos, e dá para fechar.
 
 ## Celular
 
