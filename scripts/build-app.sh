@@ -1,6 +1,7 @@
 #!/bin/bash
 # Builds build/Gaveta.app with SwiftPM, no Xcode project needed.
 # Usage: scripts/build-app.sh [debug|release]
+#        UNIVERSAL=1 scripts/build-app.sh   (Apple silicon and Intel in one app)
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -8,8 +9,10 @@ CONFIG="${1:-release}"
 APP="build/Gaveta.app"
 VERSION="0.1.0"
 
-swift build -c "$CONFIG"
-BIN="$(swift build -c "$CONFIG" --show-bin-path)/Gaveta"
+ARCHS=()
+if [ "${UNIVERSAL:-0}" = 1 ]; then ARCHS=(--arch arm64 --arch x86_64); fi
+swift build -c "$CONFIG" ${ARCHS[@]+"${ARCHS[@]}"}
+BIN="$(swift build -c "$CONFIG" ${ARCHS[@]+"${ARCHS[@]}"} --show-bin-path)/Gaveta"
 
 rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
