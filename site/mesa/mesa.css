@@ -300,7 +300,11 @@ button { font: inherit; color: inherit; }
 .mesa-rodape a:hover { color: var(--tinta); }
 
 /* ── the drawer, as in the app ─────────────────────────────────────────── */
-.gaveta { position: absolute; z-index: 950; top: var(--menus); right: 0; bottom: 0; width: 402px; pointer-events: none; }
+.gaveta {
+  position: absolute; z-index: 950; top: var(--menus); right: 0; bottom: 0; width: 402px; pointer-events: none;
+  user-select: none; -webkit-user-select: none;
+}
+.retrato img, .solto img, .fantasma img { -webkit-user-drag: none; }
 .borda { position: absolute; top: 0; bottom: 0; right: 0; width: 8px; pointer-events: auto; }
 .gaveta-corpo {
   position: absolute; right: 0; top: 200px; width: 358px; height: 230px;

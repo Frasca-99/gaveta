@@ -719,7 +719,8 @@
     if (!hit) return;
     press = { hit, pointerId: event.pointerId, x: event.clientX, y: event.clientY, dragging: false, event };
     pilha.setPointerCapture(event.pointerId);
-    if (event.pointerType !== "mouse") event.preventDefault();
+    // no text selection or native drag of a picture inside the card can steal the gesture
+    event.preventDefault();
   });
   pilha.addEventListener("pointerup", (event) => {
     if (!press || press.pointerId !== event.pointerId) return;
@@ -729,8 +730,12 @@
       endDrag(event);
       return;
     }
+    // a press that moved is never a click: letting go over the cross must not throw the card away
+    if (Math.hypot(event.clientX - current.x, event.clientY - current.y) >= 5) return;
     clickCard(current.hit, current.event);
   });
+  // nothing in the drawer is dragged by the browser itself
+  gaveta.addEventListener("dragstart", (event) => event.preventDefault());
   pilha.addEventListener("pointercancel", () => {
     if (press?.dragging) cancelDrag();
     press = null;
@@ -1133,7 +1138,7 @@
   function followPress(event) {
     if (!press.dragging) {
       if (Math.hypot(event.clientX - press.x, event.clientY - press.y) < 5) return;
-      if (press.hit.part !== "ficha") return;
+      // A card is taken by any part of it, its corners too: the circle and the cross only act on a click.
       startDrag(press.hit.print);
       press.dragging = true;
     }
