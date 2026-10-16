@@ -315,7 +315,7 @@
     return print;
   }
 
-  /** The print, drawn at `width` × `height` (fitted whole inside that box with `fit`). Without a size, the card it sits on sizes it. */
+  /** The print, drawn at `width` × `height` (fitted whole inside that box with `fit`). */
   function photo(print, width, height, fit = false) {
     const box = document.createElement("span");
     box.className = "foto";
@@ -323,18 +323,33 @@
     scale.className = "foto-escala";
     scale.append(print.portrait.cloneNode(true));
     box.append(scale);
-    if (width) sizePhoto(box, print, width, height, fit);
+    sizePhoto(box, print, width, height, fit);
     return box;
   }
 
   function sizePhoto(box, print, width, height, fit) {
     const k = fit ? Math.min(width / print.w, height / print.h) : width / print.w;
+    const x = fit ? (width - print.w * k) / 2 : 0;
+    const y = fit ? (height - print.h * k) / 2 : 0;
     box.style.width = `${width}px`;
     box.style.height = `${height}px`;
-    const scale = box.firstElementChild;
-    scale.style.setProperty("--k", k);
-    scale.style.setProperty("--ex", fit ? `${(width - print.w * k) / 2}px` : "0px");
-    scale.style.setProperty("--ey", fit ? `${(height - print.h * k) / 2}px` : "0px");
+    box.firstElementChild.style.transform = `translate(${x}px, ${y}px) scale(${k})`;
+  }
+
+  /**
+   * Writes a style, an attribute or a text only when it changes. A card that
+   * did not move costs the browser nothing, and nothing set on a card is
+   * inherited by the copy of the desk inside it.
+   */
+  const written = new WeakMap();
+  function write(el, key, value) {
+    let seen = written.get(el);
+    if (!seen) written.set(el, (seen = {}));
+    if (seen[key] === value) return;
+    seen[key] = value;
+    if (key === "text") el.textContent = value;
+    else if (key.startsWith("aria-") || key.startsWith("data-")) el.setAttribute(key, value);
+    else el.style[key] = value;
   }
 
   /** "agora", "há 5 min", "há 2 h", as the card's tab says it. */
@@ -371,7 +386,8 @@
         budget -= share;
       }
     }
-    if (hovered != null && hovered < count - 1) reveals[hovered] = Math.max(reveals[hovered], S.cardH + S.gap);
+    // A band opens up whole under the pointer; a card already whole stays put, so the stack never jiggles.
+    if (hovered != null && hovered < count - 1 && reveals[hovered] < S.cardH) reveals[hovered] = S.cardH + S.gap;
     const tops = [];
     let y = S.topInset;
     for (const reveal of reveals) {
@@ -419,6 +435,7 @@
     anchor: null,
   };
   const cards = new Map();
+  const parts = new Map();
   let clipboard = [];
   let layout = stackOf(0, null, 0);
   let placement = { top: 0, height: L.empty };
@@ -453,12 +470,20 @@
     card.setAttribute("role", "listitem");
     card.dataset.id = String(print.id);
     card.innerHTML = `<div class="ficha-papel"></div><div class="aba"></div>
-      <span class="legenda"><b>Print</b><span class="tipo">Print · </span>${print.pixels[0]} × ${print.pixels[1]}</span>
+      <span class="legenda legenda-inteira">Print · ${print.pixels[0]} × ${print.pixels[1]}</span>
+      <span class="legenda legenda-faixa"><b>Print</b>${print.pixels[0]} × ${print.pixels[1]}</span>
       <button class="ficha-botao" type="button" tabindex="-1" aria-describedby="gaveta-teclas"></button>
       <span class="bolinha" aria-hidden="true">${CHECK}</span>
       <span class="fechar" aria-hidden="true">${CROSS}</span>
       <span class="carimbo" aria-hidden="true">COPIADO</span>`;
-    card.insertBefore(photo(print), $(".legenda", card));
+    const whole = photoSize(print, S.cardH);
+    const box = photo(print, whole.w, whole.h);
+    card.insertBefore(box, $(".legenda", card));
+    // Under a whole picture one line, beside a band two: the two captions cross-fade, as in the app.
+    $(".legenda-inteira", card).style.transform = `translate(${S.border}px, ${S.border + whole.h + 6}px)`;
+    parts.set(print.id, {
+      whole, foto: box, aba: $(".aba", card), botao: $(".ficha-botao", card), carimbo: $(".carimbo", card),
+    });
     cards.set(print.id, card);
     return card;
   }
@@ -472,8 +497,8 @@
     gaveta.classList.toggle("vazia", count === 0);
     gaveta.classList.toggle("escolhendo", drawer.selection.size > 0);
     gaveta.classList.toggle("tocar", finger.matches);
-    gaveta.dataset.estado = drawer.open ? "aberta" : drawer.peeking ? "fresta" : "fechada";
-    conta.textContent = String(count);
+    write(gaveta, "data-estado", drawer.open ? "aberta" : drawer.peeking ? "fresta" : "fechada");
+    write(conta, "text", String(count));
 
     // Centred for its height at rest; a card opening up under the pointer grows it downwards only.
     const available = gaveta.clientHeight;
@@ -483,44 +508,41 @@
     const top = region + (max - rest) / 2;
     const current = drawerHeight(count, hoveredIndex >= 0 ? hoveredIndex : null);
     placement = { top: Math.round(top), height: Math.round(Math.min(current, max - (top - region))) };
-    corpo.style.setProperty("--topo", `${placement.top}px`);
-    corpo.style.setProperty("--altura", `${placement.height}px`);
-    corpo.style.setProperty("--deslize", `${slide()}px`);
-    pilha.style.height = `${layout.height}px`;
+    write(corpo, "top", `${placement.top}px`);
+    write(corpo, "height", `${placement.height}px`);
+    write(corpo, "transform", `translateX(${slide()}px)`);
+    write(pilha, "height", `${layout.height}px`);
 
     list.forEach((print, i) => {
       const card = cardFor(print);
       if (!card.parentNode) pilha.append(card);
+      const part = parts.get(print.id);
       const reveal = layout.reveal(i);
       const whole = reveal >= S.cardH;
       const selected = drawer.selection.has(print.id);
       const hovered = drawer.hovered === print.id && !drawer.dragging.size;
-      const size = photoSize(print, reveal);
+      // The picture is laid out whole once; in a band it is the same picture, scaled down: only transforms move.
+      const size = whole ? part.whole : photoSize(print, reveal);
       const slot = whole ? S.photoW : S.band;
-      card.style.setProperty("--x", `${S.left + shiftOf(hovered, selected)}px`);
-      card.style.setProperty("--y", `${layout.tops[i]}px`);
-      card.style.setProperty("--fx", `${S.border + (slot - size.w) / 2}px`);
-      card.style.setProperty("--fw", `${size.w}px`);
-      card.style.setProperty("--fh", `${size.h}px`);
-      card.style.setProperty("--k", size.w / print.w);
-      card.style.setProperty("--ly", `${S.border + size.h + 6}px`);
-      card.style.setProperty("--cx", `${S.border + slot / 2}px`);
-      card.style.setProperty("--cy", `${S.border + size.h / 2}px`);
-      card.style.zIndex = String(i + 1);
+      write(card, "transform", `translate(${S.left + shiftOf(hovered, selected)}px, ${layout.tops[i]}px)`);
+      write(part.foto, "transform", `translate(${S.border + (slot - size.w) / 2}px, ${S.border}px) scale(${size.w / part.whole.w})`);
+      write(part.carimbo, "left", `${S.border + slot / 2}px`);
+      write(part.carimbo, "top", `${S.border + size.h / 2}px`);
+      write(card, "zIndex", String(i + 1));
       card.classList.toggle("faixa", !whole);
       card.classList.toggle("pairando", hovered);
       card.classList.toggle("escolhida", selected);
       card.classList.toggle("copiada", drawer.copied.has(print.id));
       card.classList.toggle("arrastando", drawer.dragging.has(print.id));
       card.classList.toggle("oculta", drawer.landing.has(print.id));
-      $(".aba", card).textContent = ago(print.date);
-      const button = $(".ficha-botao", card);
-      button.setAttribute("aria-label", `Print de ${ago(print.date)}, ${print.pixels[0]} por ${print.pixels[1]}${selected ? ", escolhido" : ""}`);
+      write(part.aba, "text", ago(print.date));
+      write(part.botao, "aria-label", `Print de ${ago(print.date)}, ${print.pixels[0]} por ${print.pixels[1]}${selected ? ", escolhido" : ""}`);
     });
     for (const [id, card] of cards) {
       if (!printOf(id)) {
         card.remove();
         cards.delete(id);
+        parts.delete(id);
       }
     }
     rovingFocus();
@@ -826,24 +848,29 @@
     announce(ids.length === 1 ? "Print jogado no Lixo." : `${ids.length} prints jogados no Lixo.`);
   }
 
+  /** A card standing whole, for the flights: its paper, shadow, picture and words, each on its own layer. */
+  function cardFace(print) {
+    const face = document.createElement("div");
+    face.className = "voo";
+    face.innerHTML = `<div class="voo-sombra"></div><div class="voo-papel"></div><div class="aba">${ago(print.date)}</div>
+      <span class="legenda">Print · ${print.pixels[0]} × ${print.pixels[1]}</span>`;
+    const size = photoSize(print, S.cardH);
+    const box = photo(print, size.w, size.h);
+    box.style.transform = `translate(${S.border + (S.photoW - size.w) / 2}px, ${S.border}px)`;
+    $(".voo-papel", face).after(box);
+    $(".legenda", face).style.transform = `translate(${S.border}px, ${S.border + size.h + 6}px)`;
+    return {
+      face, size, paper: $(".voo-papel", face), shadow: $(".voo-sombra", face), words: [$(".aba", face), $(".legenda", face)],
+    };
+  }
+
   /** The card is pulled out by its tab, eases as it clears the drawer, then falls, turning over. */
   function toss(print, delay) {
     const card = cards.get(print.id);
     if (!card) return;
     const from = onDesk(card.getBoundingClientRect());
-    const flyer = card.cloneNode(true);
-    flyer.className = "voo";
-    flyer.removeAttribute("style");
-    for (const extra of $$(".ficha-botao, .bolinha, .fechar, .carimbo", flyer)) extra.remove();
-    const size = photoSize(print, S.cardH);
-    const box = $(".foto", flyer);
-    sizePhoto(box, print, size.w, size.h);
-    box.style.left = `${S.border + (S.photoW - size.w) / 2}px`;
-    const legend = $(".legenda", flyer);
-    legend.style.top = `${S.border + size.h + 6}px`;
-    for (const part of [$(".aba", flyer), legend]) part.style.opacity = "1";
-    flyer.style.background = "var(--papel)";
-    flyer.style.boxShadow = "0 -3px 10px rgba(0,0,0,.26)";
+    const { face: flyer } = cardFace(print);
+    flyer.classList.add("inteira");
     voos.append(flyer);
     const deskHeight = mesaBox().height;
     const start = { x: from.x + from.w / 2, y: from.y + from.h / 2 };
@@ -1034,14 +1061,8 @@
   /** The capture lifts off the screen, shrinks to a card while tilting through the turn, and lands upright. */
   function fly(print, from, landed) {
     const target = frontPhotoTarget(print);
-    const flyer = document.createElement("div");
-    flyer.className = "voo";
-    flyer.innerHTML = `<div class="aba">agora</div><span class="legenda" style="top:${S.border + target.h + 6}px"><span class="tipo">Print · </span>${print.pixels[0]} × ${print.pixels[1]}</span>`;
-    const box = photo(print, target.w, target.h);
-    box.style.left = `${S.border + (S.photoW - target.w) / 2}px`;
-    flyer.prepend(box);
+    const { face: flyer, paper, shadow: halo, words } = cardFace(print);
     voos.append(flyer);
-    const words = [$(".aba", flyer), $(".legenda", flyer)];
 
     // the card is laid out around its picture: the picture's centre is what travels
     const cx = S.border + (S.photoW - target.w) / 2 + target.w / 2;
@@ -1059,12 +1080,10 @@
       const scale = keyed([0, 0.14, 0.72, 1], [startScale, startScale * 1.04, 1.12, 1], [easeOut, easeInOut, easeOut], t);
       const turn = keyed([0, 0.14, 0.72, 1], [0, 0, 0.07, 0], [easeOut, easeInOut, easeOut], t);
       flyer.style.transform = `translate(${x - cx}px, ${y - cy}px) rotate(${turn}rad) scale(${scale})`;
-      const paper = keyed([0, 0.45, 0.8], [0, 0, 1], null, t);
-      const shadow = keyed([0, 0.14, 1], [0, 0.4, 0.28], null, t);
-      flyer.style.background = `rgba(251, 248, 241, ${paper})`;
-      flyer.style.boxShadow = `0 6px 18px rgba(0, 0, 0, ${shadow})`;
-      const ink = keyed([0, 0.7, 1], [0, 0, 1], null, t);
-      for (const part of words) part.style.opacity = String(ink);
+      paper.style.opacity = String(keyed([0, 0.45, 0.8], [0, 0, 1], null, t));
+      halo.style.opacity = String(keyed([0, 0.14, 1], [0, 1, 0.7], null, t));
+      const ink = String(keyed([0, 0.7, 1], [0, 0, 1], null, t));
+      for (const part of words) part.style.opacity = ink;
     };
     frame(0);
     play(0.78, frame, () => {
@@ -1250,7 +1269,11 @@
   function rovingFocus() {
     const list = backToFront();
     if (!list.some((p) => p.id === focusedId)) focusedId = list.length ? list[list.length - 1].id : null;
-    for (const [id, card] of cards) $(".ficha-botao", card).tabIndex = id === focusedId ? 0 : -1;
+    for (const [id] of cards) {
+      const button = parts.get(id)?.botao;
+      const index = id === focusedId ? 0 : -1;
+      if (button && button.tabIndex !== index) button.tabIndex = index;
+    }
   }
   function focusCard(id) {
     focusedId = id;
@@ -1452,7 +1475,7 @@
     };
     $("#guia-fechar").addEventListener("click", () => api.hide(true));
     // The drawer slides and grows: the arrow follows it.
-    corpo.addEventListener("transitionend", () => place());
+    corpo.addEventListener("transitionend", (event) => { if (event.target === corpo) place(); });
     addEventListener("resize", () => place());
     return api;
   })();
@@ -1490,7 +1513,7 @@
     return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
   }
 
-  $(".feltro").style.setProperty("--fiapos", `${feltTile()} 0 0 / 64px 64px`);
+  $(".feltro-fundo").style.backgroundImage = `radial-gradient(320px 320px at 30% 10%, rgba(255, 255, 255, 0.07), transparent 100%), ${feltTile()}`;
   $(".frente").style.setProperty("--veio", grain());
 
   // A short note for keyboard users, read with each card.
@@ -1516,8 +1539,8 @@
   // Tabs say how long ago, and stay right as time passes.
   setInterval(() => {
     for (const p of drawer.prints) {
-      const card = cards.get(p.id);
-      if (card) $(".aba", card).textContent = ago(p.date);
+      const part = parts.get(p.id);
+      if (part) write(part.aba, "text", ago(p.date));
     }
   }, 30000);
 

@@ -416,13 +416,13 @@ button { font: inherit; color: inherit; }
 .gaveta { position: absolute; z-index: 950; top: var(--menus); right: 0; bottom: 0; width: 402px; pointer-events: none; }
 .borda { position: absolute; top: 0; bottom: 0; right: 0; width: 8px; pointer-events: auto; }
 .gaveta-corpo {
-  position: absolute; right: 0; top: var(--topo, 200px); width: 358px; height: var(--altura, 230px);
-  display: flex; pointer-events: auto;
-  transform: translateX(var(--deslize, 350px));
-  filter: drop-shadow(-12px 16px 13px rgba(0, 0, 0, 0.35));
+  position: absolute; right: 0; top: 200px; width: 358px; height: 230px;
+  display: flex; pointer-events: auto; border-radius: 12px 0 0 12px;
+  transform: translateX(350px);
+  box-shadow: -12px 16px 26px rgba(0, 0, 0, 0.35);
+  will-change: transform;
   transition: transform var(--dur-gaveta, 0.5s) var(--mola-gaveta), height var(--dur-ficha, 0.42s) var(--mola-ficha), top var(--dur-ficha, 0.42s) var(--mola-ficha);
 }
-.gaveta[data-estado="fechada"] .gaveta-corpo { filter: drop-shadow(-3px 4px 5px rgba(0, 0, 0, 0.25)); }
 .gaveta-corpo.tranco { animation: tranco 0.38s ease-out; }
 @keyframes tranco {
   0% { translate: 0; }
@@ -459,11 +459,11 @@ button { font: inherit; color: inherit; }
 .trilho { flex: none; height: 10px; background: linear-gradient(var(--carvalho), var(--carvalho-escuro)); }
 .feltro {
   position: relative; flex: 1; min-height: 0; display: flex; flex-direction: column; overflow: hidden;
-  background:
-    radial-gradient(320px 320px at 30% 10%, rgba(255, 255, 255, 0.07), transparent 100%),
-    var(--fiapos, none),
-    var(--feltro);
-  color: var(--sobre-feltro);
+  background: var(--feltro); color: var(--sobre-feltro);
+}
+.feltro-fundo {
+  position: absolute; left: 0; top: 0; width: 100%; height: 1000px; pointer-events: none;
+  background-color: var(--feltro); background-size: auto, 64px 64px; will-change: transform;
 }
 .feltro::before, .feltro::after { content: ""; position: absolute; pointer-events: none; z-index: 3; }
 .feltro::before { left: 0; top: 0; bottom: 0; width: 22px; background: linear-gradient(90deg, rgba(0, 0, 0, 0.5), transparent); }
@@ -503,9 +503,9 @@ button { font: inherit; color: inherit; }
 /* a capture as an index card */
 .ficha {
   position: absolute; left: 0; top: 0; width: 256px; height: 182px;
-  transform: translate(var(--x, 30px), var(--y, 26px));
+  transform: translate(30px, 26px);
   transition: transform var(--dur-ficha, 0.42s) var(--mola-ficha), opacity 0.2s ease;
-  pointer-events: none;
+  will-change: transform; pointer-events: none;
 }
 .ficha.sem-transicao { transition: none; }
 .ficha.oculta { opacity: 0; }
@@ -519,22 +519,22 @@ button { font: inherit; color: inherit; }
 }
 .ficha.escolhida .aba { background: var(--azul); color: #fff; }
 .ficha .foto {
-  position: absolute; left: var(--fx, 8px); top: 8px; width: var(--fw, 240px); height: var(--fh, 150px);
-  border-radius: 2px; overflow: hidden; background: #fff;
-  transition: width var(--dur-ficha, 0.42s) var(--mola-ficha), height var(--dur-ficha, 0.42s) var(--mola-ficha), left var(--dur-ficha, 0.42s) var(--mola-ficha);
+  position: absolute; left: 0; top: 0; border-radius: 2px; background: #fff;
+  transform-origin: 0 0; will-change: transform; contain: strict;
+  transition: transform var(--dur-ficha, 0.42s) var(--mola-ficha);
 }
 .foto { overflow: hidden; }
 .foto::after { content: ""; position: absolute; inset: 0; border-radius: inherit; box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.12); pointer-events: none; }
-.foto-escala { position: absolute; left: var(--ex, 0px); top: var(--ey, 0px); transform-origin: 0 0; transform: scale(var(--k, 1)); transition: transform var(--dur-ficha, 0.42s) var(--mola-ficha); }
-.voo .foto-escala, .anexo .foto-escala, .previa-print .foto-escala, .fantasma .foto-escala { transition: none; }
+.foto-escala { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
 .legenda {
-  position: absolute; left: 8px; top: var(--ly, 164px); font-size: 11px; line-height: 1.25; color: var(--meta);
-  white-space: nowrap; font-variant-numeric: tabular-nums;
+  position: absolute; left: 0; top: 0; font-size: 11px; line-height: 1.25; color: var(--meta);
+  white-space: nowrap; font-variant-numeric: tabular-nums; transition: opacity 0.2s ease;
 }
-.legenda b { display: none; font-weight: 500; color: var(--tinta-marrom); }
-.ficha.faixa .legenda { left: 168px; top: 11px; }
-.ficha.faixa .legenda b { display: block; margin-bottom: 3px; }
-.ficha.faixa .legenda .tipo { display: none; }
+.legenda-faixa { transform: translate(168px, 11px); }
+.legenda-faixa b { display: block; margin-bottom: 3px; font-weight: 500; color: var(--tinta-marrom); }
+.ficha.faixa .legenda-inteira, .ficha:not(.faixa) .legenda-faixa { opacity: 0; }
+/* the caption that leaves goes at once; the one that comes waits for the picture to make room */
+.ficha.faixa .legenda-faixa, .ficha:not(.faixa) .legenda-inteira { transition-delay: 0.14s; }
 .ficha-botao { position: absolute; inset: 0; width: 100%; height: 100%; padding: 0; border: 0; border-radius: 4px; background: none; opacity: 0; pointer-events: none; }
 .ficha-botao:focus-visible { opacity: 1; outline: 2px solid var(--azul); outline-offset: 2px; }
 .bolinha, .fechar {
@@ -550,7 +550,7 @@ button { font: inherit; color: inherit; }
 .ficha.pairando .bolinha, .gaveta.escolhendo .bolinha, .ficha.escolhida .bolinha, .tocar .bolinha { opacity: 1; transform: none; }
 .ficha.pairando .fechar, .tocar .fechar { opacity: 1; transform: none; }
 .carimbo {
-  position: absolute; left: var(--cx, 128px); top: var(--cy, 83px); padding: 2px 10px;
+  position: absolute; left: 128px; top: 83px; padding: 2px 10px;
   border: 2.5px solid var(--carimbo); border-radius: 6px; color: var(--carimbo);
   font: 400 20px/1.2 var(--maquina); letter-spacing: 2.4px; white-space: nowrap;
   mix-blend-mode: multiply; opacity: 0; transform: translate(-50%, -50%) rotate(-12deg) scale(1.6);
@@ -561,7 +561,9 @@ button { font: inherit; color: inherit; }
 /* the copy of the desk that a print shows */
 .retrato { position: absolute; left: 0; top: 0; overflow: hidden; pointer-events: none; }
 .retrato > .mesa-copia { position: absolute; left: 0; top: 0; overflow: hidden; }
-.retrato .janela { transition: none; }
+.retrato *, .retrato *::before, .retrato *::after {
+  transition: none !important; animation: none !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important;
+}
 
 /* ── capture ───────────────────────────────────────────────────────────── */
 .captura-camada { position: absolute; inset: 0; z-index: 1000; cursor: crosshair; touch-action: none; }
@@ -590,10 +592,15 @@ button { font: inherit; color: inherit; }
 
 /* the flights: a capture into the drawer, a card out of it, a drag */
 .voos { position: absolute; inset: 0; z-index: 1100; pointer-events: none; overflow: hidden; }
-.voo { position: absolute; left: 0; top: 0; width: 256px; height: 182px; border-radius: 4px; transform-origin: 50% 50%; will-change: transform; }
-.voo .aba, .voo .legenda { opacity: 0; }
-.voo .foto { position: absolute; left: 8px; top: 8px; overflow: hidden; border-radius: 2px; background: #fff; }
-.fantasma { position: absolute; left: 0; top: 0; pointer-events: none; will-change: transform; }
+.voo { position: absolute; left: 0; top: 0; width: 256px; height: 182px; transform-origin: 50% 50%; will-change: transform; }
+.voo-papel, .voo-sombra { position: absolute; inset: 0; border-radius: 4px; opacity: 0; will-change: opacity; }
+.voo-papel { background: var(--papel); }
+.voo-sombra { box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4); }
+.voo .aba, .voo .legenda { opacity: 0; will-change: opacity; }
+.voo .foto { position: absolute; left: 0; top: 0; border-radius: 2px; background: #fff; will-change: transform; }
+.voo.inteira .voo-papel, .voo.inteira .aba, .voo.inteira .legenda { opacity: 1; }
+.voo.inteira .voo-sombra { opacity: 0.7; }
+.fantasma { position: absolute; left: 0; top: 0; pointer-events: none; will-change: transform; contain: layout style; }
 .fantasma .foto { position: absolute; overflow: hidden; border-radius: 3px; background: #fff; box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35), 0 0 0 0.5px rgba(0, 0, 0, 0.2); }
 .fantasma-conta {
   position: absolute; right: -8px; top: -8px; min-width: 22px; height: 22px; padding: 0 6px; border-radius: 11px;
@@ -690,7 +697,7 @@ button { font: inherit; color: inherit; }
 @media (prefers-reduced-motion: reduce) {
   .gaveta-corpo { transition: transform 0.2s ease, height 0.2s ease, top 0.2s ease; }
   .gaveta-corpo.tranco { animation: none; }
-  .ficha, .ficha .foto, .foto-escala { transition-duration: 0.15s; transition-timing-function: ease; }
+  .ficha, .ficha .foto { transition-duration: 0.15s; transition-timing-function: ease; }
   .anexo { animation: none; }
   .dock-app, .botao { transition: none; }
 }
@@ -845,6 +852,7 @@ button { font: inherit; color: inherit; }
       <div class="caixa">
         <div class="trilho"></div>
         <div class="feltro">
+          <div class="feltro-fundo" aria-hidden="true"></div>
           <div class="fichas" id="gaveta-fichas" tabindex="-1">
             <div class="pilha" id="pilha" role="list" aria-label="Prints na gaveta"></div>
           </div>
@@ -3007,7 +3015,7 @@ draw(performance.now());
     return print;
   }
 
-  /** The print, drawn at `width` × `height` (fitted whole inside that box with `fit`). Without a size, the card it sits on sizes it. */
+  /** The print, drawn at `width` × `height` (fitted whole inside that box with `fit`). */
   function photo(print, width, height, fit = false) {
     const box = document.createElement("span");
     box.className = "foto";
@@ -3015,18 +3023,33 @@ draw(performance.now());
     scale.className = "foto-escala";
     scale.append(print.portrait.cloneNode(true));
     box.append(scale);
-    if (width) sizePhoto(box, print, width, height, fit);
+    sizePhoto(box, print, width, height, fit);
     return box;
   }
 
   function sizePhoto(box, print, width, height, fit) {
     const k = fit ? Math.min(width / print.w, height / print.h) : width / print.w;
+    const x = fit ? (width - print.w * k) / 2 : 0;
+    const y = fit ? (height - print.h * k) / 2 : 0;
     box.style.width = `${width}px`;
     box.style.height = `${height}px`;
-    const scale = box.firstElementChild;
-    scale.style.setProperty("--k", k);
-    scale.style.setProperty("--ex", fit ? `${(width - print.w * k) / 2}px` : "0px");
-    scale.style.setProperty("--ey", fit ? `${(height - print.h * k) / 2}px` : "0px");
+    box.firstElementChild.style.transform = `translate(${x}px, ${y}px) scale(${k})`;
+  }
+
+  /**
+   * Writes a style, an attribute or a text only when it changes. A card that
+   * did not move costs the browser nothing, and nothing set on a card is
+   * inherited by the copy of the desk inside it.
+   */
+  const written = new WeakMap();
+  function write(el, key, value) {
+    let seen = written.get(el);
+    if (!seen) written.set(el, (seen = {}));
+    if (seen[key] === value) return;
+    seen[key] = value;
+    if (key === "text") el.textContent = value;
+    else if (key.startsWith("aria-") || key.startsWith("data-")) el.setAttribute(key, value);
+    else el.style[key] = value;
   }
 
   /** "agora", "há 5 min", "há 2 h", as the card's tab says it. */
@@ -3063,7 +3086,8 @@ draw(performance.now());
         budget -= share;
       }
     }
-    if (hovered != null && hovered < count - 1) reveals[hovered] = Math.max(reveals[hovered], S.cardH + S.gap);
+    // A band opens up whole under the pointer; a card already whole stays put, so the stack never jiggles.
+    if (hovered != null && hovered < count - 1 && reveals[hovered] < S.cardH) reveals[hovered] = S.cardH + S.gap;
     const tops = [];
     let y = S.topInset;
     for (const reveal of reveals) {
@@ -3111,6 +3135,7 @@ draw(performance.now());
     anchor: null,
   };
   const cards = new Map();
+  const parts = new Map();
   let clipboard = [];
   let layout = stackOf(0, null, 0);
   let placement = { top: 0, height: L.empty };
@@ -3145,12 +3170,20 @@ draw(performance.now());
     card.setAttribute("role", "listitem");
     card.dataset.id = String(print.id);
     card.innerHTML = `<div class="ficha-papel"></div><div class="aba"></div>
-      <span class="legenda"><b>Print</b><span class="tipo">Print · </span>${print.pixels[0]} × ${print.pixels[1]}</span>
+      <span class="legenda legenda-inteira">Print · ${print.pixels[0]} × ${print.pixels[1]}</span>
+      <span class="legenda legenda-faixa"><b>Print</b>${print.pixels[0]} × ${print.pixels[1]}</span>
       <button class="ficha-botao" type="button" tabindex="-1" aria-describedby="gaveta-teclas"></button>
       <span class="bolinha" aria-hidden="true">${CHECK}</span>
       <span class="fechar" aria-hidden="true">${CROSS}</span>
       <span class="carimbo" aria-hidden="true">COPIADO</span>`;
-    card.insertBefore(photo(print), $(".legenda", card));
+    const whole = photoSize(print, S.cardH);
+    const box = photo(print, whole.w, whole.h);
+    card.insertBefore(box, $(".legenda", card));
+    // Under a whole picture one line, beside a band two: the two captions cross-fade, as in the app.
+    $(".legenda-inteira", card).style.transform = `translate(${S.border}px, ${S.border + whole.h + 6}px)`;
+    parts.set(print.id, {
+      whole, foto: box, aba: $(".aba", card), botao: $(".ficha-botao", card), carimbo: $(".carimbo", card),
+    });
     cards.set(print.id, card);
     return card;
   }
@@ -3164,8 +3197,8 @@ draw(performance.now());
     gaveta.classList.toggle("vazia", count === 0);
     gaveta.classList.toggle("escolhendo", drawer.selection.size > 0);
     gaveta.classList.toggle("tocar", finger.matches);
-    gaveta.dataset.estado = drawer.open ? "aberta" : drawer.peeking ? "fresta" : "fechada";
-    conta.textContent = String(count);
+    write(gaveta, "data-estado", drawer.open ? "aberta" : drawer.peeking ? "fresta" : "fechada");
+    write(conta, "text", String(count));
 
     // Centred for its height at rest; a card opening up under the pointer grows it downwards only.
     const available = gaveta.clientHeight;
@@ -3175,44 +3208,41 @@ draw(performance.now());
     const top = region + (max - rest) / 2;
     const current = drawerHeight(count, hoveredIndex >= 0 ? hoveredIndex : null);
     placement = { top: Math.round(top), height: Math.round(Math.min(current, max - (top - region))) };
-    corpo.style.setProperty("--topo", `${placement.top}px`);
-    corpo.style.setProperty("--altura", `${placement.height}px`);
-    corpo.style.setProperty("--deslize", `${slide()}px`);
-    pilha.style.height = `${layout.height}px`;
+    write(corpo, "top", `${placement.top}px`);
+    write(corpo, "height", `${placement.height}px`);
+    write(corpo, "transform", `translateX(${slide()}px)`);
+    write(pilha, "height", `${layout.height}px`);
 
     list.forEach((print, i) => {
       const card = cardFor(print);
       if (!card.parentNode) pilha.append(card);
+      const part = parts.get(print.id);
       const reveal = layout.reveal(i);
       const whole = reveal >= S.cardH;
       const selected = drawer.selection.has(print.id);
       const hovered = drawer.hovered === print.id && !drawer.dragging.size;
-      const size = photoSize(print, reveal);
+      // The picture is laid out whole once; in a band it is the same picture, scaled down: only transforms move.
+      const size = whole ? part.whole : photoSize(print, reveal);
       const slot = whole ? S.photoW : S.band;
-      card.style.setProperty("--x", `${S.left + shiftOf(hovered, selected)}px`);
-      card.style.setProperty("--y", `${layout.tops[i]}px`);
-      card.style.setProperty("--fx", `${S.border + (slot - size.w) / 2}px`);
-      card.style.setProperty("--fw", `${size.w}px`);
-      card.style.setProperty("--fh", `${size.h}px`);
-      card.style.setProperty("--k", size.w / print.w);
-      card.style.setProperty("--ly", `${S.border + size.h + 6}px`);
-      card.style.setProperty("--cx", `${S.border + slot / 2}px`);
-      card.style.setProperty("--cy", `${S.border + size.h / 2}px`);
-      card.style.zIndex = String(i + 1);
+      write(card, "transform", `translate(${S.left + shiftOf(hovered, selected)}px, ${layout.tops[i]}px)`);
+      write(part.foto, "transform", `translate(${S.border + (slot - size.w) / 2}px, ${S.border}px) scale(${size.w / part.whole.w})`);
+      write(part.carimbo, "left", `${S.border + slot / 2}px`);
+      write(part.carimbo, "top", `${S.border + size.h / 2}px`);
+      write(card, "zIndex", String(i + 1));
       card.classList.toggle("faixa", !whole);
       card.classList.toggle("pairando", hovered);
       card.classList.toggle("escolhida", selected);
       card.classList.toggle("copiada", drawer.copied.has(print.id));
       card.classList.toggle("arrastando", drawer.dragging.has(print.id));
       card.classList.toggle("oculta", drawer.landing.has(print.id));
-      $(".aba", card).textContent = ago(print.date);
-      const button = $(".ficha-botao", card);
-      button.setAttribute("aria-label", `Print de ${ago(print.date)}, ${print.pixels[0]} por ${print.pixels[1]}${selected ? ", escolhido" : ""}`);
+      write(part.aba, "text", ago(print.date));
+      write(part.botao, "aria-label", `Print de ${ago(print.date)}, ${print.pixels[0]} por ${print.pixels[1]}${selected ? ", escolhido" : ""}`);
     });
     for (const [id, card] of cards) {
       if (!printOf(id)) {
         card.remove();
         cards.delete(id);
+        parts.delete(id);
       }
     }
     rovingFocus();
@@ -3518,24 +3548,29 @@ draw(performance.now());
     announce(ids.length === 1 ? "Print jogado no Lixo." : `${ids.length} prints jogados no Lixo.`);
   }
 
+  /** A card standing whole, for the flights: its paper, shadow, picture and words, each on its own layer. */
+  function cardFace(print) {
+    const face = document.createElement("div");
+    face.className = "voo";
+    face.innerHTML = `<div class="voo-sombra"></div><div class="voo-papel"></div><div class="aba">${ago(print.date)}</div>
+      <span class="legenda">Print · ${print.pixels[0]} × ${print.pixels[1]}</span>`;
+    const size = photoSize(print, S.cardH);
+    const box = photo(print, size.w, size.h);
+    box.style.transform = `translate(${S.border + (S.photoW - size.w) / 2}px, ${S.border}px)`;
+    $(".voo-papel", face).after(box);
+    $(".legenda", face).style.transform = `translate(${S.border}px, ${S.border + size.h + 6}px)`;
+    return {
+      face, size, paper: $(".voo-papel", face), shadow: $(".voo-sombra", face), words: [$(".aba", face), $(".legenda", face)],
+    };
+  }
+
   /** The card is pulled out by its tab, eases as it clears the drawer, then falls, turning over. */
   function toss(print, delay) {
     const card = cards.get(print.id);
     if (!card) return;
     const from = onDesk(card.getBoundingClientRect());
-    const flyer = card.cloneNode(true);
-    flyer.className = "voo";
-    flyer.removeAttribute("style");
-    for (const extra of $$(".ficha-botao, .bolinha, .fechar, .carimbo", flyer)) extra.remove();
-    const size = photoSize(print, S.cardH);
-    const box = $(".foto", flyer);
-    sizePhoto(box, print, size.w, size.h);
-    box.style.left = `${S.border + (S.photoW - size.w) / 2}px`;
-    const legend = $(".legenda", flyer);
-    legend.style.top = `${S.border + size.h + 6}px`;
-    for (const part of [$(".aba", flyer), legend]) part.style.opacity = "1";
-    flyer.style.background = "var(--papel)";
-    flyer.style.boxShadow = "0 -3px 10px rgba(0,0,0,.26)";
+    const { face: flyer } = cardFace(print);
+    flyer.classList.add("inteira");
     voos.append(flyer);
     const deskHeight = mesaBox().height;
     const start = { x: from.x + from.w / 2, y: from.y + from.h / 2 };
@@ -3726,14 +3761,8 @@ draw(performance.now());
   /** The capture lifts off the screen, shrinks to a card while tilting through the turn, and lands upright. */
   function fly(print, from, landed) {
     const target = frontPhotoTarget(print);
-    const flyer = document.createElement("div");
-    flyer.className = "voo";
-    flyer.innerHTML = `<div class="aba">agora</div><span class="legenda" style="top:${S.border + target.h + 6}px"><span class="tipo">Print · </span>${print.pixels[0]} × ${print.pixels[1]}</span>`;
-    const box = photo(print, target.w, target.h);
-    box.style.left = `${S.border + (S.photoW - target.w) / 2}px`;
-    flyer.prepend(box);
+    const { face: flyer, paper, shadow: halo, words } = cardFace(print);
     voos.append(flyer);
-    const words = [$(".aba", flyer), $(".legenda", flyer)];
 
     // the card is laid out around its picture: the picture's centre is what travels
     const cx = S.border + (S.photoW - target.w) / 2 + target.w / 2;
@@ -3751,12 +3780,10 @@ draw(performance.now());
       const scale = keyed([0, 0.14, 0.72, 1], [startScale, startScale * 1.04, 1.12, 1], [easeOut, easeInOut, easeOut], t);
       const turn = keyed([0, 0.14, 0.72, 1], [0, 0, 0.07, 0], [easeOut, easeInOut, easeOut], t);
       flyer.style.transform = `translate(${x - cx}px, ${y - cy}px) rotate(${turn}rad) scale(${scale})`;
-      const paper = keyed([0, 0.45, 0.8], [0, 0, 1], null, t);
-      const shadow = keyed([0, 0.14, 1], [0, 0.4, 0.28], null, t);
-      flyer.style.background = `rgba(251, 248, 241, ${paper})`;
-      flyer.style.boxShadow = `0 6px 18px rgba(0, 0, 0, ${shadow})`;
-      const ink = keyed([0, 0.7, 1], [0, 0, 1], null, t);
-      for (const part of words) part.style.opacity = String(ink);
+      paper.style.opacity = String(keyed([0, 0.45, 0.8], [0, 0, 1], null, t));
+      halo.style.opacity = String(keyed([0, 0.14, 1], [0, 1, 0.7], null, t));
+      const ink = String(keyed([0, 0.7, 1], [0, 0, 1], null, t));
+      for (const part of words) part.style.opacity = ink;
     };
     frame(0);
     play(0.78, frame, () => {
@@ -3942,7 +3969,11 @@ draw(performance.now());
   function rovingFocus() {
     const list = backToFront();
     if (!list.some((p) => p.id === focusedId)) focusedId = list.length ? list[list.length - 1].id : null;
-    for (const [id, card] of cards) $(".ficha-botao", card).tabIndex = id === focusedId ? 0 : -1;
+    for (const [id] of cards) {
+      const button = parts.get(id)?.botao;
+      const index = id === focusedId ? 0 : -1;
+      if (button && button.tabIndex !== index) button.tabIndex = index;
+    }
   }
   function focusCard(id) {
     focusedId = id;
@@ -4144,7 +4175,7 @@ draw(performance.now());
     };
     $("#guia-fechar").addEventListener("click", () => api.hide(true));
     // The drawer slides and grows: the arrow follows it.
-    corpo.addEventListener("transitionend", () => place());
+    corpo.addEventListener("transitionend", (event) => { if (event.target === corpo) place(); });
     addEventListener("resize", () => place());
     return api;
   })();
@@ -4182,7 +4213,7 @@ draw(performance.now());
     return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
   }
 
-  $(".feltro").style.setProperty("--fiapos", `${feltTile()} 0 0 / 64px 64px`);
+  $(".feltro-fundo").style.backgroundImage = `radial-gradient(320px 320px at 30% 10%, rgba(255, 255, 255, 0.07), transparent 100%), ${feltTile()}`;
   $(".frente").style.setProperty("--veio", grain());
 
   // A short note for keyboard users, read with each card.
@@ -4208,8 +4239,8 @@ draw(performance.now());
   // Tabs say how long ago, and stay right as time passes.
   setInterval(() => {
     for (const p of drawer.prints) {
-      const card = cards.get(p.id);
-      if (card) $(".aba", card).textContent = ago(p.date);
+      const part = parts.get(p.id);
+      if (part) write(part.aba, "text", ago(p.date));
     }
   }, 30000);
 

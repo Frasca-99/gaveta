@@ -286,13 +286,13 @@ button { font: inherit; color: inherit; }
 .gaveta { position: absolute; z-index: 950; top: var(--menus); right: 0; bottom: 0; width: 402px; pointer-events: none; }
 .borda { position: absolute; top: 0; bottom: 0; right: 0; width: 8px; pointer-events: auto; }
 .gaveta-corpo {
-  position: absolute; right: 0; top: var(--topo, 200px); width: 358px; height: var(--altura, 230px);
-  display: flex; pointer-events: auto;
-  transform: translateX(var(--deslize, 350px));
-  filter: drop-shadow(-12px 16px 13px rgba(0, 0, 0, 0.35));
+  position: absolute; right: 0; top: 200px; width: 358px; height: 230px;
+  display: flex; pointer-events: auto; border-radius: 12px 0 0 12px;
+  transform: translateX(350px);
+  box-shadow: -12px 16px 26px rgba(0, 0, 0, 0.35);
+  will-change: transform;
   transition: transform var(--dur-gaveta, 0.5s) var(--mola-gaveta), height var(--dur-ficha, 0.42s) var(--mola-ficha), top var(--dur-ficha, 0.42s) var(--mola-ficha);
 }
-.gaveta[data-estado="fechada"] .gaveta-corpo { filter: drop-shadow(-3px 4px 5px rgba(0, 0, 0, 0.25)); }
 .gaveta-corpo.tranco { animation: tranco 0.38s ease-out; }
 @keyframes tranco {
   0% { translate: 0; }
@@ -329,11 +329,11 @@ button { font: inherit; color: inherit; }
 .trilho { flex: none; height: 10px; background: linear-gradient(var(--carvalho), var(--carvalho-escuro)); }
 .feltro {
   position: relative; flex: 1; min-height: 0; display: flex; flex-direction: column; overflow: hidden;
-  background:
-    radial-gradient(320px 320px at 30% 10%, rgba(255, 255, 255, 0.07), transparent 100%),
-    var(--fiapos, none),
-    var(--feltro);
-  color: var(--sobre-feltro);
+  background: var(--feltro); color: var(--sobre-feltro);
+}
+.feltro-fundo {
+  position: absolute; left: 0; top: 0; width: 100%; height: 1000px; pointer-events: none;
+  background-color: var(--feltro); background-size: auto, 64px 64px; will-change: transform;
 }
 .feltro::before, .feltro::after { content: ""; position: absolute; pointer-events: none; z-index: 3; }
 .feltro::before { left: 0; top: 0; bottom: 0; width: 22px; background: linear-gradient(90deg, rgba(0, 0, 0, 0.5), transparent); }
@@ -373,9 +373,9 @@ button { font: inherit; color: inherit; }
 /* a capture as an index card */
 .ficha {
   position: absolute; left: 0; top: 0; width: 256px; height: 182px;
-  transform: translate(var(--x, 30px), var(--y, 26px));
+  transform: translate(30px, 26px);
   transition: transform var(--dur-ficha, 0.42s) var(--mola-ficha), opacity 0.2s ease;
-  pointer-events: none;
+  will-change: transform; pointer-events: none;
 }
 .ficha.sem-transicao { transition: none; }
 .ficha.oculta { opacity: 0; }
@@ -389,22 +389,22 @@ button { font: inherit; color: inherit; }
 }
 .ficha.escolhida .aba { background: var(--azul); color: #fff; }
 .ficha .foto {
-  position: absolute; left: var(--fx, 8px); top: 8px; width: var(--fw, 240px); height: var(--fh, 150px);
-  border-radius: 2px; overflow: hidden; background: #fff;
-  transition: width var(--dur-ficha, 0.42s) var(--mola-ficha), height var(--dur-ficha, 0.42s) var(--mola-ficha), left var(--dur-ficha, 0.42s) var(--mola-ficha);
+  position: absolute; left: 0; top: 0; border-radius: 2px; background: #fff;
+  transform-origin: 0 0; will-change: transform; contain: strict;
+  transition: transform var(--dur-ficha, 0.42s) var(--mola-ficha);
 }
 .foto { overflow: hidden; }
 .foto::after { content: ""; position: absolute; inset: 0; border-radius: inherit; box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.12); pointer-events: none; }
-.foto-escala { position: absolute; left: var(--ex, 0px); top: var(--ey, 0px); transform-origin: 0 0; transform: scale(var(--k, 1)); transition: transform var(--dur-ficha, 0.42s) var(--mola-ficha); }
-.voo .foto-escala, .anexo .foto-escala, .previa-print .foto-escala, .fantasma .foto-escala { transition: none; }
+.foto-escala { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
 .legenda {
-  position: absolute; left: 8px; top: var(--ly, 164px); font-size: 11px; line-height: 1.25; color: var(--meta);
-  white-space: nowrap; font-variant-numeric: tabular-nums;
+  position: absolute; left: 0; top: 0; font-size: 11px; line-height: 1.25; color: var(--meta);
+  white-space: nowrap; font-variant-numeric: tabular-nums; transition: opacity 0.2s ease;
 }
-.legenda b { display: none; font-weight: 500; color: var(--tinta-marrom); }
-.ficha.faixa .legenda { left: 168px; top: 11px; }
-.ficha.faixa .legenda b { display: block; margin-bottom: 3px; }
-.ficha.faixa .legenda .tipo { display: none; }
+.legenda-faixa { transform: translate(168px, 11px); }
+.legenda-faixa b { display: block; margin-bottom: 3px; font-weight: 500; color: var(--tinta-marrom); }
+.ficha.faixa .legenda-inteira, .ficha:not(.faixa) .legenda-faixa { opacity: 0; }
+/* the caption that leaves goes at once; the one that comes waits for the picture to make room */
+.ficha.faixa .legenda-faixa, .ficha:not(.faixa) .legenda-inteira { transition-delay: 0.14s; }
 .ficha-botao { position: absolute; inset: 0; width: 100%; height: 100%; padding: 0; border: 0; border-radius: 4px; background: none; opacity: 0; pointer-events: none; }
 .ficha-botao:focus-visible { opacity: 1; outline: 2px solid var(--azul); outline-offset: 2px; }
 .bolinha, .fechar {
@@ -420,7 +420,7 @@ button { font: inherit; color: inherit; }
 .ficha.pairando .bolinha, .gaveta.escolhendo .bolinha, .ficha.escolhida .bolinha, .tocar .bolinha { opacity: 1; transform: none; }
 .ficha.pairando .fechar, .tocar .fechar { opacity: 1; transform: none; }
 .carimbo {
-  position: absolute; left: var(--cx, 128px); top: var(--cy, 83px); padding: 2px 10px;
+  position: absolute; left: 128px; top: 83px; padding: 2px 10px;
   border: 2.5px solid var(--carimbo); border-radius: 6px; color: var(--carimbo);
   font: 400 20px/1.2 var(--maquina); letter-spacing: 2.4px; white-space: nowrap;
   mix-blend-mode: multiply; opacity: 0; transform: translate(-50%, -50%) rotate(-12deg) scale(1.6);
@@ -431,7 +431,9 @@ button { font: inherit; color: inherit; }
 /* the copy of the desk that a print shows */
 .retrato { position: absolute; left: 0; top: 0; overflow: hidden; pointer-events: none; }
 .retrato > .mesa-copia { position: absolute; left: 0; top: 0; overflow: hidden; }
-.retrato .janela { transition: none; }
+.retrato *, .retrato *::before, .retrato *::after {
+  transition: none !important; animation: none !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important;
+}
 
 /* ── capture ───────────────────────────────────────────────────────────── */
 .captura-camada { position: absolute; inset: 0; z-index: 1000; cursor: crosshair; touch-action: none; }
@@ -460,10 +462,15 @@ button { font: inherit; color: inherit; }
 
 /* the flights: a capture into the drawer, a card out of it, a drag */
 .voos { position: absolute; inset: 0; z-index: 1100; pointer-events: none; overflow: hidden; }
-.voo { position: absolute; left: 0; top: 0; width: 256px; height: 182px; border-radius: 4px; transform-origin: 50% 50%; will-change: transform; }
-.voo .aba, .voo .legenda { opacity: 0; }
-.voo .foto { position: absolute; left: 8px; top: 8px; overflow: hidden; border-radius: 2px; background: #fff; }
-.fantasma { position: absolute; left: 0; top: 0; pointer-events: none; will-change: transform; }
+.voo { position: absolute; left: 0; top: 0; width: 256px; height: 182px; transform-origin: 50% 50%; will-change: transform; }
+.voo-papel, .voo-sombra { position: absolute; inset: 0; border-radius: 4px; opacity: 0; will-change: opacity; }
+.voo-papel { background: var(--papel); }
+.voo-sombra { box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4); }
+.voo .aba, .voo .legenda { opacity: 0; will-change: opacity; }
+.voo .foto { position: absolute; left: 0; top: 0; border-radius: 2px; background: #fff; will-change: transform; }
+.voo.inteira .voo-papel, .voo.inteira .aba, .voo.inteira .legenda { opacity: 1; }
+.voo.inteira .voo-sombra { opacity: 0.7; }
+.fantasma { position: absolute; left: 0; top: 0; pointer-events: none; will-change: transform; contain: layout style; }
 .fantasma .foto { position: absolute; overflow: hidden; border-radius: 3px; background: #fff; box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35), 0 0 0 0.5px rgba(0, 0, 0, 0.2); }
 .fantasma-conta {
   position: absolute; right: -8px; top: -8px; min-width: 22px; height: 22px; padding: 0 6px; border-radius: 11px;
@@ -560,7 +567,7 @@ button { font: inherit; color: inherit; }
 @media (prefers-reduced-motion: reduce) {
   .gaveta-corpo { transition: transform 0.2s ease, height 0.2s ease, top 0.2s ease; }
   .gaveta-corpo.tranco { animation: none; }
-  .ficha, .ficha .foto, .foto-escala { transition-duration: 0.15s; transition-timing-function: ease; }
+  .ficha, .ficha .foto { transition-duration: 0.15s; transition-timing-function: ease; }
   .anexo { animation: none; }
   .dock-app, .botao { transition: none; }
 }
