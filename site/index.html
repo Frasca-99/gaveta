@@ -351,6 +351,23 @@ button { font: inherit; color: inherit; }
 .arquivo:hover img { box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.18), 0 0 0 3px rgba(0, 0, 0, 0.08), 0 4px 10px -4px rgba(0, 0, 0, 0.35); }
 .arquivo.escolhido span { background: var(--azul); color: #fff; }
 
+/* prints left on the desk, as files */
+.solto {
+  position: absolute; left: 0; top: 0; z-index: 6; width: 128px; padding: 4px; border: 0; background: none;
+  display: grid; justify-items: center; gap: 5px; cursor: default; touch-action: none; will-change: transform;
+  -webkit-tap-highlight-color: transparent;
+}
+.solto .foto { position: relative; display: block; border-radius: 3px; background: #fff; box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.2), 0 8px 16px -8px rgba(0, 0, 0, 0.45); }
+.solto-nome { max-width: 120px; padding: 1px 5px; border-radius: 4px; font-size: 11.5px; line-height: 1.25; color: #2b2b28; text-align: center; overflow-wrap: anywhere; }
+.solto.escolhido .solto-nome { background: var(--azul); color: #fff; }
+.solto.escolhido .foto { box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.35), 0 8px 16px -8px rgba(0, 0, 0, 0.45); }
+.solto.movendo { z-index: 955; }
+.solto.movendo .foto { box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.2), 0 16px 30px -10px rgba(0, 0, 0, 0.5); }
+.solto.chegando { animation: solto-chega 280ms var(--sai); }
+@keyframes solto-chega { from { opacity: 0.5; scale: 1.08; } }
+.solto.voltando { transition: transform 0.36s var(--sai); }
+.solto.saindo { opacity: 0; scale: 0.6; transition: opacity 0.25s ease, scale 0.25s ease; }
+
 /* the preview windows that hold the figures, and a print opened large */
 .previa { left: 50%; top: calc(var(--menus) + 7%); width: min(560px, calc(100vw - 40px)); transform: translateX(-50%); }
 .previa .janela-conteudo { background: #fff; }
@@ -569,14 +586,19 @@ button { font: inherit; color: inherit; }
 .captura-camada { position: absolute; inset: 0; z-index: 1000; cursor: crosshair; touch-action: none; }
 .captura-camada[hidden] { display: none; }
 .captura-camada.janelas { cursor: default; }
-.captura-retangulo {
-  position: absolute; display: none; border: 1px solid rgba(255, 255, 255, 0.9);
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.35), 0 0 0 100vmax rgba(0, 0, 0, 0.22);
+/* The dimming around a selection: four panels the size of the desk, only moved and scaled, never repainted. */
+.captura-sombra {
+  position: absolute; left: 0; top: 0; width: 100%; height: 100%; display: none;
+  background: rgba(0, 0, 0, 0.22); transform-origin: 0 0; transform: scale(0); will-change: transform;
 }
-.captura-camada.escolhendo .captura-retangulo { display: block; }
-.captura-janela { position: absolute; display: none; border-radius: 12px; background: rgba(0, 122, 255, 0.24); box-shadow: inset 0 0 0 1.5px rgba(0, 122, 255, 0.6); }
+.captura-retangulo {
+  position: absolute; left: 0; top: 0; display: none; border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.35); will-change: transform;
+}
+.captura-camada.escolhendo .captura-retangulo, .captura-camada.escolhendo .captura-sombra { display: block; }
+.captura-janela { position: absolute; left: 0; top: 0; display: none; will-change: transform; border-radius: 12px; background: rgba(0, 122, 255, 0.24); box-shadow: inset 0 0 0 1.5px rgba(0, 122, 255, 0.6); }
 .captura-medida {
-  position: absolute; display: none; padding: 2px 6px; border-radius: 4px; background: rgba(0, 0, 0, 0.66); color: #fff;
+  position: absolute; left: 0; top: 0; display: none; will-change: transform; padding: 2px 6px; border-radius: 4px; background: rgba(0, 0, 0, 0.66); color: #fff;
   font: 500 11px/1.4 var(--sans); font-variant-numeric: tabular-nums; white-space: nowrap; pointer-events: none;
 }
 .captura-camada.escolhendo .captura-medida { display: block; }
@@ -698,7 +720,8 @@ button { font: inherit; color: inherit; }
   .gaveta-corpo { transition: transform 0.2s ease, height 0.2s ease, top 0.2s ease; }
   .gaveta-corpo.tranco { animation: none; }
   .ficha, .ficha .foto { transition-duration: 0.15s; transition-timing-function: ease; }
-  .anexo { animation: none; }
+  .anexo, .solto.chegando { animation: none; }
+  .solto.voltando, .solto.saindo { transition: none; }
   .dock-app, .botao { transition: none; }
 }
 </style>
@@ -747,7 +770,7 @@ button { font: inherit; color: inherit; }
       <ul>
         <li><b>Clique</b> copia o print.</li>
         <li><b>Bolinha</b> escolhe vários.</li>
-        <li><b>Arraste</b> até o chamado.</li>
+        <li><b>Arraste</b> para a mesa.</li>
         <li><b>X</b> ou o Lixo: joga fora.</li>
         <li><b>⌃⌥G</b> abre e fecha a gaveta.</li>
       </ul>
@@ -866,6 +889,8 @@ button { font: inherit; color: inherit; }
 
   <div class="captura-camada" id="captura-camada" hidden>
     <div class="captura-janela" id="captura-janela"></div>
+    <div class="captura-sombra" data-lado="cima"></div><div class="captura-sombra" data-lado="baixo"></div>
+    <div class="captura-sombra" data-lado="esquerda"></div><div class="captura-sombra" data-lado="direita"></div>
     <div class="captura-retangulo" id="captura-retangulo"></div>
     <div class="captura-medida" id="captura-medida"></div>
   </div>
@@ -3214,8 +3239,14 @@ draw(performance.now());
     write(pilha, "height", `${layout.height}px`);
 
     list.forEach((print, i) => {
+      // A print in flight has its place kept, but its card is built only when it lands.
+      if (drawer.landing.has(print.id) && !cards.has(print.id)) return;
       const card = cardFor(print);
-      if (!card.parentNode) pilha.append(card);
+      if (!card.parentNode) {
+        // in order, back to front, so the newer card paints over the older
+        const after = list.slice(i + 1).map((p) => cards.get(p.id)).find((c) => c && c.parentNode);
+        pilha.insertBefore(card, after || null);
+      }
       const part = parts.get(print.id);
       const reveal = layout.reveal(i);
       const whole = reveal >= S.cardH;
@@ -3614,7 +3645,7 @@ draw(performance.now());
     camada.hidden = false;
     camada.classList.toggle("janelas", next === "janela");
     camada.classList.remove("escolhendo");
-    destaque.style.display = "none";
+    write(destaque, "display", "none");
     dicaTexto.textContent = next === "janela"
       ? "Clique numa janela para fotografá-la. Esc cancela."
       : finger.matches ? "Arraste o dedo sobre o que quer guardar." : "Arraste sobre qualquer coisa. Esc cancela.";
@@ -3673,14 +3704,24 @@ draw(performance.now());
     if (mode === "janela") {
       const win = windowAt(event.clientX, event.clientY);
       if (!win) {
-        destaque.style.display = "none";
+        write(destaque, "display", "none");
         return;
       }
       const r = onDesk(win.getBoundingClientRect());
-      Object.assign(destaque.style, { display: "block", left: `${r.x}px`, top: `${r.y}px`, width: `${r.w}px`, height: `${r.h}px` });
+      write(destaque, "display", "block");
+      write(destaque, "transform", `translate(${r.x}px, ${r.y}px)`);
+      write(destaque, "width", `${r.w}px`);
+      write(destaque, "height", `${r.h}px`);
       return;
     }
-    if (dragStart) drawSelection({ x: event.clientX - m.left, y: event.clientY - m.top });
+    if (dragStart) {
+      // one drawing per frame, however many pointer events arrive
+      pendingPoint = { x: event.clientX - m.left, y: event.clientY - m.top };
+      if (!selectionFrame) selectionFrame = requestAnimationFrame(() => {
+        selectionFrame = 0;
+        if (dragStart && pendingPoint) drawSelection(pendingPoint);
+      });
+    }
   });
   camada.addEventListener("pointerup", (event) => {
     if (mode !== "selecao" || !dragStart) return;
@@ -3696,13 +3737,23 @@ draw(performance.now());
     return { x, y, w: clamp(Math.max(a.x, b.x), 0, m.width) - x, h: clamp(Math.max(a.y, b.y), 0, m.height) - y };
   }
 
+  let pendingPoint = null;
+  let selectionFrame = 0;
+  const sombras = Object.fromEntries($$(".captura-sombra").map((el) => [el.dataset.lado, el]));
+
   function drawSelection(point) {
     const r = selection(dragStart, point);
-    Object.assign(retangulo.style, { left: `${r.x}px`, top: `${r.y}px`, width: `${r.w}px`, height: `${r.h}px` });
-    medida.textContent = `${Math.round(r.w)} × ${Math.round(r.h)}`;
     const m = mesaBox();
-    medida.style.left = `${clamp(point.x + 14, 4, m.width - 90)}px`;
-    medida.style.top = `${clamp(point.y + 14, 4, m.height - 24)}px`;
+    const W = m.width, H = m.height;
+    sombras.cima.style.transform = `scale(1, ${r.y / H})`;
+    sombras.baixo.style.transform = `translate(0, ${r.y + r.h}px) scale(1, ${(H - r.y - r.h) / H})`;
+    sombras.esquerda.style.transform = `translate(0, ${r.y}px) scale(${r.x / W}, ${r.h / H})`;
+    sombras.direita.style.transform = `translate(${r.x + r.w}px, ${r.y}px) scale(${(W - r.x - r.w) / W}, ${r.h / H})`;
+    retangulo.style.transform = `translate(${r.x}px, ${r.y}px)`;
+    retangulo.style.width = `${r.w}px`;
+    retangulo.style.height = `${r.h}px`;
+    write(medida, "text", `${Math.round(r.w)} × ${Math.round(r.h)}`);
+    medida.style.transform = `translate(${clamp(point.x + 14, 4, W - 90)}px, ${clamp(point.y + 14, 4, H - 24)}px)`;
   }
 
   /** The shutter: a flash over what was taken, then the print flies into the drawer. */
@@ -3712,7 +3763,8 @@ draw(performance.now());
     if (!still.matches) {
       flash.animate([{ opacity: 0.85 }, { opacity: 0 }], { duration: 320, easing: "ease-out" });
     }
-    receive(print, area);
+    // The flash and the closing of the capture layer get a frame to themselves; the flight starts on the next.
+    requestAnimationFrame(() => setTimeout(() => receive(print, area), 0));
   }
 
   function receive(print, from) {
@@ -3771,7 +3823,11 @@ draw(performance.now());
     const p0 = { x: from.x + from.w / 2, y: from.y + from.h / 2 };
     const p1 = { x: target.x + target.w / 2, y: target.y + target.h / 2 };
     const control = { x: p0.x + (p1.x - p0.x) * 0.55, y: Math.min(p0.y, p1.y) - 140 };
-    const startScale = from.w / target.w;
+    // A print of the whole screen would make the browser draw a screen-sized picture before the first frame:
+    // the flight starts at most 2.6 cards wide, fading in under the flash, which covers the difference.
+    const fullScale = from.w / target.w;
+    const startScale = Math.min(fullScale, 2.6);
+    const fadeIn = fullScale > startScale;
 
     const frame = (t) => {
       const e = flightEase(t);
@@ -3784,6 +3840,7 @@ draw(performance.now());
       halo.style.opacity = String(keyed([0, 0.14, 1], [0, 1, 0.7], null, t));
       const ink = String(keyed([0, 0.7, 1], [0, 0, 1], null, t));
       for (const part of words) part.style.opacity = ink;
+      if (fadeIn) flyer.style.opacity = String(keyed([0, 0.12], [0, 1], null, t));
     };
     frame(0);
     play(0.78, frame, () => {
@@ -3814,8 +3871,7 @@ draw(performance.now());
     drawer.hovered = null;
     const ghost = document.createElement("div");
     ghost.className = "fantasma";
-    const size = { w: 132, h: Math.round((132 * print.h) / print.w) };
-    if (size.h > 110) { size.h = 110; size.w = Math.round((110 * print.w) / print.h); }
+    const size = deskSize(print);
     const box = photo(print, size.w, size.h);
     box.style.left = `${-size.w / 2}px`;
     box.style.top = `${-size.h / 2}px`;
@@ -3876,10 +3932,177 @@ draw(performance.now());
       activate(chamado);
       attach(ids.map((id) => everyPrint.get(id)));
       clearSelection();
+    } else if (onTheDesk(event.clientX, event.clientY)) {
+      ghost.remove();
+      const m = mesaBox();
+      ids.forEach((id, k) => putOnDesk(everyPrint.get(id), event.clientX - m.left + k * 18, event.clientY - m.top + k * 18));
+      takeOut(ids);
+      announce(ids.length === 1 ? "Print deixado na mesa." : `${ids.length} prints deixados na mesa.`);
     } else {
       ghost.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 160, fill: "forwards" }).onfinish = () => ghost.remove();
       render();
     }
+  }
+
+  /** On the desk itself: not over the drawer, the menu bar or the dock. */
+  function onTheDesk(clientX, clientY) {
+    const inside = (el) => {
+      const r = el.getBoundingClientRect();
+      return clientX >= r.left && clientX <= r.right && clientY >= r.top && clientY <= r.bottom;
+    };
+    const m = mesaBox();
+    if (clientX < m.left || clientX > m.right || clientY < m.top + 28 || clientY > m.bottom) return false;
+    return !inside(corpo) && !inside($(".dock")) && !inside($(".captura"));
+  }
+
+  /** The prints leave the drawer: they were moved, not copied. */
+  function takeOut(ids) {
+    for (const id of ids) {
+      drawer.prints = drawer.prints.filter((p) => p.id !== id);
+      drawer.selection.delete(id);
+      drawer.copied.delete(id);
+      if (drawer.hovered === id) drawer.hovered = null;
+    }
+    render();
+  }
+
+  // ── prints left on the desk ─────────────────────────────────────────────
+
+  const DESK = { w: 104, h: 78, item: 128 };
+  function deskSize(print) {
+    let w = DESK.w, h = (DESK.w * print.h) / print.w;
+    if (h > DESK.h) { h = DESK.h; w = (DESK.h * print.w) / print.h; }
+    return { w: Math.round(w), h: Math.round(h) };
+  }
+  const onDeskNow = new Map();
+
+  /** A print as a file on the desk, its picture centred where it was let go. */
+  function putOnDesk(print, x, y) {
+    const size = deskSize(print);
+    const item = document.createElement("button");
+    item.type = "button";
+    item.className = "solto chegando";
+    item.setAttribute("aria-label", `${print.name}.png, na mesa. Enter abre, Delete joga no Lixo.`);
+    const name = document.createElement("span");
+    name.className = "solto-nome";
+    name.textContent = `${print.name}.png`;
+    item.append(photo(print, size.w, size.h), name);
+    palco.insertBefore(item, $(".dock", palco));
+    const m = mesaBox();
+    const spot = {
+      x: clamp(x - DESK.item / 2, 6, m.width - DESK.item - 6),
+      y: clamp(y - size.h / 2 - 4, 34, m.height - size.h - 40),
+    };
+    item.style.transform = `translate(${spot.x}px, ${spot.y}px)`;
+    item.addEventListener("animationend", () => item.classList.remove("chegando"), { once: true });
+    onDeskNow.set(print.id, { item, spot, print });
+    handleDeskItem(item, print);
+  }
+
+  function handleDeskItem(item, print) {
+    let lastTap = 0;
+    item.addEventListener("pointerdown", (event) => {
+      if (event.button !== 0) return;
+      const entry = onDeskNow.get(print.id);
+      for (const other of $$(".arquivo, .solto")) other.classList.toggle("escolhido", other === item);
+      activate(null);
+      item.setPointerCapture(event.pointerId);
+      const startX = event.clientX, startY = event.clientY;
+      let moving = false, over = null, frame = 0, last = event;
+      const follow = () => {
+        frame = 0;
+        const dx = last.clientX - startX, dy = last.clientY - startY;
+        item.style.transform = `translate(${entry.spot.x + dx}px, ${entry.spot.y + dy}px)`;
+        const box = corpo.getBoundingClientRect();
+        const overDrawer = drawer.open && last.clientX >= box.left && last.clientY >= box.top && last.clientY <= box.bottom;
+        const target = dropTarget(last.clientX, last.clientY) || (overDrawer ? corpo : null);
+        if (target !== over) {
+          lixo.classList.toggle("alvo", target === lixo);
+          anexos.classList.toggle("alvo", target === chamado);
+          over = target;
+        }
+        // brought to the right edge, the drawer opens to take it back
+        if (!drawer.open && last.clientX >= mesaBox().right - 10) openDrawer();
+      };
+      const move = (e) => {
+        last = e;
+        if (!moving && Math.hypot(e.clientX - startX, e.clientY - startY) < 4) return;
+        if (!moving) {
+          moving = true;
+          item.classList.add("movendo");
+        }
+        if (!frame) frame = requestAnimationFrame(follow);
+      };
+      const up = (e) => {
+        item.removeEventListener("pointermove", move);
+        item.removeEventListener("pointerup", up);
+        item.removeEventListener("pointercancel", up);
+        cancelAnimationFrame(frame);
+        lixo.classList.remove("alvo");
+        anexos.classList.remove("alvo");
+        if (!moving) {
+          const now = performance.now();
+          if (now - lastTap < 400 || finger.matches) showPrint(print);
+          lastTap = now;
+          return;
+        }
+        item.classList.remove("movendo");
+        const dx = e.clientX - startX, dy = e.clientY - startY;
+        // opened by bringing the file to the edge and let go elsewhere: the drawer slides back in
+        if (over !== corpo && drawer.open && !drawer.pinned) {
+          clearTimeout(awayTimer);
+          awayTimer = setTimeout(closeDrawer, 450);
+        }
+        if (over === lixo) return trashFromDesk(print);
+        if (over === corpo) return backToDrawer(print);
+        if (over === chamado) {
+          // into an app the file is copied: it stays where it was on the desk
+          activate(chamado);
+          attach([print]);
+          item.classList.add("voltando");
+          item.style.transform = `translate(${entry.spot.x}px, ${entry.spot.y}px)`;
+          setTimeout(() => item.classList.remove("voltando"), 360);
+          return;
+        }
+        const m = mesaBox();
+        entry.spot = {
+          x: clamp(entry.spot.x + dx, -DESK.item / 2, m.width - DESK.item / 2),
+          y: clamp(entry.spot.y + dy, 30, m.height - 60),
+        };
+        item.style.transform = `translate(${entry.spot.x}px, ${entry.spot.y}px)`;
+      };
+      item.addEventListener("pointermove", move);
+      item.addEventListener("pointerup", up);
+      item.addEventListener("pointercancel", up);
+    });
+    item.addEventListener("click", (event) => { if (event.detail === 0) showPrint(print); });
+    item.addEventListener("keydown", (event) => {
+      if (event.key === "Delete" || event.key === "Backspace") {
+        event.preventDefault();
+        trashFromDesk(print);
+      }
+    });
+  }
+
+  function trashFromDesk(print) {
+    const entry = onDeskNow.get(print.id);
+    if (!entry) return;
+    onDeskNow.delete(print.id);
+    entry.item.classList.add("saindo");
+    setTimeout(() => entry.item.remove(), 260);
+    lixo.classList.add("cheio");
+    announce("Print jogado no Lixo.");
+  }
+
+  function backToDrawer(print) {
+    const entry = onDeskNow.get(print.id);
+    if (!entry) return;
+    onDeskNow.delete(print.id);
+    entry.item.remove();
+    drawer.prints.push(print);
+    drawer.prints.sort((a, b) => b.date - a.date);
+    render();
+    announce("Print de volta na gaveta.");
   }
 
   function cancelDrag() {
