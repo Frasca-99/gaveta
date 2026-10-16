@@ -124,6 +124,41 @@
   const overlaps = (a, b) => a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
   const shown = (el) => !el.hidden && el.getClientRects().length > 0;
 
+  /**
+   * Follows one pointer gesture on the whole window until it ends. A release
+   * the page never saw (outside the window, or after the browser dropped the
+   * capture) is caught by the next move with no button down, by the window
+   * losing focus, or by the tab hiding: no gesture is ever left half done.
+   */
+  let gestureEnd = null;
+  function gesture(pointerId, { move, up, cancel }) {
+    if (gestureEnd) gestureEnd(true);
+    const done = (cancelled, event) => {
+      removeEventListener("pointermove", onMove, true);
+      removeEventListener("pointerup", onUp, true);
+      removeEventListener("pointercancel", onCancel, true);
+      removeEventListener("blur", onBlur);
+      document.removeEventListener("visibilitychange", onBlur);
+      gestureEnd = null;
+      if (cancelled) cancel?.();
+      else up(event);
+    };
+    const onMove = (event) => {
+      if (event.pointerId !== pointerId) return;
+      if (event.pointerType === "mouse" && event.buttons === 0) done(false, event);
+      else move(event);
+    };
+    const onUp = (event) => { if (event.pointerId === pointerId) done(false, event); };
+    const onCancel = (event) => { if (event.pointerId === pointerId) done(true); };
+    const onBlur = () => done(true);
+    addEventListener("pointermove", onMove, true);
+    addEventListener("pointerup", onUp, true);
+    addEventListener("pointercancel", onCancel, true);
+    addEventListener("blur", onBlur);
+    document.addEventListener("visibilitychange", onBlur);
+    gestureEnd = (cancelled) => done(cancelled);
+  }
+
   // ── windows ─────────────────────────────────────────────────────────────
 
   const appName = $("#app-da-frente");
@@ -168,7 +203,7 @@
       const box = tilted ? { x: win.offsetLeft, y: win.offsetTop } : onDesk(win.getBoundingClientRect());
       const startX = event.clientX, startY = event.clientY;
       let moved = false;
-      handle.setPointerCapture(event.pointerId);
+      try { handle.setPointerCapture(event.pointerId); } catch {}
       const move = (e) => {
         const dx = e.clientX - startX, dy = e.clientY - startY;
         if (!moved && Math.hypot(dx, dy) < 3) return;
@@ -185,14 +220,7 @@
         win.style.left = `${x}px`;
         win.style.top = `${y}px`;
       };
-      const up = () => {
-        handle.removeEventListener("pointermove", move);
-        handle.removeEventListener("pointerup", up);
-        handle.removeEventListener("pointercancel", up);
-      };
-      handle.addEventListener("pointermove", move);
-      handle.addEventListener("pointerup", up);
-      handle.addEventListener("pointercancel", up);
+      gesture(event.pointerId, { move, up: () => {}, cancel: () => {} });
     });
   }
   for (const button of $$("[data-fecha]")) {
@@ -704,10 +732,7 @@
   let lastClick = { id: 0, at: 0 };
 
   pilha.addEventListener("pointermove", (event) => {
-    if (press && press.pointerId === event.pointerId) {
-      followPress(event);
-      return;
-    }
+    if (press) return;
     if (event.pointerType === "mouse") setHovered(hitTest(event.clientX, event.clientY)?.print.id ?? null);
   });
   pilha.addEventListener("pointerleave", (event) => {
@@ -717,13 +742,20 @@
     if (event.button !== 0) return;
     const hit = hitTest(event.clientX, event.clientY);
     if (!hit) return;
+    endPress();
     press = { hit, pointerId: event.pointerId, x: event.clientX, y: event.clientY, dragging: false, event };
-    pilha.setPointerCapture(event.pointerId);
+    try { pilha.setPointerCapture(event.pointerId); } catch {}
+    // The gesture is followed on the whole window, so it ends even if the browser lets go of the capture.
+    gesture(event.pointerId, { move: pressMove, up: pressUp, cancel: endPress });
     // no text selection or native drag of a picture inside the card can steal the gesture
     event.preventDefault();
   });
-  pilha.addEventListener("pointerup", (event) => {
-    if (!press || press.pointerId !== event.pointerId) return;
+
+  function pressMove(event) {
+    if (press) followPress(event);
+  }
+  function pressUp(event) {
+    if (!press) return;
     const current = press;
     press = null;
     if (current.dragging) {
@@ -733,13 +765,14 @@
     // a press that moved is never a click: letting go over the cross must not throw the card away
     if (Math.hypot(event.clientX - current.x, event.clientY - current.y) >= 5) return;
     clickCard(current.hit, current.event);
-  });
+  }
+  /** Drops whatever gesture is half done: its ghost, the dimmed cards. */
+  function endPress() {
+    if (press?.dragging || drag) cancelDrag();
+    press = null;
+  }
   // nothing in the drawer is dragged by the browser itself
   gaveta.addEventListener("dragstart", (event) => event.preventDefault());
-  pilha.addEventListener("pointercancel", () => {
-    if (press?.dragging) cancelDrag();
-    press = null;
-  });
 
   function clickCard({ print, part }, event) {
     const marks = drawer.hovered === print.id || finger.matches;
@@ -1146,6 +1179,7 @@
   }
 
   function startDrag(print) {
+    if (drag) cancelDrag();
     const ids = drawer.selection.has(print.id) ? selectedPrints().map((p) => p.id) : [print.id];
     drawer.dragging = new Set(ids);
     drawer.hovered = null;
@@ -1286,7 +1320,7 @@
       const entry = onDeskNow.get(print.id);
       for (const other of $$(".arquivo, .solto")) other.classList.toggle("escolhido", other === item);
       activate(null);
-      item.setPointerCapture(event.pointerId);
+      try { item.setPointerCapture(event.pointerId); } catch {}
       const startX = event.clientX, startY = event.clientY;
       let moving = false, over = null, frame = 0, last = event;
       const follow = () => {
@@ -1314,9 +1348,6 @@
         if (!frame) frame = requestAnimationFrame(follow);
       };
       const up = (e) => {
-        item.removeEventListener("pointermove", move);
-        item.removeEventListener("pointerup", up);
-        item.removeEventListener("pointercancel", up);
         cancelAnimationFrame(frame);
         lixo.classList.remove("alvo");
         anexos.classList.remove("alvo");
@@ -1351,9 +1382,14 @@
         };
         item.style.transform = `translate(${entry.spot.x}px, ${entry.spot.y}px)`;
       };
-      item.addEventListener("pointermove", move);
-      item.addEventListener("pointerup", up);
-      item.addEventListener("pointercancel", up);
+      const cancel = () => {
+        cancelAnimationFrame(frame);
+        lixo.classList.remove("alvo");
+        anexos.classList.remove("alvo");
+        item.classList.remove("movendo");
+        item.style.transform = `translate(${entry.spot.x}px, ${entry.spot.y}px)`;
+      };
+      gesture(event.pointerId, { move, up, cancel });
     });
     item.addEventListener("click", (event) => { if (event.detail === 0) showPrint(print); });
     item.addEventListener("keydown", (event) => {
