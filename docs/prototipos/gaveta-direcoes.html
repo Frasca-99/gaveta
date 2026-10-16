@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gaveta · direções</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+:root {
+  --oak: #C8925A;
+  --oak-light: #E2B47E;
+  --oak-dark: #8A5A2E;
+  --felt: #1F4A3A;
+  --felt-deep: #143428;
+  --brass: #C9A24B;
+  --brass-light: #F1D891;
+  --paper: #FBF8F1;
+  --ink: #22201C;
+  --accent: #2F7BF6;
+  --ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
+  --label: "Special Elite", "Courier New", monospace;
+  --spring: cubic-bezier(.2, .9, .25, 1.12);
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; overflow: hidden; }
+body {
+  font-family: var(--ui);
+  color: var(--ink);
+  background:
+    radial-gradient(1200px 700px at 20% 15%, #5A6B86 0%, transparent 60%),
+    radial-gradient(900px 600px at 75% 85%, #7A5A78 0%, transparent 55%),
+    #2E3446;
+}
+
+/* A make-believe app window, so the drawer has something to slide over. */
+.window {
+  position: absolute; left: 6vw; top: 9vh; width: min(720px, 60vw); height: 70vh;
+  background: #F6F7F9; border-radius: 12px; overflow: hidden;
+  box-shadow: 0 30px 80px rgba(0,0,0,.35), 0 0 0 .5px rgba(0,0,0,.2);
+}
+.window .bar { height: 38px; background: #E9EBEF; display: flex; align-items: center; gap: 8px; padding: 0 14px; }
+.window .bar i { width: 12px; height: 12px; border-radius: 50%; display: block; }
+.window .body { padding: 28px; display: grid; gap: 14px; }
+.window .line { height: 12px; border-radius: 6px; background: #DDE1E8; }
+.window h1 { margin: 0 0 6px; font-size: 22px; font-weight: 650; letter-spacing: -.01em; }
+.window p { margin: 0; color: #5B6170; font-size: 14px; line-height: 1.5; max-width: 46ch; }
+
+/* Controls for the prototype itself. */
+.toolbar {
+  position: fixed; left: 16px; bottom: 16px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+  padding: 8px; border-radius: 14px; background: rgba(20,22,30,.72); backdrop-filter: blur(16px);
+  color: #fff; font-size: 13px; z-index: 50; max-width: calc(100vw - 32px);
+}
+.seg { display: flex; background: rgba(255,255,255,.1); border-radius: 9px; padding: 2px; }
+.seg button, .toolbar > button {
+  font: inherit; color: inherit; border: 0; background: transparent; padding: 7px 12px; border-radius: 7px; cursor: pointer;
+}
+.seg button[aria-pressed="true"] { background: rgba(255,255,255,.95); color: var(--ink); }
+.toolbar > button { background: rgba(255,255,255,.14); }
+.toolbar > button:hover { background: rgba(255,255,255,.22); }
+.toolbar .hint { opacity: .6; padding: 0 6px; }
+button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.flash { position: fixed; inset: 0; background: #fff; opacity: 0; pointer-events: none; z-index: 60; }
+.flash.on { animation: flash .35s ease-out; }
+@keyframes flash { 0% { opacity: .7; } 100% { opacity: 0; } }
+
+.toast {
+  position: fixed; left: 50%; top: 18px; transform: translate(-50%, -80px); z-index: 70;
+  padding: 9px 16px; border-radius: 999px; background: rgba(20,22,30,.86); color: #fff; font-size: 13px; font-weight: 500;
+  transition: transform .35s var(--spring);
+}
+.toast.on { transform: translate(-50%, 0); }
+
+/* ---------- The drawer, shared ---------- */
+.drawer {
+  position: fixed; right: 0; top: 50%; z-index: 40;
+  --x: calc(100% + 40px);
+  transform: translate(var(--x), -50%);
+  transition: transform .55s var(--spring);
+}
+.drawer.open { --x: 0px; }
+.drawer.peek { --x: calc(100% - var(--peek, 88px)); }
+.drawer.thunk { animation: thunk .4s ease-out; }
+@keyframes thunk { 30% { translate: -6px 0; } 60% { translate: 2px 0; } }
+.edge { position: fixed; right: 0; top: 0; bottom: 0; width: 6px; z-index: 30; }
+
+.sel-dot {
+  width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid #fff; background: rgba(0,0,0,.3);
+  box-shadow: 0 1px 2px rgba(0,0,0,.35); cursor: pointer; padding: 0; display: grid; place-items: center;
+}
+.sel-dot svg { width: 12px; height: 12px; opacity: 0; }
+.selected .sel-dot { background: var(--accent); border-color: #fff; }
+.selected .sel-dot svg { opacity: 1; }
+
+.foot { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+.foot .grow { flex: 1; }
+.pill {
+  font: 500 11px var(--ui); border: 0; border-radius: 999px; padding: 6px 11px; cursor: pointer;
+  background: rgba(0,0,0,.08); color: inherit;
+}
+.pill.main { background: var(--accent); color: #fff; }
+
+@keyframes drop-in { from { transform: translateY(-46px) rotate(-3deg); opacity: 0; } }
+
+/* ---------- A · Fichário ---------- */
+.dir-a { display: flex; align-items: stretch; filter: drop-shadow(-14px 18px 26px rgba(0,0,0,.35)); --peek: 92px; }
+.a-front {
+  width: 58px; border-radius: 12px 0 0 12px; position: relative;
+  background:
+    repeating-linear-gradient(176deg, rgba(90,50,20,.0) 0 7px, rgba(90,50,20,.12) 7px 8px, rgba(90,50,20,0) 8px 15px),
+    linear-gradient(90deg, var(--oak-light), var(--oak) 55%, var(--oak-dark));
+  box-shadow: inset -2px 0 0 rgba(0,0,0,.18), inset 2px 0 0 rgba(255,235,200,.35);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px;
+}
+.a-label {
+  writing-mode: vertical-rl; transform: rotate(180deg);
+  font: 15px var(--label); letter-spacing: .32em; color: #3A2A14;
+  padding: 14px 7px; border-radius: 4px;
+  background: linear-gradient(90deg, #F7EED7, #EADBB6);
+  box-shadow: 0 0 0 3px var(--brass), 0 0 0 4px #7C6224, inset 0 1px 2px rgba(0,0,0,.2);
+}
+.a-pull {
+  width: 18px; height: 54px; border-radius: 9px;
+  background: linear-gradient(90deg, var(--brass-light), var(--brass) 45%, #7C6224);
+  box-shadow: 0 2px 4px rgba(0,0,0,.45), inset 0 0 0 1px rgba(255,255,255,.25);
+}
+.a-box {
+  width: 300px; padding: 14px 14px 10px 16px;
+  background: linear-gradient(180deg, #3B2A1A, #2A1D11);
+  border-top: 10px solid var(--oak-dark); border-bottom: 10px solid var(--oak-dark);
+  box-shadow: inset 8px 0 18px rgba(0,0,0,.55);
+  display: flex; flex-direction: column; max-height: 78vh;
+}
+.a-cards { display: flex; flex-direction: column; padding-top: 18px; overflow-y: auto; scrollbar-width: none; }
+.a-card {
+  position: relative; background: var(--paper); border-radius: 4px 4px 3px 3px; padding: 8px 8px 9px;
+  box-shadow: 0 -1px 0 rgba(0,0,0,.06), 0 -6px 12px rgba(0,0,0,.25);
+  margin-top: -150px; transition: margin .35s var(--spring), transform .25s ease;
+  cursor: pointer;
+}
+.a-card:first-child { margin-top: 0; }
+.a-card:hover { transform: translateX(-10px); }
+.a-card:hover + .a-card { margin-top: 12px; }
+.a-card.new { animation: drop-in .5s var(--spring); }
+.a-card img { display: block; width: 100%; aspect-ratio: 16/10; object-fit: cover; border-radius: 2px; }
+.a-tab {
+  position: absolute; top: -17px; left: calc(10px + var(--tab) * 82px);
+  font: 11px var(--label); color: #3A2A14; background: var(--paper);
+  padding: 3px 10px 2px; border-radius: 5px 5px 0 0;
+  box-shadow: 0 -3px 6px rgba(0,0,0,.15);
+}
+.a-card .sel-dot { position: absolute; top: 14px; left: 14px; opacity: 0; transition: opacity .15s; }
+.a-card:hover .sel-dot, .a-cards.selecting .sel-dot { opacity: 1; }
+.a-card.selected { box-shadow: 0 0 0 2px var(--accent), 0 -6px 12px rgba(0,0,0,.25); }
+.a-card .meta { display: flex; justify-content: space-between; font: 11px var(--ui); color: #6A6458; margin-top: 7px; }
+.a-box .foot { color: #EADBB6; padding-top: 10px; margin-top: 8px; border-top: 1px solid rgba(255,255,255,.08); }
+.a-box .pill { background: rgba(255,255,255,.12); }
+.a-box .pill.main { background: var(--brass); color: #2A1D11; }
+
+/* ---------- B · Gaveta de mesa ---------- */
+.dir-b { display: flex; filter: drop-shadow(-16px 22px 30px rgba(0,0,0,.4)); --peek: 120px; }
+.b-front {
+  width: 34px; border-radius: 10px 0 0 10px;
+  background:
+    repeating-linear-gradient(90deg, rgba(90,50,20,0) 0 5px, rgba(90,50,20,.12) 5px 6px),
+    linear-gradient(90deg, var(--oak-light), var(--oak));
+  display: grid; place-items: center;
+}
+.b-front span {
+  width: 12px; height: 70px; border-radius: 6px;
+  background: linear-gradient(90deg, var(--brass-light), var(--brass) 50%, #7C6224);
+  box-shadow: 0 2px 3px rgba(0,0,0,.4);
+}
+.b-tray {
+  width: 330px; max-height: 80vh; padding: 16px;
+  background:
+    radial-gradient(circle at 30% 20%, rgba(255,255,255,.05), transparent 60%),
+    repeating-radial-gradient(circle at 10% 10%, rgba(255,255,255,.015) 0 1px, transparent 1px 3px),
+    var(--felt);
+  border: 14px solid var(--oak);
+  border-image: linear-gradient(180deg, var(--oak-light), var(--oak) 40%, var(--oak-dark)) 1;
+  box-shadow: inset 0 10px 20px rgba(0,0,0,.45), inset 10px 0 18px rgba(0,0,0,.35);
+  display: flex; flex-direction: column;
+}
+.b-photos { overflow-y: auto; scrollbar-width: none; padding: 8px 10px 14px; display: flex; flex-direction: column; }
+.b-photo {
+  position: relative; background: #fff; padding: 7px 7px 22px; border-radius: 2px;
+  transform: rotate(var(--r)) translateX(var(--dx));
+  box-shadow: 0 4px 10px rgba(0,0,0,.4);
+  margin-top: -34px; transition: transform .3s var(--spring), box-shadow .3s, margin .3s var(--spring); cursor: pointer;
+}
+.b-photo:first-child { margin-top: 0; }
+.b-photo:hover { transform: rotate(0) scale(1.04); box-shadow: 0 14px 26px rgba(0,0,0,.45); z-index: 5; }
+.b-photo:hover + .b-photo { margin-top: 6px; }
+.b-photo.new { animation: drop-in .55s var(--spring); }
+.b-photo img { display: block; width: 100%; aspect-ratio: 16/10; object-fit: cover; }
+.b-photo .cap { position: absolute; left: 9px; right: 9px; bottom: 4px; display: flex; justify-content: space-between; font: 11px var(--label); color: #57524A; }
+.b-clip {
+  position: absolute; top: -12px; left: 18px; width: 18px; height: 40px; border: 0; padding: 0; cursor: pointer;
+  background: none; opacity: 0; transition: opacity .15s, transform .25s var(--spring); transform: translateY(-6px);
+}
+.b-clip svg { width: 100%; height: 100%; }
+.b-photo:hover .b-clip, .b-photos.selecting .b-clip { opacity: .45; transform: none; }
+.b-photo.selected .b-clip { opacity: 1; transform: none; }
+.b-tray .foot { color: #D9E6DE; padding-top: 10px; }
+.b-tray .pill { background: rgba(255,255,255,.12); }
+.b-tray .pill.main { background: var(--brass); color: #2A1D11; }
+
+/* ---------- C · Vidro com puxador ---------- */
+.dir-c { display: flex; align-items: center; --peek: 104px; }
+.c-pull {
+  width: 14px; height: 76px; border-radius: 7px 0 0 7px; margin-right: -1px;
+  background: linear-gradient(90deg, var(--brass-light), var(--brass) 50%, #7C6224);
+  box-shadow: -2px 3px 6px rgba(0,0,0,.35); cursor: pointer;
+}
+.c-panel {
+  width: 300px; max-height: 78vh; border-radius: 16px 0 0 16px; padding: 10px;
+  background: rgba(246,246,248,.72); backdrop-filter: blur(24px) saturate(1.4);
+  box-shadow: -18px 20px 40px rgba(0,0,0,.3), inset 0 0 0 .5px rgba(255,255,255,.6);
+  display: flex; flex-direction: column;
+}
+.c-head { display: flex; justify-content: space-between; padding: 4px 6px 10px; font-size: 13px; font-weight: 600; }
+.c-head span { font-weight: 400; color: #77797f; font-size: 11px; }
+.c-rows { overflow-y: auto; scrollbar-width: none; display: flex; flex-direction: column; gap: 6px; }
+.c-row {
+  position: relative; display: flex; gap: 10px; align-items: center; padding: 7px; border-radius: 11px;
+  background: rgba(0,0,0,.035); box-shadow: inset 0 1px 2px rgba(0,0,0,.12), 0 1px 0 rgba(255,255,255,.7);
+  cursor: pointer; transition: background .15s, transform .25s var(--spring);
+}
+.c-row:hover { background: rgba(0,0,0,.07); transform: translateX(-4px); }
+.c-row.new { animation: drop-in .5s var(--spring); }
+.c-row img { width: 80px; height: 52px; object-fit: cover; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,.25); }
+.c-row b { display: block; font-size: 12px; font-weight: 600; }
+.c-row small { color: #77797f; font-size: 11px; }
+.c-row .sel-dot { position: absolute; left: 3px; top: 3px; opacity: 0; transition: opacity .15s; }
+.c-row:hover .sel-dot, .c-rows.selecting .sel-dot { opacity: 1; }
+.c-row.selected { background: rgba(47,123,246,.14); box-shadow: inset 0 0 0 1px rgba(47,123,246,.5); }
+.c-panel .foot { padding: 10px 6px 2px; color: #55585e; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+@media (max-width: 600px) {
+  .window { display: none; }
+  .a-box, .b-tray, .c-panel { width: min(300px, 78vw); }
+}
+</style>
+</head>
+<body>
+<div class="window" aria-hidden="true">
+  <div class="bar"><i style="background:#FF5F57"></i><i style="background:#FEBC2E"></i><i style="background:#28C840"></i></div>
+  <div class="body">
+    <h1>Chamado #4821: botão de pagar some no Safari</h1>
+    <p>Tire alguns prints com "Tirar print" lá embaixo, abra a gaveta encostando o ponteiro na borda direita e selecione vários pela bolinha.</p>
+    <div class="line" style="width:90%"></div><div class="line" style="width:72%"></div><div class="line" style="width:80%"></div>
+    <div class="line" style="width:55%"></div><div class="line" style="width:86%"></div>
+  </div>
+</div>
+
+<div class="edge" id="edge"></div>
+<div class="drawer" id="drawer" role="region" aria-label="Gaveta"></div>
+<div class="flash" id="flash"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<div class="toolbar">
+  <div class="seg" role="group" aria-label="Direção">
+    <button data-dir="a" aria-pressed="true">Fichário</button>
+    <button data-dir="b" aria-pressed="false">Gaveta de mesa</button>
+    <button data-dir="c" aria-pressed="false">Vidro com puxador</button>
+  </div>
+  <button id="shoot">Tirar print</button>
+  <button id="toggle">Abrir gaveta</button>
+  <span class="hint">ou encoste o ponteiro na borda direita</span>
+</div>
+
+<script>
+const palettes = [
+  ["#FFFFFF", "#2F7BF6", "#E8EEF9"], ["#14161C", "#9B7BFF", "#262A35"], ["#FFFFFF", "#F2994A", "#FBEFE3"],
+  ["#F4F6F8", "#27AE60", "#DCEFE3"], ["#1C2230", "#56CCF2", "#2B3346"], ["#FFFFFF", "#EB5757", "#FBE5E5"],
+];
+let seq = 0;
+function shot() {
+  const [bg, accent, soft] = palettes[seq % palettes.length];
+  const dark = bg.startsWith("#1");
+  const line = dark ? "#3A4152" : "#D9DEE7";
+  const bars = Array.from({ length: 6 }, (_, i) => {
+    const h = 20 + ((seq * 7 + i * 13) % 50);
+    return `<rect x="${118 + i * 30}" y="${170 - h}" width="18" height="${h}" rx="3" fill="${i === 3 ? accent : soft}"/>`;
+  }).join("");
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200">
+    <rect width="320" height="200" fill="${bg}"/><rect width="320" height="22" fill="${dark ? "#0E1015" : "#ECEEF2"}"/>
+    <circle cx="12" cy="11" r="4" fill="#FF5F57"/><circle cx="24" cy="11" r="4" fill="#FEBC2E"/><circle cx="36" cy="11" r="4" fill="#28C840"/>
+    <rect x="0" y="22" width="96" height="178" fill="${soft}"/>
+    <rect x="12" y="40" width="64" height="7" rx="3.5" fill="${accent}"/>
+    <rect x="12" y="58" width="56" height="6" rx="3" fill="${line}"/><rect x="12" y="72" width="48" height="6" rx="3" fill="${line}"/>
+    <rect x="118" y="38" width="120" height="10" rx="5" fill="${dark ? "#E6E8EE" : "#2A2D35"}"/>
+    <rect x="118" y="56" width="170" height="6" rx="3" fill="${line}"/>${bars}</svg>`;
+  seq++;
+  return "data:image/svg+xml;utf8," + encodeURIComponent(svg);
+}
+
+const minutesAgo = [0, 2, 5, 12, 40];
+// Newest first.
+let prints = minutesAgo.map((m, i) => ({ id: i + 1, at: Date.now() - m * 60000, img: shot(), size: "1440 × 900" }));
+let nextId = prints.length + 1;
+const selected = new Set();
+let dir = "a", isOpen = false, peekTimer, closeTimer, newestId = null;
+
+const drawer = document.getElementById("drawer");
+const check = `<svg viewBox="0 0 12 12"><path d="M2.5 6.2 5 8.5 9.5 3.5" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const clip = `<svg viewBox="0 0 18 40"><path d="M6 36V8a4 4 0 0 1 8 0v24a6 6 0 0 1-12 0V10" fill="none" stroke="url(#brass)" stroke-width="2.4" stroke-linecap="round"/><defs><linearGradient id="brass" x1="0" x2="1"><stop offset="0" stop-color="#F1D891"/><stop offset=".5" stop-color="#C9A24B"/><stop offset="1" stop-color="#7C6224"/></linearGradient></defs></svg>`;
+
+function ago(t) {
+  const m = Math.round((Date.now() - t) / 60000);
+  return m < 1 ? "agora" : `há ${m} min`;
+}
+
+function footer() {
+  const n = selected.size, total = prints.length;
+  if (n === 0) {
+    return `<div class="foot"><button class="pill" data-act="all">Selecionar todos</button><span class="grow"></span><span style="opacity:.6">ou clique na bolinha</span></div>`;
+  }
+  return `<div class="foot"><b>${n} de ${total}</b><span class="grow"></span>
+    ${n < total ? `<button class="pill" data-act="all">Todos</button>` : ""}
+    <button class="pill main" data-act="copy">${n === 1 ? "Copiar" : "Copiar todos"}</button>
+    <button class="pill" data-act="clear" aria-label="Limpar seleção">✕</button></div>`;
+}
+
+function render() {
+  const selecting = selected.size ? "selecting" : "";
+  drawer.className = `drawer dir-${dir}` + (isOpen ? " open" : "") + (drawer.classList.contains("peek") && !isOpen ? " peek" : "");
+  if (dir === "a") {
+    drawer.innerHTML = `<div class="a-front"><div class="a-label">PRINTS</div><div class="a-pull"></div></div>
+      <div class="a-box"><div class="a-cards ${selecting}">${[...prints].reverse().map((p, i) => `
+        <div class="a-card ${selected.has(p.id) ? "selected" : ""} ${p.id === newestId ? "new" : ""}" data-id="${p.id}" style="--tab:${i % 3}; z-index:${i + 1}">
+          <div class="a-tab">${ago(p.at)}</div>
+          <img src="${p.img}" alt="Print ${p.id}">
+          <button class="sel-dot" data-sel="${p.id}" aria-label="Selecionar">${check}</button>
+          <div class="meta"><span>Print ${p.id}</span><span>${p.size}</span></div>
+        </div>`).join("")}</div>${footer()}</div>`;
+  } else if (dir === "b") {
+    drawer.innerHTML = `<div class="b-front"><span></span></div><div class="b-tray"><div class="b-photos ${selecting}">${prints.map((p, i) => `
+        <div class="b-photo ${selected.has(p.id) ? "selected" : ""} ${p.id === newestId ? "new" : ""}" data-id="${p.id}"
+             style="--r:${[-3, 2.5, -1.5, 3.5, -2.5][i % 5]}deg; --dx:${[0, 8, -6, 4, -2][i % 5]}px; z-index:${prints.length - i}">
+          <button class="b-clip" data-sel="${p.id}" aria-label="Selecionar">${clip}</button>
+          <img src="${p.img}" alt="Print ${p.id}">
+          <div class="cap"><span>${ago(p.at)}</span><span>${p.size}</span></div>
+        </div>`).join("")}</div>${footer()}</div>`;
+  } else {
+    drawer.innerHTML = `<div class="c-pull" data-act="toggle" title="Abrir a gaveta"></div><div class="c-panel">
+      <div class="c-head">Gaveta <span>${prints.length} prints</span></div>
+      <div class="c-rows ${selecting}">${prints.map(p => `
+        <div class="c-row ${selected.has(p.id) ? "selected" : ""} ${p.id === newestId ? "new" : ""}" data-id="${p.id}">
+          <img src="${p.img}" alt="Print ${p.id}"><div><b>${ago(p.at)}</b><small>${p.size}</small></div>
+          <button class="sel-dot" data-sel="${p.id}" aria-label="Selecionar">${check}</button>
+        </div>`).join("")}</div>${footer()}</div>`;
+  }
+  // The glass drawer keeps its pull visible on the edge while shut.
+  if (dir === "c" && !isOpen && !drawer.classList.contains("peek")) drawer.style.setProperty("--x", "calc(100% - 14px)");
+  else drawer.style.removeProperty("--x");
+  newestId = null;
+  const cards = drawer.querySelector(".a-cards");
+  if (cards) cards.scrollTop = cards.scrollHeight;
+}
+
+function toast(text) {
+  const t = document.getElementById("toast");
+  t.textContent = text; t.classList.add("on");
+  clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove("on"), 1300);
+}
+
+function setOpen(open) {
+  isOpen = open;
+  drawer.classList.remove("peek");
+  if (!open) selected.clear();
+  document.getElementById("toggle").textContent = open ? "Fechar gaveta" : "Abrir gaveta";
+  render();
+}
+
+document.querySelectorAll(".seg button").forEach(b => b.addEventListener("click", () => {
+  dir = b.dataset.dir;
+  document.querySelectorAll(".seg button").forEach(x => x.setAttribute("aria-pressed", x === b));
+  render();
+}));
+
+document.getElementById("toggle").addEventListener("click", () => setOpen(!isOpen));
+
+document.getElementById("shoot").addEventListener("click", () => {
+  const f = document.getElementById("flash");
+  f.classList.remove("on"); void f.offsetWidth; f.classList.add("on");
+  const p = { id: nextId++, at: Date.now(), img: shot(), size: ["1440 × 900", "820 × 540", "2560 × 1600"][nextId % 3] };
+  prints.unshift(p);
+  newestId = p.id;
+  if (!isOpen) {
+    drawer.classList.add("peek");
+    clearTimeout(peekTimer);
+    peekTimer = setTimeout(() => { drawer.classList.remove("peek"); render(); }, 1800);
+  }
+  render();
+  drawer.classList.remove("thunk"); void drawer.offsetWidth; drawer.classList.add("thunk");
+});
+
+drawer.addEventListener("click", e => {
+  const sel = e.target.closest("[data-sel]");
+  const act = e.target.closest("[data-act]");
+  if (sel) {
+    const id = +sel.dataset.sel;
+    selected.has(id) ? selected.delete(id) : selected.add(id);
+    return render();
+  }
+  if (act) {
+    const a = act.dataset.act;
+    if (a === "toggle") return setOpen(!isOpen);
+    if (a === "all") prints.forEach(p => selected.add(p.id));
+    if (a === "clear") selected.clear();
+    if (a === "copy") { toast(selected.size === 1 ? "Copiado" : `${selected.size} prints copiados`); }
+    return render();
+  }
+  const card = e.target.closest("[data-id]");
+  if (!card) return;
+  if (!isOpen) return setOpen(true);
+  const id = +card.dataset.id;
+  if (selected.size > 1 && selected.has(id)) toast(`${selected.size} prints copiados`);
+  else { selected.clear(); toast("Copiado"); render(); }
+});
+
+// Resting on the right edge opens it; leaving closes it.
+let dwell;
+document.getElementById("edge").addEventListener("mouseenter", () => { dwell = setTimeout(() => setOpen(true), 200); });
+document.getElementById("edge").addEventListener("mouseleave", () => clearTimeout(dwell));
+drawer.addEventListener("mouseenter", () => {
+  clearTimeout(closeTimer);
+  if (drawer.classList.contains("peek")) setOpen(true);
+});
+drawer.addEventListener("mouseleave", () => {
+  clearTimeout(closeTimer);
+  closeTimer = setTimeout(() => { if (isOpen) setOpen(false); }, 600);
+});
+
+render();
+</script>
+</body>
+</html>

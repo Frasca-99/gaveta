@@ -1,0 +1,518 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gaveta · fichário</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+:root {
+  --oak: #C8925A;
+  --oak-light: #E2B47E;
+  --oak-dark: #8A5A2E;
+  --felt: #1F4A3A;
+  --felt-deep: #143428;
+  --brass: #C9A24B;
+  --brass-light: #F1D891;
+  --brass-dark: #7C6224;
+  --paper: #FBF8F1;
+  --ink: #22201C;
+  --stamp: #B3362B;
+  --accent: #2F7BF6;
+  --ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
+  --label: "Special Elite", "Courier New", monospace;
+  --spring: cubic-bezier(.2, .9, .25, 1.12);
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; overflow: hidden; }
+body {
+  font-family: var(--ui); color: var(--ink);
+  background:
+    radial-gradient(1200px 700px at 20% 15%, #5A6B86 0%, transparent 60%),
+    radial-gradient(900px 600px at 75% 85%, #7A5A78 0%, transparent 55%),
+    #2E3446;
+}
+button { font: inherit; }
+button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* The support ticket behind the drawer: where captures get pasted. */
+.window {
+  position: absolute; left: 5vw; top: 8vh; width: min(640px, 56vw); height: 74vh;
+  background: #F6F7F9; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column;
+  box-shadow: 0 30px 80px rgba(0,0,0,.35), 0 0 0 .5px rgba(0,0,0,.2);
+}
+.window .bar { height: 38px; flex: none; background: #E9EBEF; display: flex; align-items: center; gap: 8px; padding: 0 14px; }
+.window .bar i { width: 12px; height: 12px; border-radius: 50%; display: block; }
+.window .body { padding: 26px 28px; display: flex; flex-direction: column; gap: 14px; flex: 1; min-height: 0; }
+.window h1 { margin: 0; font-size: 21px; font-weight: 650; letter-spacing: -.01em; }
+.window p { margin: 0; color: #5B6170; font-size: 14px; line-height: 1.5; max-width: 48ch; }
+.attach {
+  flex: 1; min-height: 120px; border: 1.5px dashed #C5CAD4; border-radius: 12px; padding: 14px;
+  display: flex; flex-wrap: wrap; align-content: flex-start; gap: 10px; overflow-y: auto; transition: background .2s, border-color .2s;
+}
+.attach.over { background: #EAF1FE; border-color: var(--accent); }
+.attach .empty { margin: auto; color: #8A90A0; font-size: 13px; text-align: center; line-height: 1.6; }
+.attach img { width: 124px; aspect-ratio: 16/10; object-fit: cover; border-radius: 7px; box-shadow: 0 1px 4px rgba(0,0,0,.2); animation: pop .35s var(--spring); }
+@keyframes pop { from { transform: scale(.7); opacity: 0; } }
+kbd { font: 12px var(--ui); background: #fff; border: 1px solid #D5D9E0; border-bottom-width: 2px; border-radius: 5px; padding: 1px 6px; }
+
+.toolbar {
+  position: fixed; left: 16px; bottom: 16px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+  padding: 8px; border-radius: 14px; background: rgba(20,22,30,.72); backdrop-filter: blur(16px);
+  color: #fff; font-size: 13px; z-index: 50; max-width: calc(100vw - 32px);
+}
+.toolbar button { color: inherit; border: 0; background: rgba(255,255,255,.14); padding: 7px 12px; border-radius: 8px; cursor: pointer; }
+.toolbar button:hover { background: rgba(255,255,255,.22); }
+.toolbar .hint { opacity: .6; padding: 0 6px; }
+
+.flash { position: fixed; inset: 0; background: #fff; opacity: 0; pointer-events: none; z-index: 60; }
+.flash.on { animation: flash .35s ease-out; }
+@keyframes flash { 0% { opacity: .7; } 100% { opacity: 0; } }
+.toast {
+  position: fixed; left: 50%; top: 18px; transform: translate(-50%, -80px); z-index: 70;
+  padding: 9px 16px; border-radius: 999px; background: rgba(20,22,30,.86); color: #fff; font-size: 13px; font-weight: 500;
+  transition: transform .35s var(--spring); pointer-events: none;
+}
+.toast.on { transform: translate(-50%, 0); }
+
+/* ---------- The drawer ---------- */
+.edge { position: fixed; right: 0; top: 0; bottom: 0; width: 6px; z-index: 30; }
+.drawer {
+  position: fixed; right: 0; top: 50%; z-index: 40; display: flex; align-items: stretch;
+  --x: calc(100% + 40px);
+  transform: translate(var(--x), -50%);
+  transition: transform .55s var(--spring);
+  filter: drop-shadow(-14px 18px 26px rgba(0,0,0,.35));
+}
+.drawer.open { --x: 0px; }
+.drawer.peek { --x: calc(100% - 96px); }
+.drawer.thunk { animation: thunk .4s ease-out; }
+@keyframes thunk { 30% { translate: -6px 0; } 60% { translate: 2px 0; } }
+
+.front {
+  width: 58px; border-radius: 12px 0 0 12px;
+  background:
+    repeating-linear-gradient(176deg, rgba(90,50,20,0) 0 7px, rgba(90,50,20,.12) 7px 8px, rgba(90,50,20,0) 8px 15px),
+    linear-gradient(90deg, var(--oak-light), var(--oak) 55%, var(--oak-dark));
+  box-shadow: inset -2px 0 0 rgba(0,0,0,.18), inset 2px 0 0 rgba(255,235,200,.35);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px;
+}
+.label {
+  writing-mode: vertical-rl; transform: rotate(180deg);
+  font: 15px var(--label); letter-spacing: .32em; color: #3A2A14; padding: 14px 7px; border-radius: 4px;
+  background: linear-gradient(90deg, #F7EED7, #EADBB6);
+  box-shadow: 0 0 0 3px var(--brass), 0 0 0 4px var(--brass-dark), inset 0 1px 2px rgba(0,0,0,.2);
+}
+.pull {
+  width: 18px; height: 54px; border-radius: 9px;
+  background: linear-gradient(90deg, var(--brass-light), var(--brass) 45%, var(--brass-dark));
+  box-shadow: 0 2px 4px rgba(0,0,0,.45), inset 0 0 0 1px rgba(255,255,255,.25);
+}
+.count { font: 12px var(--label); color: #3A2A14; opacity: .75; }
+
+.box {
+  width: 300px; max-height: 80vh; display: flex; flex-direction: column;
+  background:
+    radial-gradient(circle at 30% 10%, rgba(255,255,255,.06), transparent 55%),
+    repeating-radial-gradient(circle at 10% 10%, rgba(255,255,255,.015) 0 1px, transparent 1px 3px),
+    var(--felt);
+  border-top: 10px solid var(--oak-dark); border-bottom: 10px solid var(--oak-dark);
+  box-shadow: inset 10px 0 20px rgba(0,0,0,.5), inset 0 8px 14px rgba(0,0,0,.35);
+}
+.cards { display: flex; flex-direction: column; padding: 26px 14px 8px 30px; overflow-y: auto; scrollbar-width: none; }
+.card {
+  position: relative; background: var(--paper); border-radius: 4px 4px 3px 3px; padding: 8px 8px 9px;
+  box-shadow: 0 -1px 0 rgba(0,0,0,.06), 0 -6px 12px rgba(0,0,0,.28);
+  margin-top: -150px; cursor: pointer; user-select: none;
+  transition: margin .35s var(--spring), transform .3s var(--spring), opacity .3s;
+}
+.card:first-child { margin-top: 0; }
+.card:hover { transform: translateX(-10px); }
+.card:hover + .card { margin-top: 12px; }
+.card.selected { transform: translateX(-22px); box-shadow: 0 0 0 2px var(--accent), 0 -6px 12px rgba(0,0,0,.28); }
+.card.selected:hover { transform: translateX(-26px); }
+.card.new { animation: drop-in .5s var(--spring); }
+@keyframes drop-in { from { transform: translateY(-50px) rotate(-3deg); opacity: 0; } }
+.card.falling { transform: translate(-30px, 120px) rotate(-12deg); opacity: 0; transition: transform .4s ease-in, opacity .4s ease-in; }
+.card.dragging { opacity: .45; }
+.card img { display: block; width: 100%; aspect-ratio: 16/10; object-fit: cover; border-radius: 2px; pointer-events: none; }
+.tab {
+  position: absolute; top: -17px; left: calc(10px + var(--tab) * 82px);
+  font: 11px var(--label); color: #3A2A14; background: var(--paper);
+  padding: 3px 10px 2px; border-radius: 5px 5px 0 0; box-shadow: 0 -3px 6px rgba(0,0,0,.15);
+  transition: background .2s, color .2s;
+}
+.card.selected .tab { background: var(--accent); color: #fff; }
+.meta { display: flex; justify-content: space-between; font: 11px var(--ui); color: #6A6458; margin-top: 7px; }
+
+.dot, .x {
+  position: absolute; top: 14px; width: 20px; height: 20px; border-radius: 50%; padding: 0; cursor: pointer;
+  display: grid; place-items: center; opacity: 0; transition: opacity .15s; box-shadow: 0 1px 2px rgba(0,0,0,.35);
+}
+.dot { left: 14px; border: 1.5px solid #fff; background: rgba(0,0,0,.3); }
+.dot svg { width: 12px; height: 12px; opacity: 0; }
+.x { right: 14px; border: 0; background: rgba(20,20,20,.7); color: #fff; font-size: 11px; line-height: 1; }
+.card:hover .dot, .cards.selecting .dot, .card:hover .x { opacity: 1; }
+.card.selected .dot { opacity: 1; background: var(--accent); }
+.card.selected .dot svg { opacity: 1; }
+
+.stamp {
+  position: absolute; left: 50%; top: 40%; transform: translate(-50%, -50%) rotate(-12deg) scale(1.6);
+  font: 20px var(--label); letter-spacing: .12em; color: var(--stamp); border: 2.5px solid var(--stamp); border-radius: 6px;
+  padding: 2px 10px; opacity: 0; pointer-events: none; mix-blend-mode: multiply;
+}
+.card.copied .stamp { animation: stamp 1.3s ease-out; }
+@keyframes stamp {
+  0% { opacity: 0; transform: translate(-50%, -50%) rotate(-12deg) scale(1.6); }
+  15% { opacity: .9; transform: translate(-50%, -50%) rotate(-12deg) scale(1); }
+  75% { opacity: .9; }
+  100% { opacity: 0; transform: translate(-50%, -50%) rotate(-12deg) scale(1); }
+}
+
+.foot { display: flex; align-items: center; gap: 7px; font-size: 12px; color: #D9E6DE; padding: 10px 12px 10px 16px; border-top: 1px solid rgba(255,255,255,.08); }
+.foot .grow { flex: 1; }
+.foot .hint { opacity: .6; font-size: 11px; }
+.pill { font: 500 11px var(--ui); border: 0; border-radius: 999px; padding: 6px 11px; cursor: pointer; background: rgba(255,255,255,.12); color: inherit; }
+.pill:hover { background: rgba(255,255,255,.2); }
+.pill.main { background: var(--brass); color: #2A1D11; }
+.pill.main:hover { background: var(--brass-light); }
+.emptybox { padding: 46px 20px; text-align: center; color: #D9E6DE; font-size: 13px; line-height: 1.6; }
+.emptybox b { display: block; font: 15px var(--label); margin-bottom: 4px; }
+
+/* A context menu in the system's style. */
+.menu {
+  position: fixed; z-index: 80; min-width: 210px; padding: 5px; border-radius: 9px;
+  background: rgba(246,246,248,.92); backdrop-filter: blur(20px);
+  box-shadow: 0 12px 30px rgba(0,0,0,.28), 0 0 0 .5px rgba(0,0,0,.2); font-size: 13px;
+}
+.menu button { display: block; width: 100%; text-align: left; border: 0; background: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; color: var(--ink); }
+.menu button:hover { background: var(--accent); color: #fff; }
+.menu hr { border: 0; border-top: 1px solid rgba(0,0,0,.1); margin: 4px 6px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+@media (max-width: 700px) {
+  .window { width: calc(100vw - 32px); left: 16px; height: 46vh; }
+  .box { width: min(300px, 74vw); }
+}
+</style>
+</head>
+<body>
+<div class="window">
+  <div class="bar"><i style="background:#FF5F57"></i><i style="background:#FEBC2E"></i><i style="background:#28C840"></i></div>
+  <div class="body">
+    <h1>Chamado #4821: botão de pagar some no Safari</h1>
+    <p>Tire alguns prints, abra a gaveta na borda direita, escolha os que importam e traga para cá colando com <kbd>⌘V</kbd> ou arrastando.</p>
+    <div class="attach" id="attach"><div class="empty">Anexos<br>Cole com ⌘V ou solte prints aqui</div></div>
+  </div>
+</div>
+
+<div class="edge" id="edge"></div>
+<div class="drawer" id="drawer" role="region" aria-label="Gaveta"></div>
+<div class="flash" id="flash"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<div class="toolbar">
+  <button id="shoot">Tirar print</button>
+  <button id="toggle">Abrir gaveta</button>
+  <span class="hint">ou encoste o ponteiro na borda direita</span>
+</div>
+
+<script>
+const palettes = [
+  ["#FFFFFF", "#2F7BF6", "#E8EEF9"], ["#14161C", "#9B7BFF", "#262A35"], ["#FFFFFF", "#F2994A", "#FBEFE3"],
+  ["#F4F6F8", "#27AE60", "#DCEFE3"], ["#1C2230", "#56CCF2", "#2B3346"], ["#FFFFFF", "#EB5757", "#FBE5E5"],
+];
+let seq = 0;
+function shot() {
+  const [bg, accent, soft] = palettes[seq % palettes.length];
+  const dark = bg.startsWith("#1");
+  const line = dark ? "#3A4152" : "#D9DEE7";
+  const bars = Array.from({ length: 6 }, (_, i) => {
+    const h = 20 + ((seq * 7 + i * 13) % 50);
+    return `<rect x="${118 + i * 30}" y="${170 - h}" width="18" height="${h}" rx="3" fill="${i === 3 ? accent : soft}"/>`;
+  }).join("");
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 200">
+    <rect width="320" height="200" fill="${bg}"/><rect width="320" height="22" fill="${dark ? "#0E1015" : "#ECEEF2"}"/>
+    <circle cx="12" cy="11" r="4" fill="#FF5F57"/><circle cx="24" cy="11" r="4" fill="#FEBC2E"/><circle cx="36" cy="11" r="4" fill="#28C840"/>
+    <rect x="0" y="22" width="96" height="178" fill="${soft}"/>
+    <rect x="12" y="40" width="64" height="7" rx="3.5" fill="${accent}"/>
+    <rect x="12" y="58" width="56" height="6" rx="3" fill="${line}"/><rect x="12" y="72" width="48" height="6" rx="3" fill="${line}"/>
+    <rect x="118" y="38" width="120" height="10" rx="5" fill="${dark ? "#E6E8EE" : "#2A2D35"}"/>
+    <rect x="118" y="56" width="170" height="6" rx="3" fill="${line}"/>${bars}</svg>`;
+  seq++;
+  return "data:image/svg+xml;utf8," + encodeURIComponent(svg);
+}
+const sizes = ["1440 × 900", "820 × 540", "2560 × 1600", "1200 × 760"];
+
+// Newest first, as the app keeps them.
+let prints = [0, 2, 5, 12, 40].map((m, i) => ({ id: i + 1, at: Date.now() - m * 60000, img: shot(), size: sizes[i % 4] }));
+let nextId = prints.length + 1;
+const selected = new Set();
+let anchor = null, clipboard = [], isOpen = false, newestId = null, copiedIds = new Set();
+let peekTimer, closeTimer, holdTimer, held = false, menuOpen = false, dragging = false;
+
+const drawer = document.getElementById("drawer");
+const check = `<svg viewBox="0 0 12 12"><path d="M2.5 6.2 5 8.5 9.5 3.5" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const byId = id => prints.find(p => p.id === id);
+/** The selected captures, oldest first: the order they were taken. */
+const selectedPrints = () => [...prints].reverse().filter(p => selected.has(p.id));
+
+function ago(t) {
+  const m = Math.round((Date.now() - t) / 60000);
+  return m < 1 ? "agora" : `há ${m} min`;
+}
+
+function toast(text) {
+  const t = document.getElementById("toast");
+  t.textContent = text; t.classList.add("on");
+  clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove("on"), 1400);
+}
+
+function footer() {
+  const n = selected.size, total = prints.length;
+  if (total === 0) return "";
+  if (n === 0) {
+    return total > 1
+      ? `<div class="foot"><button class="pill" data-act="all">Selecionar todos</button><span class="grow"></span><span class="hint">ou clique na bolinha</span></div>`
+      : `<div class="foot"><span class="hint">Clique para copiar</span></div>`;
+  }
+  return `<div class="foot"><b>${n} de ${total}</b><span class="grow"></span>
+    ${n < total ? `<button class="pill" data-act="all">Todos</button>` : ""}
+    <button class="pill main" data-act="copy">${n === 1 ? "Copiar" : "Copiar todos"}</button>
+    <button class="pill" data-act="clear" aria-label="Limpar seleção">✕</button></div>`;
+}
+
+function render() {
+  const peeking = drawer.classList.contains("peek");
+  drawer.className = "drawer" + (isOpen ? " open" : "") + (peeking && !isOpen ? " peek" : "");
+  const list = [...prints].reverse(); // oldest at the back, newest in front
+  drawer.innerHTML = `
+    <div class="front"><div class="label">PRINTS</div><div class="pull"></div><div class="count">${prints.length}</div></div>
+    <div class="box">
+      ${prints.length === 0 ? `<div class="emptybox"><b>Gaveta vazia</b>Tire um print com ⌘⇧4 e ele cai aqui.</div>` : `
+      <div class="cards ${selected.size ? "selecting" : ""}">${list.map((p, i) => `
+        <div class="card ${selected.has(p.id) ? "selected" : ""} ${p.id === newestId ? "new" : ""} ${copiedIds.has(p.id) ? "copied" : ""}"
+             data-id="${p.id}" draggable="true" style="--tab:${i % 3}; z-index:${i + 1}">
+          <div class="tab">${ago(p.at)}</div>
+          <img src="${p.img}" alt="Print ${p.id}">
+          <button class="dot" data-sel="${p.id}" aria-label="Selecionar">${check}</button>
+          <button class="x" data-del="${p.id}" aria-label="Tirar da gaveta">✕</button>
+          <div class="stamp">COPIADO</div>
+          <div class="meta"><span>Print ${p.id}</span><span>${p.size}</span></div>
+        </div>`).join("")}</div>`}
+      ${footer()}
+    </div>`;
+  newestId = null;
+  copiedIds = new Set();
+  const cards = drawer.querySelector(".cards");
+  if (cards) cards.scrollTop = cards.scrollHeight;
+}
+
+function setOpen(open) {
+  isOpen = open;
+  drawer.classList.remove("peek");
+  if (!open) { selected.clear(); anchor = null; closeMenu(); }
+  document.getElementById("toggle").textContent = open ? "Fechar gaveta" : "Abrir gaveta";
+  render();
+}
+
+// ---- Actions, the same as the app's ----
+
+function copy(ids) {
+  clipboard = ids.map(byId).filter(Boolean);
+  copiedIds = new Set(ids);
+  toast(ids.length === 1 ? "Copiado" : `${ids.length} prints copiados · ⌘V para colar`);
+  render();
+}
+/** A click copies that one, or the whole selection when it is part of it. */
+function copyFrom(id) {
+  if (selected.size > 1 && selected.has(id)) return copy(selectedPrints().map(p => p.id));
+  selected.clear();
+  copy([id]);
+}
+function toggleSel(id) {
+  selected.has(id) ? selected.delete(id) : selected.add(id);
+  anchor = id;
+  render();
+}
+function extendSel(id) {
+  if (anchor === null) return toggleSel(id);
+  const a = prints.findIndex(p => p.id === anchor), b = prints.findIndex(p => p.id === id);
+  prints.slice(Math.min(a, b), Math.max(a, b) + 1).forEach(p => selected.add(p.id));
+  render();
+}
+function discard(ids) {
+  ids.forEach(id => drawer.querySelector(`.card[data-id="${id}"]`)?.classList.add("falling"));
+  setTimeout(() => {
+    prints = prints.filter(p => !ids.includes(p.id));
+    ids.forEach(id => selected.delete(id));
+    render();
+  }, 380);
+}
+function attach(list) {
+  const box = document.getElementById("attach");
+  box.querySelector(".empty")?.remove();
+  list.forEach(p => {
+    const img = document.createElement("img");
+    img.src = p.img; img.alt = `Print ${p.id}`;
+    box.appendChild(img);
+  });
+}
+
+// ---- Context menu ----
+
+function closeMenu() { document.querySelector(".menu")?.remove(); menuOpen = false; }
+function openMenu(x, y, id) {
+  closeMenu();
+  const n = selected.size;
+  const items = n > 1 && selected.has(id) ? [
+    [`Copiar ${n} prints`, () => copy(selectedPrints().map(p => p.id))],
+    [`Tirar ${n} prints da gaveta`, () => discard([...selected])],
+    null,
+    ...(n < prints.length ? [["Selecionar todos", () => { prints.forEach(p => selected.add(p.id)); render(); }]] : []),
+    ["Limpar seleção", () => { selected.clear(); render(); }],
+  ] : [
+    ["Copiar", () => copyFrom(id)],
+    ["Abrir", () => toast("Abrindo no Pré-Visualização")],
+    ["Marcação", () => toast("Abrindo na Marcação")],
+    ["Visualização Rápida", () => toast("Visualização Rápida")],
+    ["Mostrar no Finder", () => toast("Mostrando no Finder")],
+    null,
+    [selected.has(id) ? "Tirar da seleção" : "Selecionar", () => toggleSel(id)],
+    ...(prints.length > 1 ? [["Selecionar todos", () => { prints.forEach(p => selected.add(p.id)); render(); }]] : []),
+    ["Tirar da gaveta", () => discard([id])],
+  ];
+  const menu = document.createElement("div");
+  menu.className = "menu";
+  items.forEach(item => {
+    if (!item) return menu.appendChild(document.createElement("hr"));
+    const b = document.createElement("button");
+    b.textContent = item[0];
+    b.addEventListener("click", ev => { ev.stopPropagation(); closeMenu(); item[1](); });
+    menu.appendChild(b);
+  });
+  document.body.appendChild(menu);
+  const r = menu.getBoundingClientRect();
+  menu.style.left = Math.min(x, innerWidth - r.width - 8) + "px";
+  menu.style.top = Math.min(y, innerHeight - r.height - 8) + "px";
+  menuOpen = true;
+}
+document.addEventListener("click", closeMenu);
+
+// ---- Pointer on the drawer ----
+
+drawer.addEventListener("pointerdown", e => {
+  const card = e.target.closest(".card");
+  if (!card || e.button !== 0 || e.target.closest("button")) return;
+  held = false;
+  clearTimeout(holdTimer);
+  holdTimer = setTimeout(() => { held = true; toast("Abrindo na Marcação"); }, 500);
+});
+["pointerup", "pointerleave"].forEach(t => drawer.addEventListener(t, () => clearTimeout(holdTimer)));
+
+drawer.addEventListener("click", e => {
+  const sel = e.target.closest("[data-sel]"), del = e.target.closest("[data-del]"), act = e.target.closest("[data-act]");
+  if (sel) return toggleSel(+sel.dataset.sel);
+  if (del) return discard([+del.dataset.del]);
+  if (act) {
+    const a = act.dataset.act;
+    if (a === "all") { prints.forEach(p => selected.add(p.id)); return render(); }
+    if (a === "clear") { selected.clear(); return render(); }
+    if (a === "copy") return copy(selectedPrints().map(p => p.id));
+  }
+  const card = e.target.closest(".card");
+  if (!card) return;
+  if (!isOpen) return setOpen(true);
+  if (held) { held = false; return; }
+  const id = +card.dataset.id;
+  if (e.metaKey || e.ctrlKey) return toggleSel(id);
+  if (e.shiftKey) return extendSel(id);
+  if (e.detail === 2) return toast("Abrindo no Pré-Visualização");
+  copyFrom(id);
+});
+
+drawer.addEventListener("contextmenu", e => {
+  const card = e.target.closest(".card");
+  if (!card) return;
+  e.preventDefault();
+  clearTimeout(closeTimer);
+  openMenu(e.clientX, e.clientY, +card.dataset.id);
+});
+
+// Dragging a selected card takes the whole selection with it.
+drawer.addEventListener("dragstart", e => {
+  const card = e.target.closest(".card");
+  if (!card) return;
+  clearTimeout(holdTimer);
+  const id = +card.dataset.id;
+  const ids = selected.size > 1 && selected.has(id) ? selectedPrints().map(p => p.id) : [id];
+  e.dataTransfer.setData("text/gaveta", JSON.stringify(ids));
+  e.dataTransfer.effectAllowed = "copy";
+  ids.forEach(i => drawer.querySelector(`.card[data-id="${i}"]`)?.classList.add("dragging"));
+  dragging = true;
+});
+drawer.addEventListener("dragend", () => {
+  dragging = false;
+  drawer.querySelectorAll(".dragging").forEach(c => c.classList.remove("dragging"));
+});
+
+const attachBox = document.getElementById("attach");
+attachBox.addEventListener("dragover", e => { e.preventDefault(); attachBox.classList.add("over"); });
+attachBox.addEventListener("dragleave", () => attachBox.classList.remove("over"));
+attachBox.addEventListener("drop", e => {
+  e.preventDefault();
+  attachBox.classList.remove("over");
+  const ids = JSON.parse(e.dataTransfer.getData("text/gaveta") || "[]");
+  attach(ids.map(byId).filter(Boolean));
+  if (ids.length) toast(ids.length === 1 ? "1 print anexado" : `${ids.length} prints anexados`);
+});
+
+// ⌘V pastes whatever the drawer copied, like any app would.
+document.addEventListener("keydown", e => {
+  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "v" && clipboard.length) {
+    e.preventDefault();
+    attach(clipboard);
+    toast(clipboard.length === 1 ? "1 print colado" : `${clipboard.length} prints colados`);
+  }
+  if (e.key === "Escape") closeMenu();
+});
+
+// ---- Opening and closing ----
+
+document.getElementById("toggle").addEventListener("click", () => setOpen(!isOpen));
+
+document.getElementById("shoot").addEventListener("click", () => {
+  const f = document.getElementById("flash");
+  f.classList.remove("on"); void f.offsetWidth; f.classList.add("on");
+  const p = { id: nextId++, at: Date.now(), img: shot(), size: sizes[nextId % 4] };
+  prints.unshift(p);
+  if (prints.length > 50) prints.pop();
+  newestId = p.id;
+  if (!isOpen) {
+    drawer.classList.add("peek");
+    clearTimeout(peekTimer);
+    peekTimer = setTimeout(() => { if (!isOpen) { drawer.classList.remove("peek"); render(); } }, 1800);
+  }
+  render();
+  drawer.classList.remove("thunk"); void drawer.offsetWidth; drawer.classList.add("thunk");
+});
+
+let dwell;
+document.getElementById("edge").addEventListener("mouseenter", () => { if (prints.length) dwell = setTimeout(() => setOpen(true), 200); });
+document.getElementById("edge").addEventListener("mouseleave", () => clearTimeout(dwell));
+drawer.addEventListener("mouseenter", () => {
+  clearTimeout(closeTimer);
+  if (drawer.classList.contains("peek")) setOpen(true);
+});
+drawer.addEventListener("mouseleave", () => {
+  clearTimeout(closeTimer);
+  closeTimer = setTimeout(() => { if (isOpen && !menuOpen && !dragging) setOpen(false); }, 700);
+});
+
+render();
+</script>
+</body>
+</html>
