@@ -14,6 +14,8 @@
 
   const mesa = $("#mesa");
   const palco = $("#palco");
+  // Every print holds a copy of the desk, dock and all: the real ones are kept here, never looked up again.
+  const realDock = $("#palco > .dock");
   const menus = $("#menus");
   const voos = $("#voos");
   const aviso = $("#aviso");
@@ -187,7 +189,7 @@
   }
 
   function updateDock() {
-    for (const button of $$(".dock-app[data-abre]")) {
+    for (const button of $$("#palco > .dock > .dock-app[data-abre]")) {
       const win = document.getElementById(button.dataset.abre);
       button.classList.toggle("aberto", !!win && shown(win));
     }
@@ -230,7 +232,7 @@
     if (event.target === palco || event.target.closest(".abertura")) activate(null);
   });
 
-  for (const button of $$(".dock-app[data-abre]")) {
+  for (const button of $$("#palco > .dock > .dock-app[data-abre]")) {
     button.addEventListener("click", () => {
       const win = document.getElementById(button.dataset.abre);
       if (!win) return;
@@ -243,7 +245,7 @@
   for (const file of $$(".arquivo")) {
     const open = () => openWindow(document.getElementById(file.dataset.abre));
     file.addEventListener("click", (event) => {
-      for (const other of $$(".arquivo")) other.classList.toggle("escolhido", other === file);
+      for (const other of $$("#palco > .arquivos > .arquivo, #palco > .solto")) other.classList.toggle("escolhido", other === file);
       if (event.detail === 0 || finger.matches) open();
     });
     file.addEventListener("dblclick", open);
@@ -664,23 +666,59 @@
     }, 1800);
   }
 
+  /** Slides the drawer back in a moment from now, unless the pointer is back on it by then. Only one is ever pending. */
+  function closeSoon() {
+    clearTimeout(awayTimer);
+    awayTimer = setTimeout(() => {
+      if (drawer.dragging.size || pointerOnDrawer()) return;
+      closeDrawer();
+    }, 450);
+  }
+
+  // Where the pointer really is: :hover lags behind after a captured drag, this does not.
+  const lastPointer = { x: -1, y: -1, mouse: false };
+  for (const type of ["pointermove", "pointerdown", "pointerup"]) {
+    addEventListener(type, (event) => {
+      lastPointer.x = event.clientX;
+      lastPointer.y = event.clientY;
+      lastPointer.mouse = event.pointerType === "mouse";
+    }, true);
+  }
+  function pointerOnDrawer() {
+    if (!lastPointer.mouse) return false;
+    const box = corpo.getBoundingClientRect();
+    return lastPointer.x >= box.left - 24 && lastPointer.y >= box.top - 24 && lastPointer.y <= box.bottom + 24;
+  }
+
   // The pointer resting on the right edge opens it, like the app's edge trigger.
   const startDwell = () => {
-    if (drawer.open || !drawer.prints.length) return;
-    clearTimeout(dwellTimer);
-    dwellTimer = setTimeout(() => openDrawer(), 200);
+    if (drawer.open || !drawer.prints.length || dwellTimer) return;
+    dwellTimer = setTimeout(() => {
+      dwellTimer = 0;
+      openDrawer();
+    }, 200);
   };
+  const stopDwell = () => {
+    clearTimeout(dwellTimer);
+    dwellTimer = 0;
+  };
+  // Resting on the edge counts even if the pointer got there while the drawer was still out.
+  for (const edge of [borda, corpo]) {
+    edge.addEventListener("pointermove", (event) => {
+      if (event.pointerType === "mouse" && !drawer.open && !press) startDwell();
+    });
+  }
   borda.addEventListener("pointerenter", (event) => { if (event.pointerType === "mouse") startDwell(); });
-  borda.addEventListener("pointerleave", () => clearTimeout(dwellTimer));
+  borda.addEventListener("pointerleave", stopDwell);
   corpo.addEventListener("pointerenter", (event) => {
     clearTimeout(awayTimer);
     if (event.pointerType === "mouse" && !drawer.open) startDwell();
   });
   corpo.addEventListener("pointerleave", (event) => {
-    clearTimeout(dwellTimer);
+    stopDwell();
     if (event.pointerType !== "mouse" || !drawer.open || drawer.pinned || drawer.dragging.size) return;
     if (gaveta.contains(document.activeElement) && document.activeElement !== document.body) return;
-    awayTimer = setTimeout(closeDrawer, 450);
+    closeSoon();
   });
   // A finger opens it with a tap on the oak, and closes it with a tap anywhere else.
   corpo.addEventListener("click", (event) => {
@@ -1230,8 +1268,7 @@
     const box = corpo.getBoundingClientRect();
     const away = event.clientX < box.left - 24 || event.clientY < box.top - 24 || event.clientY > box.bottom + 24;
     if (away && event.pointerType === "mouse" && !drawer.pinned) {
-      clearTimeout(awayTimer);
-      awayTimer = setTimeout(closeDrawer, 450);
+      closeSoon();
     }
     lixo.classList.remove("alvo");
     anexos.classList.remove("alvo");
@@ -1266,7 +1303,7 @@
     };
     const m = mesaBox();
     if (clientX < m.left || clientX > m.right || clientY < m.top + 28 || clientY > m.bottom) return false;
-    return !inside(corpo) && !inside($(".dock")) && !inside($(".captura"));
+    return !inside(corpo) && !inside(realDock) && !inside($(".captura"));
   }
 
   /** The prints leave the drawer: they were moved, not copied. */
@@ -1301,7 +1338,7 @@
     name.className = "solto-nome";
     name.textContent = `${print.name}.png`;
     item.append(photo(print, size.w, size.h), name);
-    palco.insertBefore(item, $(".dock", palco));
+    palco.insertBefore(item, realDock);
     const m = mesaBox();
     const spot = {
       x: clamp(x - DESK.item / 2, 6, m.width - DESK.item - 6),
@@ -1318,7 +1355,7 @@
     item.addEventListener("pointerdown", (event) => {
       if (event.button !== 0) return;
       const entry = onDeskNow.get(print.id);
-      for (const other of $$(".arquivo, .solto")) other.classList.toggle("escolhido", other === item);
+      for (const other of $$("#palco > .arquivos > .arquivo, #palco > .solto")) other.classList.toggle("escolhido", other === item);
       activate(null);
       try { item.setPointerCapture(event.pointerId); } catch {}
       const startX = event.clientX, startY = event.clientY;
@@ -1361,8 +1398,7 @@
         const dx = e.clientX - startX, dy = e.clientY - startY;
         // opened by bringing the file to the edge and let go elsewhere: the drawer slides back in
         if (over !== corpo && drawer.open && !drawer.pinned) {
-          clearTimeout(awayTimer);
-          awayTimer = setTimeout(closeDrawer, 450);
+          closeSoon();
         }
         if (over === lixo) return trashFromDesk(print);
         if (over === corpo) return backToDrawer(print);
@@ -1664,7 +1700,7 @@
         x = visibleLeft - w - 16;
         y = current === 3 ? frontDot - h / 2 : top + Math.min(150, placement.height / 2) - h / 2;
         // never over the page's own words: below them, still beside the drawer
-        const words = onDesk($(".abertura").getBoundingClientRect());
+        const words = onDesk($("#palco > .abertura").getBoundingClientRect());
         if (overlaps({ x, y, w, h }, { x: words.x - 12, y: words.y - 12, w: words.w + 24, h: words.h + 24 })) {
           y = words.y + words.h + 14;
         }
