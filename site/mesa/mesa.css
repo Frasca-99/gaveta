@@ -193,7 +193,7 @@ button { font: inherit; color: inherit; }
 
 /* the how-to card, a ruled index card typed on a typewriter */
 .ficha-uso {
-  position: absolute; z-index: 9; right: 7.5%; top: calc(var(--menus) + 36%); width: 252px;
+  position: absolute; z-index: 9; right: 44px; top: calc(var(--menus) + 36%); width: 252px;
   padding: 14px 18px 16px; border-radius: 3px; transform: rotate(1.8deg);
   background:
     linear-gradient(transparent 38px, rgba(196, 64, 52, 0.55) 38px, rgba(196, 64, 52, 0.55) 39.5px, transparent 39.5px),
@@ -508,10 +508,12 @@ button { font: inherit; color: inherit; }
   position: absolute; z-index: 1050; width: 270px; padding: 12px 34px 13px 14px; border-radius: 12px;
   background: rgba(255, 255, 255, 0.94); color: var(--tinta);
   box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.16), 0 18px 40px -14px rgba(0, 0, 0, 0.4);
-  font-size: 13px; line-height: 1.4; transition: opacity 0.25s ease, transform 0.35s var(--sai);
+  left: 0; top: 0; will-change: transform;
+  font-size: 13px; line-height: 1.4; transition: opacity 0.25s ease, transform var(--dur-gaveta, 0.5s) var(--mola-gaveta);
 }
 .guia[hidden] { display: none; }
-.guia.saindo { opacity: 0; transform: translateY(6px); }
+.guia.saindo { opacity: 0; }
+.guia.sem-mola { transition: opacity 0.25s ease; }
 .guia-passo { margin: 0 0 3px; font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--feltro); }
 .guia-texto { margin: 0; text-wrap: pretty; }
 .guia-texto b { font-weight: 600; }

@@ -583,7 +583,13 @@
     }
     rovingFocus();
     renderBar();
+    const where = `${slide()}|${placement.top}|${placement.height}|${count}|${drawer.open}`;
+    if (where !== guideWhere) {
+      guideWhere = where;
+      guide.place();
+    }
   }
+  let guideWhere = "";
 
   /** The selection bar: with nothing chosen it offers to choose everything; with some, to copy them. */
   function renderBar() {
@@ -1629,6 +1635,7 @@
     let off = false;
     let paused = false;
     let hideTimer = 0;
+    let anchor = null;
     const steps = {
       1: () => ({
         passo: "1 de 3",
@@ -1665,9 +1672,12 @@
     function place() {
       mesa.classList.toggle("guia-no-inicio", !off && !paused && current === 1);
       if (off || paused || !current) return;
-      const s = steps[current]();
-      step.textContent = s.passo;
-      text.innerHTML = s.texto;
+      // Step 3 speaks about the open drawer: with the drawer shut again, the tip goes back to saying how to open it.
+      const visibleStep = current === 3 && !drawer.open ? 2 : current;
+      const s = steps[visibleStep]();
+      if (step.textContent !== s.passo) step.textContent = s.passo;
+      if (text.innerHTML !== s.texto) text.innerHTML = s.texto;
+      const appearing = box.hidden || box.classList.contains("saindo");
       box.hidden = false;
       box.classList.remove("saindo");
       box.dataset.seta = s.seta;
@@ -1697,18 +1707,32 @@
         const top = (parseFloat(getComputedStyle(gaveta).top) || 28) + placement.top;
         const scroll = Math.max(0, layout.height - (placement.height - L.rail * 2 - L.footer));
         const frontDot = top + L.rail + (layout.tops[drawer.prints.length - 1] ?? 0) - scroll + 24;
+        // Level with the front card's circle whether the drawer is shut or open, so opening only pushes it sideways.
         x = visibleLeft - w - 16;
-        y = current === 3 ? frontDot - h / 2 : top + Math.min(150, placement.height / 2) - h / 2;
-        // never over the page's own words: below them, still beside the drawer
+        y = frontDot - h / 2;
+        // Never over the page's own words, judged where the open drawer would push it, so the height never jumps.
+        const pushed = m.width - drawerWidth - w - 16;
         const words = onDesk($("#palco > .abertura").getBoundingClientRect());
-        if (overlaps({ x, y, w, h }, { x: words.x - 12, y: words.y - 12, w: words.w + 24, h: words.h + 24 })) {
+        if (overlaps({ x: pushed, y, w, h }, { x: words.x - 12, y: words.y - 12, w: words.w + 24, h: words.h + 24 })) {
           y = words.y + words.h + 14;
         }
       }
       const cx = clamp(x, 10, m.width - w - 10);
       if (s.seta === "baixo" && cx !== x) box.dataset.seta = "nenhuma";
-      box.style.left = `${cx}px`;
-      box.style.top = `${clamp(y, 40, m.height - h - 10)}px`;
+      const spot = `translate(${Math.round(cx)}px, ${Math.round(clamp(y, 40, m.height - h - 10))}px)`;
+      // Beside the drawer the tip rides with it, on the drawer's own spring, as if the oak pushed it.
+      // Moving to another thing (the bar, the drawer, the ticket) it does not fly across: it fades in where it goes.
+      const jump = appearing || anchor !== s.alvo;
+      anchor = s.alvo;
+      if (jump) {
+        box.classList.add("sem-mola");
+        box.style.transform = spot;
+        void box.offsetWidth;
+        box.classList.remove("sem-mola");
+        if (!still.matches) box.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 220, easing: "ease-out" });
+      } else if (box.style.transform !== spot) {
+        box.style.transform = spot;
+      }
     }
 
     function go(next) {
@@ -1749,8 +1773,6 @@
       place,
     };
     $("#guia-fechar").addEventListener("click", () => api.hide(true));
-    // The drawer slides and grows: the arrow follows it.
-    corpo.addEventListener("transitionend", (event) => { if (event.target === corpo) place(); });
     addEventListener("resize", () => place());
     return api;
   })();
