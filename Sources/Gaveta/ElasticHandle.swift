@@ -32,6 +32,8 @@ struct ElasticLine: Shape {
 struct ResizeGrip: View {
     @ObservedObject var drawer: Drawer
     @State private var bend: CGFloat = 0
+    /// The pointer is on the grip: it comes forward, ready to be pulled.
+    @State private var hovering = false
 
     /// Kept small: the glass drawer is the quiet one.
     private static let most: CGFloat = 7
@@ -45,11 +47,16 @@ struct ResizeGrip: View {
     }
 
     var body: some View {
+        let lit = hovering || drawer.resizing
         ElasticLine(bend: bend)
-            .stroke(Color.primary.opacity(drawer.resizing ? 0.4 : 0.2), style: StrokeStyle(lineWidth: 4, lineCap: .round))
+            .stroke(Color.primary.opacity(lit ? 0.5 : 0.2), style: StrokeStyle(lineWidth: lit ? 5 : 4, lineCap: .round))
             .frame(width: 26, height: 40)
+            // Easier to catch than the line is wide.
+            .padding(.vertical, 10)
+            .padding(.horizontal, 6)
             .contentShape(Rectangle())
             .overlay(GripControl(
+                hover: { hovering = $0 },
                 begin: {
                     drawer.resizing = true
                     return drawer.glassWidth
@@ -72,6 +79,7 @@ struct ResizeGrip: View {
                 }
             ))
             .animation(.spring(response: 0.22, dampingFraction: 0.4), value: bend)
+            .animation(.easeOut(duration: 0.15), value: lit)
             .help("Arraste para alargar a gaveta. Clique duplo volta ao normal.")
             .accessibilityHidden(true)
     }
@@ -81,6 +89,8 @@ struct ResizeGrip: View {
 /// drawer can move under the pointer as it grows. Works on the first click,
 /// though the drawer never becomes the key window.
 struct GripControl: NSViewRepresentable {
+    /// The pointer came onto the grip, or left it.
+    var hover: (Bool) -> Void
     /// The drag starts; returns the width it starts from.
     var begin: () -> CGFloat
     /// The width for where the pointer is, how far past a limit the drawer
@@ -94,6 +104,7 @@ struct GripControl: NSViewRepresentable {
     func makeNSView(context: Context) -> GripView { GripView() }
 
     func updateNSView(_ view: GripView, context: Context) {
+        view.hover = hover
         view.begin = begin
         view.move = move
         view.pause = pause
@@ -102,6 +113,7 @@ struct GripControl: NSViewRepresentable {
     }
 
     final class GripView: NSView {
+        var hover: ((Bool) -> Void)?
         var begin: (() -> CGFloat)?
         var move: ((CGFloat, CGFloat, CGFloat) -> Void)?
         var pause: (() -> Void)?
@@ -118,13 +130,19 @@ struct GripControl: NSViewRepresentable {
         override func updateTrackingAreas() {
             super.updateTrackingAreas()
             if let tracking { removeTrackingArea(tracking) }
-            let area = NSTrackingArea(rect: .zero, options: [.mouseEnteredAndExited, .cursorUpdate, .activeAlways, .inVisibleRect],
+            let area = NSTrackingArea(rect: .zero, options: [.mouseEnteredAndExited, .mouseMoved, .cursorUpdate, .activeAlways, .inVisibleRect],
                                       owner: self, userInfo: nil)
             addTrackingArea(area)
             tracking = area
         }
 
-        override func mouseEntered(with event: NSEvent) { cursor().set() }
+        override func mouseEntered(with event: NSEvent) {
+            hover?(true)
+            cursor().set()
+        }
+        // The drawer's own views put the arrow back as the pointer moves:
+        // the grip sets its cursor again on every move.
+        override func mouseMoved(with event: NSEvent) { cursor().set() }
         override func cursorUpdate(with event: NSEvent) { cursor().set() }
 
         /// The divider cursor, a bar with an arrow either side, as macOS
@@ -138,6 +156,7 @@ struct GripControl: NSViewRepresentable {
             return .columnResize
         }
         override func mouseExited(with event: NSEvent) {
+            hover?(false)
             if start == nil { NSCursor.arrow.set() }
         }
 
