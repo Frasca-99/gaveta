@@ -1622,11 +1622,15 @@ kbd {
       clearTimeout(hideTimer);
       if (off) return hide();
       if (mode === "janela") {
-        return put("janela", "janela", "Window", fine.matches
-          ? "Click a window to take it. <b>Esc</b> cancels."
-          : "Tap a window to take it, or <b>Window</b> again to cancel.", -1);
+        return put("janela", "janela", "Pick a window", fine.matches
+          ? "Click a window and its screenshot lands in the drawer. <b>Esc</b> cancels."
+          : "Tap a window and its screenshot lands in the drawer. Tap <b>Window</b> again to cancel.", -1);
       }
-      if (mode) return put("selecao", "selecao", "Selection", fine.matches ? "Drag over anything. <b>Esc</b> cancels." : "Drag your finger over what you want to keep.", -1);
+      if (mode) {
+        return put("selecao", "selecao", "Mark the area", fine.matches
+          ? "Click and drag over what you want. Let go and it lands in the drawer."
+          : "Drag your finger over what you want. Let go and it lands in the drawer.", -1);
+      }
       const index = STEPS.findIndex(([key]) => !done.has(key));
       if (index < 0) {
         // "Pronto" shows once; after that, the tip only comes back for the capture modes

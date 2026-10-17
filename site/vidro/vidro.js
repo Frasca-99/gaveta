@@ -1035,11 +1035,15 @@
       clearTimeout(hideTimer);
       if (off) return hide();
       if (mode === "janela") {
-        return put("janela", "janela", "Janela", fine.matches
-          ? "Clique numa janela para fotografá-la. <b>Esc</b> cancela."
-          : "Toque numa janela para fotografá-la, ou em <b>Janela</b> de novo para cancelar.", -1);
+        return put("janela", "janela", "Escolha a janela", fine.matches
+          ? "Clique numa janela e o print dela cai na gaveta. <b>Esc</b> cancela."
+          : "Toque numa janela e o print dela cai na gaveta. Toque em <b>Janela</b> de novo para cancelar.", -1);
       }
-      if (mode) return put("selecao", "selecao", "Seleção", fine.matches ? "Arraste sobre qualquer coisa. <b>Esc</b> cancela." : "Arraste o dedo sobre o que quer guardar.", -1);
+      if (mode) {
+        return put("selecao", "selecao", "Marque a área do print", fine.matches
+          ? "Clique e arraste sobre o que quer no print. Ao soltar, ele cai na gaveta."
+          : "Arraste o dedo sobre o que quer no print. Ao soltar, ele cai na gaveta.", -1);
+      }
       const index = STEPS.findIndex(([key]) => !done.has(key));
       if (index < 0) {
         // "Pronto" shows once; after that, the tip only comes back for the capture modes
