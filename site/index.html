@@ -559,6 +559,7 @@ button { font: inherit; color: inherit; }
 .fichas::-webkit-scrollbar { display: none; }
 .pilha { position: relative; width: 300px; touch-action: pan-y; }
 .gaveta-vazia {
+  position: relative; /* above the felt's texture, which is positioned */
   display: none; flex: 1; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 0 28px; text-align: center;
 }
 .gaveta-vazia p { margin: 0; font-size: 12px; opacity: 0.85; }
@@ -3563,7 +3564,7 @@ draw(performance.now());
 
   // The pointer resting on the right edge opens it, like the app's edge trigger.
   const startDwell = () => {
-    if (drawer.open || !drawer.prints.length || dwellTimer) return;
+    if (drawer.open || dwellTimer) return;
     dwellTimer = setTimeout(() => {
       dwellTimer = 0;
       openDrawer();

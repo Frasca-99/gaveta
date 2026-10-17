@@ -724,7 +724,7 @@
 
   // The pointer resting on the right edge opens it, like the app's edge trigger.
   const startDwell = () => {
-    if (drawer.open || !drawer.prints.length || dwellTimer) return;
+    if (drawer.open || dwellTimer) return;
     dwellTimer = setTimeout(() => {
       dwellTimer = 0;
       openDrawer();
