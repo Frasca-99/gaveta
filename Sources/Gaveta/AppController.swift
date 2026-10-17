@@ -70,6 +70,7 @@ final class AppController: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     func applicationWillTerminate(_ notification: Notification) {
+        DrawnCursor.shared.hide()
         CaptureTakeover.release()
     }
 

@@ -130,14 +130,14 @@ struct GripControl: NSViewRepresentable {
         override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
 
         // The Gaveta stays in the background, so it does not hear the pointer
-        // pass the way the app in front does, and that app keeps setting its
-        // own cursor as the mouse moves. So the grip watches the pointer
-        // itself, like the edge of the screen does, and while it is on the
-        // grip it puts the divider cursor back each time.
+        // pass the way the app in front does. So the grip watches the pointer
+        // itself, like the edge of the screen does, and while the pointer is
+        // on it the Gaveta draws the divider cursor in the system's place.
         override func viewDidMoveToWindow() {
             super.viewDidMoveToWindow()
             watch?.invalidate()
             watch = nil
+            leave()
             guard window != nil else { return }
             let timer = Timer(timeInterval: 1.0 / 60, repeats: true) { [weak self] _ in
                 MainActor.assumeIsolated { self?.look() }
@@ -147,17 +147,22 @@ struct GripControl: NSViewRepresentable {
         }
 
         private func look() {
-            guard let window, window.isVisible, start == nil else { return }
+            guard start == nil else { return }
+            guard let window, window.isVisible else { return leave() }
             let pointer = window.convertPoint(fromScreen: NSEvent.mouseLocation)
-            let now = bounds.contains(convert(pointer, from: nil)) && window.occlusionState.contains(.visible)
-            if now {
-                if !inside { hover?(true) }
-                cursor().set()
-            } else if inside {
-                hover?(false)
-                NSCursor.arrow.set()
-            }
-            inside = now
+            guard bounds.contains(convert(pointer, from: nil)), window.occlusionState.contains(.visible) else { return leave() }
+            if !inside { hover?(true) }
+            inside = true
+            DrawnCursor.shared.show(cursor())
+        }
+
+        /// The pointer is off the grip, or the drawer went away under it:
+        /// the system's cursor comes back.
+        private func leave() {
+            guard inside else { return }
+            inside = false
+            hover?(false)
+            DrawnCursor.shared.hide()
         }
 
         /// The divider cursor, a bar with an arrow either side, as macOS
@@ -177,6 +182,10 @@ struct GripControl: NSViewRepresentable {
                 return
             }
             guard let width = begin?() else { return }
+            // Holding the grip, the mouse is the drawer's alone and nothing
+            // fights over the cursor: the system's own shows the divider.
+            DrawnCursor.shared.hide()
+            cursor().set()
             let x = NSEvent.mouseLocation.x
             start = (x, width)
             last = (x, event.timestamp)
@@ -220,6 +229,74 @@ struct GripControl: NSViewRepresentable {
             start = nil
             if bounds.contains(convert(event.locationInWindow, from: nil)) { cursor().set() } else { NSCursor.arrow.set() }
         }
+    }
+}
+
+/// The divider cursor drawn by the Gaveta itself while the pointer rests on
+/// the grip. The app in front keeps putting its own cursor back as the mouse
+/// moves, and two apps setting the one cursor take turns: it flickers. So on
+/// the grip the Gaveta hides the system's cursor and draws the same divider
+/// in its place, following the mouse; off the grip, the system's comes back.
+@MainActor
+final class DrawnCursor {
+    static let shared = DrawnCursor()
+
+    private let window: NSPanel
+    private let picture = NSImageView()
+    private var drawn: NSCursor?
+    private var monitors: [Any] = []
+    private var shown = false
+
+    private init() {
+        window = NSPanel(contentRect: NSRect(x: 0, y: 0, width: 32, height: 32),
+                         styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: true)
+        window.isOpaque = false
+        window.backgroundColor = .clear
+        window.hasShadow = false
+        window.level = .screenSaver
+        window.ignoresMouseEvents = true
+        window.collectionBehavior = [.canJoinAllSpaces, .stationary, .ignoresCycle, .fullScreenAuxiliary]
+        window.hidesOnDeactivate = false
+        picture.imageScaling = .scaleNone
+        window.contentView = picture
+    }
+
+    func show(_ cursor: NSCursor) {
+        if drawn !== cursor {
+            drawn = cursor
+            picture.image = cursor.image
+            window.setContentSize(cursor.image.size)
+        }
+        follow()
+        guard !shown else { return }
+        shown = true
+        window.orderFrontRegardless()
+        CGDisplayHideCursor(CGMainDisplayID())
+        let moves: NSEvent.EventTypeMask = [.mouseMoved, .leftMouseDragged]
+        monitors.append(NSEvent.addGlobalMonitorForEvents(matching: moves) { [weak self] _ in
+            MainActor.assumeIsolated { self?.follow() }
+        } as Any)
+        monitors.append(NSEvent.addLocalMonitorForEvents(matching: moves) { [weak self] event in
+            MainActor.assumeIsolated { self?.follow() }
+            return event
+        } as Any)
+    }
+
+    func hide() {
+        guard shown else { return }
+        shown = false
+        monitors.forEach(NSEvent.removeMonitor)
+        monitors.removeAll()
+        window.orderOut(nil)
+        CGDisplayShowCursor(CGMainDisplayID())
+    }
+
+    /// The picture's hot spot on the pointer; a cursor's hot spot counts from
+    /// the top of its image, a window from the bottom of the screen.
+    private func follow() {
+        guard let drawn else { return }
+        let point = NSEvent.mouseLocation
+        window.setFrameOrigin(NSPoint(x: point.x - drawn.hotSpot.x, y: point.y - drawn.image.size.height + drawn.hotSpot.y))
     }
 }
 
