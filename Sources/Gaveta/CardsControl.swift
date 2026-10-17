@@ -66,7 +66,7 @@ final class CardsControlView: NSView, NSDraggingSource {
 
     private func hit(at point: NSPoint) -> (pin: Pin, part: CardStack.Part)? {
         guard let drawer else { return nil }
-        guard let found = stack.hit(point, shift: { self.shift(of: $0, in: drawer) }),
+        guard let found = stack.hit(point, tabs: drawer.style == .catalog, shift: { self.shift(of: $0, in: drawer) }),
               found.index < cards.count else { return nil }
         return (cards[found.index], found.part)
     }

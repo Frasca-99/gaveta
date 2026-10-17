@@ -65,7 +65,7 @@ final class Flights {
     /// Flies `pin`, whose picture is `image`, from `start` to the card's
     /// place in the drawer, both in screen coordinates.
     func fly(_ pin: Pin, image: CGImage, from start: CGRect, to card: CGRect, on screen: NSScreen,
-             landed: @escaping () -> Void) {
+             glass: Bool = false, landed: @escaping () -> Void) {
         let window = overlay(on: screen)
         guard let root = window.contentView?.layer else { return landed() }
         inFlight += 1
@@ -75,15 +75,25 @@ final class Flights {
         // tab above the right of its top edge.
         let size = CGSize(width: CardStack.cardWidth, height: CardStack.cardHeight)
         let photo = CardStack.photoSize(for: pin.thumbnail.size, reveal: CardStack.cardHeight)
+        let photoTop = glass ? GlassCardView.photoTop(photo, whole: true) : CardStack.border
         let photoFrame = CGRect(x: CardStack.border + (CardStack.photoWidth - photo.width) / 2,
-                                y: size.height - CardStack.border - photo.height,
+                                y: size.height - photoTop - photo.height,
                                 width: photo.width, height: photo.height)
         let scale = screen.backingScaleFactor
+        // The glass drawer's cards are plain, rounder and follow light or dark.
+        var paper = Self.paper
+        var meta = Self.meta
+        if glass {
+            NSApp.effectiveAppearance.performAsCurrentDrawingAppearance {
+                paper = NSColor.controlBackgroundColor.cgColor
+                meta = NSColor.secondaryLabelColor.cgColor
+            }
+        }
 
         let flyer = CALayer()
         flyer.bounds = CGRect(origin: .zero, size: size)
         flyer.anchorPoint = CGPoint(x: photoFrame.midX / size.width, y: photoFrame.midY / size.height)
-        flyer.cornerRadius = 4
+        flyer.cornerRadius = glass ? GlassCardView.radius : 4
         flyer.shadowColor = NSColor.black.cgColor
         flyer.shadowOffset = CGSize(width: 0, height: -6)
         flyer.shadowRadius = 12
@@ -92,13 +102,21 @@ final class Flights {
         picture.frame = photoFrame
         picture.contents = image
         picture.contentsGravity = .resize
-        picture.cornerRadius = 2
+        picture.cornerRadius = glass ? 6 : 2
         picture.masksToBounds = true
         flyer.addSublayer(picture)
 
-        let caption = Self.text("\(pin.kind) · \(pin.detail)", font: .systemFont(ofSize: 11), color: Self.meta, scale: scale)
-        caption.frame = CGRect(x: CardStack.border, y: photoFrame.minY - 6 - 14, width: size.width - 16, height: 14)
+        let caption = Self.text("\(pin.kind) · \(pin.detail)", font: .systemFont(ofSize: 11), color: meta, scale: scale)
+        let captionY = glass ? size.height - GlassCardView.captionTop - 14 : photoFrame.minY - 6 - 14
+        caption.frame = CGRect(x: CardStack.border + (glass ? 2 : 0), y: captionY, width: size.width - 16, height: 14)
         flyer.addSublayer(caption)
+
+        // On a glass card the age stands at the right of the words, not on a tab.
+        let age = Self.text("agora", font: .systemFont(ofSize: 11), color: meta, scale: scale)
+        age.alignmentMode = .right
+        age.frame = CGRect(x: CardStack.border, y: captionY, width: CardStack.photoWidth - 2, height: 14)
+        age.isHidden = !glass
+        flyer.addSublayer(age)
 
         let tab = CALayer()
         tab.frame = CGRect(x: CardStack.tabX, y: size.height, width: CardStack.tabSize.width, height: CardStack.tabSize.height)
@@ -110,6 +128,7 @@ final class Flights {
         label.alignmentMode = .center
         label.frame = tab.bounds.insetBy(dx: 0, dy: 2)
         tab.addSublayer(label)
+        tab.isHidden = glass
         flyer.addSublayer(tab)
 
         let origin = window.frame.origin
@@ -121,7 +140,7 @@ final class Flights {
         CATransaction.begin()
         CATransaction.setDisableActions(true)
         flyer.position = to
-        flyer.backgroundColor = Self.paper
+        flyer.backgroundColor = paper
         flyer.shadowOpacity = 0.28
         caption.opacity = 1
         tab.opacity = 1
@@ -168,7 +187,7 @@ final class Flights {
                                 CAMediaTimingFunction(name: .easeOut)]
 
         let paperIn = CAKeyframeAnimation(keyPath: "backgroundColor")
-        paperIn.values = [Self.paper.copy(alpha: 0)!, Self.paper.copy(alpha: 0)!, Self.paper]
+        paperIn.values = [paper.copy(alpha: 0)!, paper.copy(alpha: 0)!, paper]
         paperIn.keyTimes = [0, 0.45, 0.8]
 
         let shadow = CAKeyframeAnimation(keyPath: "shadowOpacity")
@@ -183,7 +202,7 @@ final class Flights {
             animation.duration = Self.duration
             flyer.add(animation, forKey: animation.keyPath)
         }
-        for layer in [caption, tab] {
+        for layer in [caption, tab, age] {
             let fade = wordsIn.copy() as! CAKeyframeAnimation
             fade.duration = Self.duration
             layer.add(fade, forKey: "opacity")
@@ -197,13 +216,15 @@ final class Flights {
 
     /// Throws `pin`'s card out of the drawer from `card`, its place on
     /// screen, after `delay` seconds.
-    func toss(_ pin: Pin, from card: CGRect, on screen: NSScreen, delay: CFTimeInterval) {
+    func toss(_ pin: Pin, from card: CGRect, on screen: NSScreen, delay: CFTimeInterval, glass: Bool = false) {
         guard !NSWorkspace.shared.accessibilityDisplayShouldReduceMotion else { return }
         // The card as it stands, whole, without the marks the pointer brings.
         let pad = Self.tossPadding
-        let renderer = ImageRenderer(content: CardView(pin: pin, reveal: CardStack.cardHeight, hovered: false,
-                                                       selected: false, selecting: false, copied: false,
-                                                       dragging: false).padding(pad))
+        let face = glass
+            ? AnyView(GlassCardView(pin: pin, reveal: CardStack.cardHeight))
+            : AnyView(CardView(pin: pin, reveal: CardStack.cardHeight, hovered: false, selected: false,
+                               selecting: false, copied: false, dragging: false))
+        let renderer = ImageRenderer(content: face.padding(pad))
         renderer.scale = screen.backingScaleFactor
         guard let image = renderer.cgImage else { return }
         let window = overlay(on: screen)

@@ -57,9 +57,14 @@ enum DrawerLayout {
 struct DrawerView: View {
     @ObservedObject var drawer: Drawer
 
-    private static let frontID = "front"
-
     var body: some View {
+        switch drawer.style {
+        case .catalog: catalog
+        case .glass: GlassDrawerView(drawer: drawer)
+        }
+    }
+
+    private var catalog: some View {
         GeometryReader { geo in
             let maximum = geo.size.height - DrawerLayout.shadowRoom * 2
             let placement = DrawerLayout.placement(for: drawer, maximum: maximum)
@@ -104,7 +109,7 @@ struct DrawerView: View {
                 if drawer.pins.isEmpty {
                     emptyState
                 } else {
-                    cards(maximum: maximum)
+                    StackView(drawer: drawer, maximum: maximum)
                     footer
                 }
             }
@@ -129,39 +134,6 @@ struct DrawerView: View {
     private var rail: some View {
         LinearGradient(colors: [Palette.oak, Palette.oakDark], startPoint: .top, endPoint: .bottom)
             .frame(height: DrawerLayout.rail)
-    }
-
-    private func cards(maximum: CGFloat) -> some View {
-        let list = drawer.stackOrder
-        let stack = CardStack(count: list.count, hovered: drawer.hoveredIndex,
-                              room: DrawerLayout.stackRoom(maximum: maximum))
-        let selecting = !drawer.selection.isEmpty
-        return ScrollViewReader { proxy in
-            ScrollView(.vertical) {
-                VStack(spacing: 0) {
-                    ZStack(alignment: .topLeading) {
-                        ForEach(Array(list.enumerated()), id: \.element.id) { index, pin in
-                            let hovered = drawer.hovered == pin.id
-                            let selected = drawer.selection.contains(pin.id)
-                            CardView(pin: pin, reveal: stack.reveal(index), hovered: hovered && drawer.dragging.isEmpty,
-                                     selected: selected, selecting: selecting,
-                                     copied: drawer.copied.contains(pin.id), dragging: drawer.dragging.contains(pin.id),
-                                     hidden: drawer.landing.contains(pin.id) || drawer.departing.contains(pin.id))
-                                .offset(x: CardStack.leftInset + CardStack.shift(hovered: hovered, selected: selected),
-                                        y: stack.top(index))
-                                .transition(.card)
-                        }
-                    }
-                    .frame(width: DrawerLayout.boxWidth, height: stack.height, alignment: .topLeading)
-                    .overlay(CardsControl(drawer: drawer, cards: list, stack: stack))
-                    Color.clear.frame(height: 0).id(Self.frontID)
-                }
-            }
-            .scrollIndicators(.never)
-            .onAppear { proxy.scrollTo(Self.frontID, anchor: .bottom) }
-            .onChange(of: drawer.pins.first?.id) { proxy.scrollTo(Self.frontID, anchor: .bottom) }
-            .onChange(of: drawer.isOpen) { if drawer.isOpen { proxy.scrollTo(Self.frontID, anchor: .bottom) } }
-        }
     }
 
     /// The selection bar. With nothing selected it offers to select
@@ -297,6 +269,59 @@ struct FirstClick: NSViewRepresentable {
         override func mouseDown(with event: NSEvent) {}
         override func mouseUp(with event: NSEvent) {
             if bounds.contains(convert(event.locationInWindow, from: nil)) { action?() }
+        }
+    }
+}
+
+/// The captures standing in the drawer, newest in front, scrolled to the
+/// front. Both styles stand them the same way, so the pointer finds them the
+/// same way; only the cards are drawn differently.
+struct StackView: View {
+    @ObservedObject var drawer: Drawer
+    let maximum: CGFloat
+
+    private static let frontID = "front"
+
+    var body: some View {
+        let list = drawer.stackOrder
+        let stack = CardStack(count: list.count, hovered: drawer.hoveredIndex,
+                              room: DrawerLayout.stackRoom(maximum: maximum))
+        let selecting = !drawer.selection.isEmpty
+        let glass = drawer.style == .glass
+        return ScrollViewReader { proxy in
+            ScrollView(.vertical) {
+                VStack(spacing: 0) {
+                    ZStack(alignment: .topLeading) {
+                        ForEach(Array(list.enumerated()), id: \.element.id) { index, pin in
+                            let hovered = drawer.hovered == pin.id
+                            let selected = drawer.selection.contains(pin.id)
+                            let card = CardState(hovered: hovered && drawer.dragging.isEmpty, selected: selected,
+                                                 selecting: selecting, copied: drawer.copied.contains(pin.id),
+                                                 dragging: drawer.dragging.contains(pin.id),
+                                                 hidden: drawer.landing.contains(pin.id) || drawer.departing.contains(pin.id))
+                            Group {
+                                if glass {
+                                    GlassCardView(pin: pin, reveal: stack.reveal(index), state: card)
+                                } else {
+                                    CardView(pin: pin, reveal: stack.reveal(index), hovered: card.hovered,
+                                             selected: selected, selecting: selecting, copied: card.copied,
+                                             dragging: card.dragging, hidden: card.hidden)
+                                }
+                            }
+                            .offset(x: CardStack.leftInset + CardStack.shift(hovered: hovered, selected: selected),
+                                    y: stack.top(index))
+                            .transition(.card)
+                        }
+                    }
+                    .frame(width: DrawerLayout.boxWidth, height: stack.height, alignment: .topLeading)
+                    .overlay(CardsControl(drawer: drawer, cards: list, stack: stack))
+                    Color.clear.frame(height: 0).id(Self.frontID)
+                }
+            }
+            .scrollIndicators(.never)
+            .onAppear { proxy.scrollTo(Self.frontID, anchor: .bottom) }
+            .onChange(of: drawer.pins.first?.id) { proxy.scrollTo(Self.frontID, anchor: .bottom) }
+            .onChange(of: drawer.isOpen) { if drawer.isOpen { proxy.scrollTo(Self.frontID, anchor: .bottom) } }
         }
     }
 }

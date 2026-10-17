@@ -23,7 +23,7 @@ final class AppController: NSObject, NSApplicationDelegate, NSMenuDelegate {
         drawer.onChange = { [weak self] in self?.trigger.drawerChanged() }
         drawer.onToss = { [weak self] pin, frame, delay in
             guard let self, let screen = self.panel.screen else { return }
-            self.flights.toss(pin, from: frame, on: screen, delay: delay)
+            self.flights.toss(pin, from: frame, on: screen, delay: delay, glass: self.drawer.style == .glass)
         }
 
         setUpStatusItem()
@@ -96,7 +96,7 @@ final class AppController: NSObject, NSApplicationDelegate, NSMenuDelegate {
                     drawer.land(pin.id)
                     return
                 }
-                flights.fly(pin, image: image, from: start, to: card, on: screen) {
+                flights.fly(pin, image: image, from: start, to: card, on: screen, glass: drawer.style == .glass) {
                     self.drawer.land(pin.id)
                 }
                 return
@@ -236,6 +236,17 @@ final class AppController: NSObject, NSApplicationDelegate, NSMenuDelegate {
         }
         copied.state = Prefs.copiedImages ? .on : .off
         menu.addItem(copied)
+
+        // The look of the drawer; it works the same either way.
+        let styles = NSMenu()
+        for (title, style) in [("Fichário", DrawerStyle.catalog), ("Vidro", DrawerStyle.glass)] {
+            let item = ActionMenuItem(title) { [weak self] in self?.drawer.style = style }
+            item.state = drawer.style == style ? .on : .off
+            styles.addItem(item)
+        }
+        let look = NSMenuItem(title: "Estilo da gaveta", action: nil, keyEquivalent: "")
+        look.submenu = styles
+        menu.addItem(look)
 
         menu.addItem(ActionMenuItem("Abrir pasta de capturas") {
             let folder = Prefs.takeOverCaptures ? CaptureTakeover.folder : CaptureTakeover.screenshotFolder()

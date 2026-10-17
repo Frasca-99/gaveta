@@ -127,8 +127,9 @@ struct CardStack {
     enum Part { case card, dot, close }
 
     /// The frontmost card under a point, and which part of it. Each card's
-    /// tab rises over the card behind it, so it is tested before that card.
-    func hit(_ point: CGPoint, shift: (Int) -> CGFloat) -> (index: Int, part: Part)? {
+    /// tab rises over the card behind it, so it is tested before that card;
+    /// cards without tabs (the glass drawer's) leave that room empty.
+    func hit(_ point: CGPoint, tabs: Bool = true, shift: (Int) -> CGFloat) -> (index: Int, part: Part)? {
         for index in stride(from: count - 1, through: 0, by: -1) {
             let card = cardRect(index, shift: shift(index))
             if card.contains(point) {
@@ -137,7 +138,7 @@ struct CardStack {
                 if Self.closeBox.contains(local) { return (index, .close) }
                 return (index, .card)
             }
-            if tabRect(index, shift: shift(index)).contains(point) { return (index, .card) }
+            if tabs, tabRect(index, shift: shift(index)).contains(point) { return (index, .card) }
         }
         // In the gap opened under the card, the pointer is still on it.
         if let hovered, hovered < count - 1 {

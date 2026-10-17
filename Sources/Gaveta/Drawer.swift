@@ -25,6 +25,14 @@ struct Pin: Identifiable, Equatable {
     }
 }
 
+/// How the drawer looks. It works the same either way.
+enum DrawerStyle: String {
+    /// An oak card catalog drawer with felt and index cards.
+    case catalog = "fichario"
+    /// A pane of glass that takes on what is behind it, with plain cards.
+    case glass = "vidro"
+}
+
 /// What is in the drawer and what can be done with each capture. The files
 /// stay where they are; the drawer only points at them.
 @MainActor
@@ -32,6 +40,9 @@ final class Drawer: ObservableObject {
     /// Newest first.
     @Published private(set) var pins: [Pin] = []
     @Published var isOpen = false
+    @Published var style = Prefs.drawerStyle {
+        didSet { Prefs.drawerStyle = style }
+    }
     /// Out by a crack, showing a new capture slide in.
     @Published var peeking = false
     @Published var hovered: UUID?

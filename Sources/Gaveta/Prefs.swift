@@ -32,6 +32,12 @@ enum Prefs {
         set { store.set(newValue, forKey: "copiedImages") }
     }
 
+    /// How the drawer looks: the oak card catalog, or glass.
+    static var drawerStyle: DrawerStyle {
+        get { DrawerStyle(rawValue: store.string(forKey: "drawerStyle") ?? "") ?? .catalog }
+        set { store.set(newValue.rawValue, forKey: "drawerStyle") }
+    }
+
     /// The shortcut for the drawer; nil when the user removed it.
     static var shortcut: Shortcut? {
         get {
