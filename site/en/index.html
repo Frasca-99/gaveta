@@ -5,16 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <script>try { if (localStorage.getItem("gaveta-idioma") === "pt") location.replace("../" + location.hash); } catch {}</script>
 <title>Gaveta: your screenshots in a drawer, on the Mac</title>
-<meta name="description" content="Every screenshot you take lands in a glass drawer at the edge of your Mac's screen. Pick several and paste them all at once. Free and open source.">
+<meta name="description" content="Every screenshot you take lands in a drawer at the edge of your Mac's screen. Pick several and paste them all at once. Free and open source.">
 <meta property="og:title" content="Gaveta: your screenshots in a drawer, on the Mac">
-<meta property="og:description" content="Every screenshot you take lands in a glass drawer at the edge of the screen. Pick several and paste them all at once.">
+<meta property="og:description" content="Every screenshot you take lands in a drawer at the edge of the screen. Pick several and paste them all at once.">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="en_US">
 <meta property="og:locale:alternate" content="pt_BR">
 <meta property="og:image" content="../assets/compartilhar-en.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Gaveta open at the edge of a Mac's screen, a glass drawer full of screenshots.">
+<meta property="og:image:alt" content="A Mac desk with Gaveta's glass drawer open at the right edge, full of screenshots.">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#ffffff">
 <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32.png">
@@ -22,14 +22,15 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400..600&family=Geist+Mono:wght@400;500&display=swap">
-<style>/* Gaveta, the landing: a white page in Geist with hairlines and mono labels,
-   and at its heart a Mac screen with a bright wallpaper where the glass
-   drawer works: take a screenshot, it flies in, pick, copy, throw out. */
+<style>/* Gaveta, the landing: one screen, a white Mac desk where the glass drawer
+   works. Take a screenshot of the desk with the bar below, it flies into the
+   drawer at the right edge; copy one or several and paste them into the
+   ticket. Geist over white, hairlines, mono labels. */
 
 :root {
   color-scheme: light;
   --branco: #ffffff;
-  --fundo: #fafafa;
+  --fundo: #f7f7f5;
   --tinta: #0a0a0a;
   --tinta-suave: #4d4d4d;
   --tinta-muda: #8a8a8a;
@@ -41,180 +42,197 @@
   --mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
   --mola: cubic-bezier(0.22, 1.18, 0.36, 1);
   --sai: cubic-bezier(0.2, 0.7, 0.2, 1);
-  --largura-pagina: 1180px;
+  --menus: 30px;
+  --janela: clamp(270px, 23vw, 350px);
+  --reserva: 390px; /* the room the open drawer takes at the right */
 }
 
 *, *::before, *::after { box-sizing: border-box; }
-html { scroll-behavior: smooth; scroll-padding-top: 5rem; -webkit-text-size-adjust: 100%; }
+html { -webkit-text-size-adjust: 100%; }
 body {
-  margin: 0; background: var(--branco); color: var(--tinta);
+  margin: 0; background: var(--fundo); color: var(--tinta);
   font: 400 1rem/1.6 var(--sans); -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
 }
-main { overflow-x: clip; }
 img { display: block; max-width: 100%; }
 a { color: inherit; }
 button { font: inherit; color: inherit; }
 kbd {
-  display: inline-block; min-width: 1.5em; padding: 0 0.35em; border-radius: 6px;
+  display: inline-block; min-width: 1.5em; padding: 0 0.35em; border-radius: 5px;
   border: 1px solid var(--linha-forte); border-bottom-width: 2px; background: var(--branco);
-  font: 500 0.82em/1.5 var(--mono); text-align: center; color: var(--tinta); vertical-align: 0.06em;
+  font: 500 0.82em/1.45 var(--mono); text-align: center; color: var(--tinta); vertical-align: 0.06em;
 }
-:focus-visible { outline: 2px solid var(--foco); outline-offset: 3px; border-radius: 6px; }
+:focus-visible { outline: 2px solid var(--foco); outline-offset: 2px; border-radius: 6px; }
 .pular {
   position: fixed; z-index: 100; left: 1rem; top: -4rem; padding: 0.5rem 0.9rem; border-radius: 8px;
   background: var(--tinta); color: var(--branco); text-decoration: none; font-size: 0.875rem;
 }
-.pular:focus { top: 1rem; }
-.etiqueta, .passo-numero, .detalhe-rotulo, .opcao-rotulo, .nota, .dicas, .rodape {
+.pular:focus { top: 2.5rem; }
+.aviso { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; margin: -1px; }
+
+/* ── the desk: one screen, nothing to scroll ────────────────────────────── */
+.mesa { position: relative; height: 100svh; min-height: 640px; overflow: hidden; isolation: isolate; }
+@media (min-width: 761px) and (min-height: 640px) { html, body { height: 100%; overflow: hidden; } }
+.papel { position: absolute; z-index: -1; inset: 0; background: var(--fundo); overflow: hidden; }
+.mancha { position: absolute; border-radius: 50%; }
+.mancha.m1 { width: 62vw; height: 62vw; right: -20vw; top: -26vw; background: radial-gradient(closest-side, rgba(120, 165, 255, 0.5), rgba(120, 165, 255, 0) ); }
+.mancha.m2 { width: 52vw; height: 52vw; right: -16vw; bottom: -26vw; background: radial-gradient(closest-side, rgba(255, 160, 120, 0.42), rgba(255, 160, 120, 0)); }
+.mancha.m3 { width: 46vw; height: 46vw; left: 26vw; bottom: -30vw; background: radial-gradient(closest-side, rgba(175, 145, 255, 0.28), rgba(175, 145, 255, 0)); }
+
+/* the menu bar */
+.menus {
+  position: absolute; z-index: 50; inset: 0 0 auto; height: var(--menus); display: flex; align-items: center; gap: 4px; padding: 0 10px;
+  background: rgba(255, 255, 255, 0.55); backdrop-filter: blur(20px) saturate(1.6); -webkit-backdrop-filter: blur(20px) saturate(1.6);
+  box-shadow: 0 0.5px 0 rgba(0, 0, 0, 0.08); font: 500 12.5px var(--sans); color: #1a1a1a;
+}
+.marca { display: inline-flex; align-items: center; gap: 7px; padding: 0 8px; font-weight: 700; text-decoration: none; }
+.marca img { border-radius: 4px; }
+.app-da-frente { padding: 0 8px; font-weight: 500; }
+.menus .espaco { flex: 1; }
+.menus-item {
+  display: inline-grid; place-items: center; height: 22px; min-width: 28px; padding: 0 7px; border: 0; border-radius: 5px; background: none;
+  font: 600 11px var(--sans); letter-spacing: 0.04em; text-decoration: none; cursor: pointer;
+}
+.menus-item:hover, .menus-gaveta[aria-pressed="true"] { background: rgba(0, 0, 0, 0.08); }
+.menus-item svg { width: 16px; height: 16px; }
+.relogio { padding: 0 8px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* the words, in the middle of the desk */
+.abertura {
+  position: absolute; z-index: 1; top: 50%; left: calc((20px + var(--janela) + 100vw - var(--reserva)) / 2);
+  width: min(560px, calc(100vw - var(--janela) - var(--reserva) - 64px)); transform: translate(-50%, -56%); text-align: center;
+}
+.etiqueta {
+  display: inline-flex; margin: 0 0 1.4rem; padding: 0.25rem 0.75rem; border: 1px solid var(--linha); border-radius: 999px; background: rgba(255, 255, 255, 0.7);
   font: 500 0.6875rem/1.6 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--tinta-muda);
 }
-
-/* ── header ─────────────────────────────────────────────────────────────── */
-.topo {
-  position: sticky; z-index: 40; top: 0;
-  background: color-mix(in srgb, var(--branco) 82%, transparent);
-  backdrop-filter: saturate(1.8) blur(14px); -webkit-backdrop-filter: saturate(1.8) blur(14px);
-  border-bottom: 1px solid transparent; transition: border-color 200ms var(--sai);
-}
-.topo.rolou { border-bottom-color: var(--linha); }
-.topo-dentro {
-  display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 1rem;
-  max-width: var(--largura-pagina); height: 64px; margin: 0 auto; padding: 0 1.5rem;
-}
-.marca { display: inline-flex; align-items: center; gap: 0.55rem; font-weight: 600; letter-spacing: -0.01em; text-decoration: none; justify-self: start; }
-.marca img { border-radius: 6px; }
-.topo-nav { display: flex; gap: 0.25rem; }
-.topo-nav a {
-  padding: 0.35rem 0.75rem; border-radius: 8px; color: var(--tinta-suave); font-size: 0.875rem; text-decoration: none;
-  transition: color 150ms var(--sai), background-color 150ms var(--sai);
-}
-.topo-nav a:hover { color: var(--tinta); background: var(--fundo); }
-.topo-acoes { display: flex; gap: 0.5rem; justify-self: end; }
-.botao-fino {
-  display: inline-flex; align-items: center; gap: 0.45rem; height: 34px; padding: 0 0.8rem; border-radius: 8px;
-  border: 1px solid var(--linha-forte); background: var(--branco); font: 500 0.8125rem var(--sans); text-decoration: none;
-  transition: background-color 150ms var(--sai), border-color 150ms var(--sai), transform 120ms var(--sai);
-}
-.botao-fino:hover { background: var(--fundo); }
-.botao-fino:active, .botao:active { transform: scale(0.96); }
-.botao-fino svg { width: 15px; height: 15px; }
-.botao-fino.botao-escuro { background: var(--tinta); border-color: var(--tinta); color: var(--branco); }
-.botao-fino.botao-escuro:hover { background: #2a2a2a; }
-
-/* ── opening ────────────────────────────────────────────────────────────── */
-.abertura {
-  position: relative; isolation: isolate; max-width: 880px; margin: 0 auto; padding: clamp(4rem, 10vh, 6.5rem) 1.5rem 3.5rem; text-align: center;
-}
-.abertura::before { /* a faint grid, fading out from the middle */
-  content: ""; position: absolute; z-index: -1; inset: -64px -30vw 0; pointer-events: none;
-  background:
-    linear-gradient(var(--linha) 1px, transparent 1px) 0 0 / 64px 64px,
-    linear-gradient(90deg, var(--linha) 1px, transparent 1px) 0 0 / 64px 64px;
-  mask-image: radial-gradient(ellipse 50% 70% at 50% 30%, #000 10%, transparent 75%);
-  -webkit-mask-image: radial-gradient(ellipse 50% 70% at 50% 30%, #000 10%, transparent 75%);
-  opacity: 0.7;
-}
-.abertura .etiqueta {
-  display: inline-flex; margin: 0 0 1.75rem; padding: 0.3rem 0.8rem; border: 1px solid var(--linha); border-radius: 999px; background: var(--branco);
-}
-.titulo {
-  margin: 0; font-size: clamp(2.6rem, 7vw, 5rem); line-height: 1.02; font-weight: 600; letter-spacing: -0.045em; text-wrap: balance;
-}
-.titulo span, .secao-titulo span { color: var(--tinta-muda); }
-.intro { max-width: 34rem; margin: 1.5rem auto 0; color: var(--tinta-suave); font-size: clamp(1.05rem, 1.6vw, 1.2rem); line-height: 1.6; text-wrap: pretty; }
-.acoes { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.75rem; margin-top: 2.25rem; }
+.titulo { margin: 0; font-size: clamp(2.4rem, 4.2vw, 4.4rem); line-height: 1.02; font-weight: 600; letter-spacing: -0.045em; text-wrap: balance; }
+.titulo span { color: var(--tinta-muda); }
+.intro { max-width: 30rem; margin: 1.2rem auto 0; color: var(--tinta-suave); font-size: clamp(1rem, 1.25vw, 1.125rem); line-height: 1.6; text-wrap: pretty; }
 .botao {
-  display: inline-flex; align-items: center; justify-content: center; gap: 0.55rem; min-height: 46px; padding: 0 1.25rem;
-  border-radius: 10px; border: 1px solid var(--linha-forte); background: var(--branco); cursor: pointer;
-  font: 500 0.9375rem var(--sans); text-decoration: none;
+  display: inline-flex; align-items: center; gap: 0.55rem; height: 44px; margin-top: 1.75rem; padding: 0 1.2rem; border-radius: 10px;
+  background: var(--tinta); color: var(--branco); font: 500 0.9375rem var(--sans); text-decoration: none;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.14);
   transition: background-color 150ms var(--sai), transform 120ms var(--sai);
 }
-.botao:hover { background: var(--fundo); }
-.botao svg { width: 16px; height: 16px; }
-.botao.botao-escuro { background: var(--tinta); border-color: var(--tinta); color: var(--branco); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.14); }
-.botao.botao-escuro:hover { background: #262626; }
-.nota { margin: 1.25rem 0 0; }
+.botao:hover { background: #262626; }
+.botao:active { transform: scale(0.96); }
+.botao svg { width: 17px; height: 17px; }
+.nota { margin: 1rem 0 0; font: 500 0.6875rem/1.6 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--tinta-muda); }
+.credito { margin: 0.35rem 0 0; font-size: 0.75rem; color: var(--tinta-muda); }
+.credito a { text-underline-offset: 3px; }
 
-/* ── the Mac, with the drawer working on it ─────────────────────────────── */
-.vitrine { max-width: calc(var(--largura-pagina) + 3rem); margin: 0 auto; padding: 0 1.5rem; }
-.moldura {
-  padding: 8px; border-radius: 22px; background: var(--fundo); border: 1px solid var(--linha);
-  box-shadow: 0 40px 80px -40px rgba(10, 30, 80, 0.35), 0 12px 24px -16px rgba(0, 0, 0, 0.18);
-}
-.palco {
-  --barra-menus: 28px;
-  position: relative; overflow: hidden; isolation: isolate; aspect-ratio: 16 / 10; min-height: 560px; border-radius: 14px;
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.06); user-select: none; -webkit-user-select: none; touch-action: manipulation;
-}
-.papel-de-parede {
-  position: absolute; z-index: -1; inset: 0; overflow: hidden;
-  background:
-    radial-gradient(110% 80% at 0% 0%, #cfe6ff 0%, transparent 55%),
-    radial-gradient(70% 70% at 100% 0%, #ffd6bd 0%, transparent 55%),
-    radial-gradient(90% 90% at 75% 100%, #6c8cff 0%, transparent 60%),
-    radial-gradient(70% 80% at 0% 100%, #2e5ae6 0%, transparent 62%),
-    linear-gradient(160deg, #eaf2ff 0%, #9bb8ff 60%, #ff9f7a 120%);
-}
-.mancha { position: absolute; border-radius: 50%; filter: blur(40px); opacity: 0.85; }
-.mancha.m1 { width: 38%; aspect-ratio: 1; right: 6%; top: 8%; background: radial-gradient(circle, #ff7a59, transparent 70%); }
-.mancha.m2 { width: 30%; aspect-ratio: 1; right: -4%; bottom: 4%; background: radial-gradient(circle, #8a5cff, transparent 70%); }
-.mancha.m3 { width: 34%; aspect-ratio: 1; left: 18%; bottom: -12%; background: radial-gradient(circle, #36c2ff, transparent 70%); }
-@media (prefers-reduced-motion: no-preference) {
-  .mancha { animation: deriva 18s ease-in-out infinite alternate; }
-  .mancha.m2 { animation-duration: 23s; animation-delay: -6s; }
-  .mancha.m3 { animation-duration: 27s; animation-delay: -12s; }
-}
-@keyframes deriva { to { transform: translate(-6%, 8%) scale(1.12); } }
-
-.barra-menus {
-  position: absolute; z-index: 3; inset: 0 0 auto; height: var(--barra-menus); display: flex; align-items: center; gap: 14px; padding: 0 14px;
-  background: rgba(255, 255, 255, 0.28); backdrop-filter: blur(20px) saturate(1.6); -webkit-backdrop-filter: blur(20px) saturate(1.6);
-  color: #111; font: 500 12px var(--sans); font-variant-numeric: tabular-nums;
-}
-.barra-menus .espaco { flex: 1; }
-.barra-menus svg { width: 15px; height: 15px; }
-
+/* ── windows ────────────────────────────────────────────────────────────── */
 .janela {
-  position: absolute; margin: 0; border-radius: 10px; overflow: hidden; background: #fff;
-  box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.22), 0 22px 50px -14px rgba(10, 20, 60, 0.45), 0 6px 14px -6px rgba(10, 20, 60, 0.25);
+  position: absolute; z-index: 2; margin: 0; overflow: hidden; border-radius: 12px; background: var(--branco);
+  box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.16), 0 20px 44px -18px rgba(0, 0, 0, 0.24), 0 4px 10px -4px rgba(0, 0, 0, 0.08);
 }
-.janela img { width: 100%; height: auto; pointer-events: none; }
-.j-painel { left: 5%; top: 13%; width: 46%; }
-.j-codigo { left: 44%; top: 8%; width: 40%; }
-.j-erro { left: 31%; top: 47%; width: 27%; }
-
-.selecao {
-  position: absolute; z-index: 20; pointer-events: none; opacity: 0;
-  border: 1px solid rgba(255, 255, 255, 0.95); background: rgba(47, 124, 246, 0.12);
-  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.22);
+.j-loja { left: 20px; top: calc(var(--menus) + 18px); width: var(--janela); }
+.j-chamado { left: 20px; bottom: 18px; width: var(--janela); }
+.j-codigo { right: 22px; top: 20%; width: clamp(320px, 30vw, 460px); border-radius: 10px; cursor: grab; touch-action: none; }
+.j-codigo img { width: 100%; height: auto; pointer-events: none; user-select: none; -webkit-user-drag: none; }
+.janela-barra {
+  display: flex; align-items: center; gap: 10px; height: 36px; padding: 0 12px; border-bottom: 1px solid #f0f0f0;
+  cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none;
 }
-.clarao { position: absolute; z-index: 21; inset: 0; background: #fff; opacity: 0; pointer-events: none; }
+.semaforo { display: inline-flex; gap: 6px; }
+.semaforo i { width: 11px; height: 11px; border-radius: 50%; background: #e3e3e3; }
+.janela.ativa .semaforo i:nth-child(1) { background: #ff5f57; }
+.janela.ativa .semaforo i:nth-child(2) { background: #febc2e; }
+.janela.ativa .semaforo i:nth-child(3) { background: #28c840; }
+.endereco { flex: 1; display: grid; place-items: center; height: 22px; border-radius: 6px; background: #f3f3f3; font-size: 11.5px; color: #555; }
+.janela-nome { flex: 1; margin-right: 45px; text-align: center; font: 600 12.5px var(--sans); color: #333; }
 
+.loja { padding: 14px 18px 18px; }
+.loja-marca, .chamado-rotulo { margin: 0; font: 500 10.5px/1.6 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: #9a9a9a; }
+.loja-titulo { margin: 2px 0 8px; font-size: 19px; font-weight: 600; letter-spacing: -0.02em; }
+.loja-itens { margin: 0; padding: 0; list-style: none; font-size: 13.5px; }
+.loja-itens li { display: flex; justify-content: space-between; gap: 12px; padding: 7px 0; border-bottom: 1px solid #f1f1f1; font-variant-numeric: tabular-nums; }
+.loja-itens .total { border-bottom: 0; font-weight: 600; }
+.loja-erro { display: flex; gap: 8px; margin: 8px 0 12px; padding: 9px 11px; border-radius: 8px; background: #fdeeec; color: #b42318; font-size: 12.5px; line-height: 1.45; }
+.loja-erro b { white-space: nowrap; }
+.loja-erro svg { flex: none; width: 14px; height: 14px; margin-top: 2px; color: #d92d20; }
+.loja-erro.de-novo { animation: tremor 360ms var(--sai); }
+@keyframes tremor { 20%, 60% { transform: translateX(-4px); } 40%, 80% { transform: translateX(4px); } }
+.loja-pagar {
+  width: 100%; height: 38px; border: 0; border-radius: 8px; background: #111; color: #fff; font: 600 13.5px var(--sans); cursor: pointer;
+  transition: transform 120ms var(--sai);
+}
+.loja-pagar:active { transform: scale(0.97); }
+
+.chamado { padding: 12px 18px 18px; }
+.chamado-cabeca { display: flex; align-items: center; gap: 8px; margin: 0; font: 500 12px var(--mono); color: #8a8a8a; }
+.chamado-estado { padding: 0 8px; border-radius: 999px; background: #e7f6ec; color: #1a7f37; font: 500 11px/1.7 var(--sans); }
+.chamado-titulo { margin: 4px 0 2px; font-size: 15.5px; font-weight: 600; letter-spacing: -0.01em; }
+.chamado-texto { margin: 0 0 10px; color: #555; font-size: 12.5px; line-height: 1.5; }
+.chamado-rotulo span { color: var(--tinta); }
+.anexos {
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; min-height: 76px; max-height: 172px; margin-top: 6px; padding: 8px;
+  overflow-y: auto; border: 1px dashed var(--linha-forte); border-radius: 10px; scrollbar-width: none;
+  transition: border-color 150ms var(--sai), background-color 150ms var(--sai);
+}
+.anexos.alvo, .anexos.com-copia { border-color: var(--azul); background: rgba(47, 124, 246, 0.05); }
+.anexos-vazio { grid-column: 1 / -1; align-self: center; margin: 0; text-align: center; font-size: 12px; color: #8a8a8a; }
+.anexos-vazio kbd { font-size: 0.85em; }
+.anexo { position: relative; margin: 0; aspect-ratio: 4 / 3; overflow: hidden; border-radius: 6px; background: #f4f4f4; box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.12); }
+.anexo.chegou { animation: anexo 420ms var(--mola) both; }
+@keyframes anexo { from { opacity: 0; transform: scale(0.6); } }
+.colar {
+  grid-column: 1 / -1; height: 30px; border: 0; border-radius: 7px; background: var(--azul); color: #fff; font: 600 12px var(--sans); cursor: pointer;
+}
+.colar[hidden] { display: none; }
+
+/* a screenshot: a still copy of the desk, scaled into whatever shows it */
+.retrato { position: relative; display: block; overflow: hidden; }
+.foto { position: absolute; inset: 0; display: block; overflow: hidden; }
+.foto-escala { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+.foto > img { width: 100%; height: 100%; object-fit: fill; }
+.mesa-copia { position: absolute !important; left: 0; top: 0; min-height: 0 !important; pointer-events: none; }
+.mesa-copia *, .mesa-copia { animation: none !important; transition: none !important; }
+
+/* ── taking a screenshot ────────────────────────────────────────────────── */
 .captura {
-  position: absolute; z-index: 10; left: 50%; bottom: 18px; transform: translateX(-50%);
-  display: inline-flex; align-items: center; gap: 0.5rem; height: 40px; padding: 0 0.6rem 0 0.9rem; border: 0; border-radius: 999px; cursor: pointer;
-  background: rgba(255, 255, 255, 0.34); color: #111; font: 500 0.875rem var(--sans); white-space: nowrap;
-  backdrop-filter: blur(22px) saturate(1.8); -webkit-backdrop-filter: blur(22px) saturate(1.8);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85), inset 0 0 0 1px rgba(255, 255, 255, 0.4), 0 10px 30px -10px rgba(10, 20, 60, 0.45);
-  transition: transform 140ms var(--sai), background-color 150ms var(--sai);
+  position: fixed; z-index: 65; left: 50%; bottom: 18px; transform: translateX(-50%);
+  display: flex; gap: 2px; padding: 4px; border-radius: 14px;
+  background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(22px) saturate(1.8); -webkit-backdrop-filter: blur(22px) saturate(1.8);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 0 0 0.5px rgba(0, 0, 0, 0.12), 0 12px 32px -12px rgba(0, 0, 0, 0.25);
 }
-.captura:hover { background: rgba(255, 255, 255, 0.5); }
-.captura:active { transform: translateX(-50%) scale(0.96); }
-.captura svg { width: 16px; height: 16px; }
-.captura kbd { border-color: rgba(0, 0, 0, 0.12); background: rgba(255, 255, 255, 0.6); font-size: 0.72rem; }
-@media (prefers-reduced-motion: no-preference) {
-  .captura.chama::after {
-    content: ""; position: absolute; inset: -4px; border-radius: inherit; border: 2px solid rgba(255, 255, 255, 0.85);
-    animation: chama 1.8s var(--sai) infinite; pointer-events: none;
-  }
+.captura-modo {
+  display: inline-flex; align-items: center; gap: 7px; height: 36px; padding: 0 13px; border: 0; border-radius: 10px; background: none; cursor: pointer;
+  font: 500 13px var(--sans); color: #222; transition: background-color 150ms var(--sai), transform 120ms var(--sai);
 }
-@keyframes chama { from { opacity: 0.9; transform: scale(1); } to { opacity: 0; transform: scale(1.12, 1.4); } }
+.captura-modo:hover { background: rgba(0, 0, 0, 0.06); }
+.captura-modo:active { transform: scale(0.96); }
+.captura-modo[aria-pressed="true"] { background: var(--branco); box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.12), 0 1px 3px rgba(0, 0, 0, 0.1); }
+.captura-modo svg { width: 16px; height: 16px; }
 
-.dicas {
-  display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem 2rem; margin: 1.5rem 0 0; padding: 0; list-style: none;
+.camada { position: fixed; z-index: 70; inset: 0; cursor: crosshair; touch-action: none; }
+.camada[hidden] { display: none; }
+.camada.janelas { cursor: default; }
+.sombra { position: absolute; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.2); transform-origin: 0 0; transform: scale(0); }
+.camada:not(.escolhendo) .sombra, .camada:not(.escolhendo) .retangulo, .camada:not(.escolhendo) .medida { display: none; }
+.retangulo { position: absolute; left: 0; top: 0; border: 1px solid rgba(255, 255, 255, 0.95); box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.35); }
+.medida {
+  position: absolute; left: 0; top: 0; padding: 2px 7px; border-radius: 5px; background: rgba(0, 0, 0, 0.72); color: #fff;
+  font: 500 11px var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap;
 }
-.dicas li span { margin-right: 0.5rem; color: var(--tinta); }
-.dicas kbd { font-size: 0.68rem; text-transform: none; letter-spacing: 0; }
+.destaque { position: absolute; left: 0; top: 0; display: none; border-radius: 12px; background: rgba(47, 124, 246, 0.2); box-shadow: inset 0 0 0 2px rgba(47, 124, 246, 0.7); }
+.clarao { position: fixed; z-index: 80; left: 0; top: 0; width: 0; height: 0; background: #fff; opacity: 0; pointer-events: none; }
+
+/* the guide, above the bar */
+.guia {
+  position: fixed; z-index: 65; left: 50%; bottom: 76px; transform: translateX(-50%);
+  width: min(340px, calc(100vw - 32px)); padding: 11px 36px 12px 14px; border-radius: 14px; background: var(--branco);
+  box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.12), 0 14px 34px -14px rgba(0, 0, 0, 0.3);
+  transition: opacity 200ms var(--sai), transform 260ms var(--mola);
+}
+.guia[hidden] { display: block; opacity: 0; pointer-events: none; transform: translate(-50%, 8px); }
+.guia::after { content: ""; position: absolute; left: calc(50% - 6px); bottom: -5px; width: 12px; height: 12px; background: var(--branco); transform: rotate(45deg); box-shadow: 0.5px 0.5px 0 rgba(0, 0, 0, 0.1); }
+.guia-passo { margin: 0 0 2px; font: 500 10.5px/1.6 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--azul); }
+.guia-texto { margin: 0; font-size: 13px; line-height: 1.5; color: #333; text-wrap: pretty; }
+.guia-texto b { color: var(--tinta); font-weight: 600; }
+.guia-fechar { position: absolute; top: 6px; right: 6px; display: grid; place-items: center; width: 26px; height: 26px; padding: 0; border: 0; border-radius: 7px; background: none; color: #999; cursor: pointer; }
+.guia-fechar:hover { background: rgba(0, 0, 0, 0.05); color: #333; }
+.guia-fechar svg { width: 11px; height: 11px; }
 
 /* ── the glass drawer, at the screen's right edge ────────────────────────── */
 .gaveta {
@@ -222,9 +240,9 @@ kbd {
   --frente: 58px;            /* the spine */
   --altura: 420px;
   --raio-esq: 26px;
-  --vidro: rgba(255, 255, 255, 0.26);
+  --vidro: rgba(255, 255, 255, 0.3);
   --vidro-traco: rgba(0, 0, 0, 0.08);
-  position: absolute; z-index: 12; top: var(--topo, 80px); right: 0;
+  position: fixed; z-index: 60; top: var(--topo, 120px); right: 0;
   width: calc(var(--frente) + var(--largura)); height: var(--altura);
   pointer-events: none;
   transition: transform 460ms var(--mola), height 300ms var(--mola), top 300ms var(--mola), width 0ms;
@@ -235,25 +253,28 @@ kbd {
 .gaveta.puxando { transition: transform 460ms var(--mola), height 300ms var(--mola), top 300ms var(--mola); }
 .gaveta.puxando .ficha, .gaveta.puxando .ficha-foto { transition: none; }
 .gaveta.voltando { transition: transform 460ms var(--mola), height 300ms var(--mola), top 300ms var(--mola), width 420ms var(--mola); }
+.gaveta.tranco .painel { animation: tranco 420ms var(--mola); }
+@keyframes tranco { 30% { transform: translateX(-6px); } }
 .painel {
   position: absolute; inset: 0 0 0 auto; width: 100%; display: flex; overflow: hidden;
   border-radius: var(--raio-esq) 26px 26px var(--raio-esq);
   background: var(--vidro);
-  backdrop-filter: blur(24px) saturate(1.9) brightness(1.06);
-  -webkit-backdrop-filter: blur(24px) saturate(1.9) brightness(1.06);
+  backdrop-filter: blur(22px) saturate(1.9) brightness(1.04);
+  -webkit-backdrop-filter: blur(22px) saturate(1.9) brightness(1.04);
   box-shadow:
-    inset 0 0 0 0.5px rgba(255, 255, 255, 0.5),
-    0 30px 60px -20px rgba(10, 20, 60, 0.45),
-    0 8px 20px -10px rgba(10, 20, 60, 0.3);
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.6),
+    0 0 0 0.5px rgba(0, 0, 0, 0.1),
+    0 30px 60px -22px rgba(0, 0, 0, 0.3),
+    0 8px 20px -10px rgba(0, 0, 0, 0.18);
   transition: border-radius 420ms var(--mola), width 520ms var(--mola), height 520ms var(--mola);
 }
 .painel::before { /* the light the glass catches */
   content: ""; position: absolute; inset: 0; pointer-events: none; border-radius: inherit;
-  background: linear-gradient(155deg, rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0.08) 28%, transparent 55%, rgba(255, 255, 255, 0.14));
+  background: linear-gradient(155deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.1) 28%, transparent 55%, rgba(255, 255, 255, 0.16));
 }
 .painel::after { /* its rim, bright where the light hits */
   content: ""; position: absolute; inset: 0; pointer-events: none; border-radius: inherit; padding: 1.2px;
-  background: linear-gradient(140deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.2) 30%, rgba(255, 255, 255, 0.05) 60%, rgba(255, 255, 255, 0.7));
+  background: linear-gradient(140deg, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0.25) 30%, rgba(255, 255, 255, 0.05) 60%, rgba(255, 255, 255, 0.8));
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
   mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
 }
@@ -266,10 +287,9 @@ kbd {
 }
 .espinha::after { content: ""; position: absolute; right: 0; top: 22px; bottom: 22px; width: 1px; background: var(--vidro-traco); }
 .espinha-icone { width: 17px; height: 17px; opacity: 0.75; }
-.conta { font: 600 13px var(--sans); font-variant-numeric: tabular-nums; margin-bottom: 4px; }
+.conta { margin-bottom: 4px; font: 600 13px var(--sans); font-variant-numeric: tabular-nums; }
 .alca {
-  width: 38px; height: 60px; padding: 0; border: 0; background: none; cursor: col-resize;
-  display: grid; place-items: center; touch-action: none;
+  display: grid; place-items: center; width: 38px; height: 60px; padding: 0; border: 0; background: none; cursor: col-resize; touch-action: none;
 }
 .alca svg { width: 26px; height: 40px; overflow: visible; }
 .alca path { fill: none; stroke: #000; stroke-opacity: 0.22; stroke-width: 4; stroke-linecap: round; transition: stroke-opacity 150ms var(--sai), stroke-width 150ms var(--sai); }
@@ -278,37 +298,36 @@ kbd {
 .caixa { position: relative; z-index: 1; flex: 1; min-width: 0; display: flex; flex-direction: column; padding: 10px 0; }
 .fichas { position: relative; flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; scrollbar-width: none; overscroll-behavior: contain; }
 .fichas::-webkit-scrollbar { display: none; }
-.pilha { position: relative; }
+.pilha { position: relative; touch-action: pan-y; }
 .gaveta:not([data-estado="aberta"]) .caixa, .gaveta:not([data-estado="aberta"]) .espinha > * { opacity: 0; transition: opacity 120ms; }
 .gaveta[data-estado="aberta"] .caixa { opacity: 1; transition: opacity 260ms 120ms; }
 
 .ficha {
   position: absolute; left: 0; top: 0;
   border-radius: 12px; background: #fff; color: #111;
-  box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.1), 0 -2px 12px -2px rgba(0, 0, 0, 0.14);
+  box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.1), 0 -2px 12px -2px rgba(0, 0, 0, 0.12);
   transition: transform 260ms var(--mola), opacity 200ms var(--sai), box-shadow 160ms var(--sai);
   cursor: default; contain: layout;
 }
 .ficha.chegando .ficha-foto { opacity: 0; }
-.ficha.escolhida { box-shadow: 0 0 0 2px var(--azul), 0 -2px 12px -2px rgba(0, 0, 0, 0.14); }
+.ficha.escolhida { box-shadow: 0 0 0 2px var(--azul), 0 -2px 12px -2px rgba(0, 0, 0, 0.12); }
 .ficha-foto {
-  position: absolute; border-radius: 6px; object-fit: fill; box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.1);
+  position: absolute; left: 0; top: 0; display: block; overflow: hidden; border-radius: 6px; box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.1);
   transition: width 260ms var(--mola), height 260ms var(--mola), transform 260ms var(--mola), opacity 120ms;
-  user-select: none; -webkit-user-drag: none; pointer-events: none;
+  pointer-events: none;
 }
 .ficha-legenda {
   position: absolute; display: flex; gap: 8px; font: 400 11px/14px var(--sans); color: #8a8a8a;
   font-variant-numeric: tabular-nums; white-space: nowrap;
 }
 .ficha-legenda span { overflow: hidden; text-overflow: ellipsis; }
-.ficha-legenda .idade { margin-left: auto; flex: none; }
+.ficha-legenda .idade { flex: none; margin-left: auto; }
 .ficha-faixa { position: absolute; display: grid; gap: 2px; font: 400 11px/14px var(--sans); color: #8a8a8a; font-variant-numeric: tabular-nums; }
 .ficha-faixa span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .ficha-faixa .tipo { color: #111; font-weight: 500; }
 .ficha-bolinha, .ficha-x {
-  position: absolute; top: 14px; width: 20px; height: 20px; border-radius: 50%;
-  display: grid; place-items: center; opacity: 0; transform: scale(0.6);
-  transition: opacity 150ms var(--sai), transform 150ms var(--sai);
+  position: absolute; top: 14px; display: grid; place-items: center; width: 20px; height: 20px; border-radius: 50%;
+  opacity: 0; transform: scale(0.6); transition: opacity 150ms var(--sai), transform 150ms var(--sai);
 }
 .ficha-bolinha { left: 14px; background: rgba(0, 0, 0, 0.3); box-shadow: inset 0 0 0 1.5px #fff, 0 0.5px 1.5px rgba(0, 0, 0, 0.35); }
 .ficha-x { right: 14px; background: rgba(0, 0, 0, 0.7); color: #fff; box-shadow: 0 0.5px 1.5px rgba(0, 0, 0, 0.35); }
@@ -325,17 +344,17 @@ kbd {
 .ficha.copiada .ficha-copiado { opacity: 1; transform: translate(-50%, -50%); }
 
 .barra {
-  flex: none; height: 44px; display: flex; align-items: center; gap: 7px; padding: 0 12px 0 14px;
-  border-top: 1px solid var(--vidro-traco); margin: 0 4px; font: 400 11px var(--sans); color: rgba(0, 0, 0, 0.5); white-space: nowrap;
+  flex: none; display: flex; align-items: center; gap: 7px; height: 44px; margin: 0 4px; padding: 0 12px 0 14px;
+  border-top: 1px solid var(--vidro-traco); font: 400 11px var(--sans); color: rgba(0, 0, 0, 0.5); white-space: nowrap;
 }
 .barra .quantos { color: #111; font: 600 12px var(--sans); font-variant-numeric: tabular-nums; }
 .barra .espaco { flex: 1; }
 .pilula-barra {
-  display: inline-flex; align-items: center; gap: 4px; height: 24px; padding: 0 10px; border: 0; border-radius: 999px;
-  background: rgba(255, 255, 255, 0.55); box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.08); color: #111; font: 500 11px var(--sans); cursor: pointer;
+  display: inline-flex; align-items: center; gap: 4px; height: 24px; padding: 0 10px; border: 0; border-radius: 999px; cursor: pointer;
+  background: rgba(255, 255, 255, 0.6); box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.08); color: #111; font: 500 11px var(--sans);
   transition: transform 120ms var(--sai), background-color 150ms var(--sai);
 }
-.pilula-barra:hover { background: rgba(255, 255, 255, 0.8); }
+.pilula-barra:hover { background: rgba(255, 255, 255, 0.85); }
 .pilula-barra:active { transform: scale(0.96); }
 .pilula-barra.principal { background: var(--azul); color: #fff; box-shadow: none; }
 .pilula-barra.so-icone { padding: 0 7px; }
@@ -349,287 +368,182 @@ kbd {
 /* the handle at the screen's edge: resting there while the drawer is shut,
    taut as the pointer leans on the edge */
 .borda-alca {
-  position: absolute; z-index: 11; right: 0; top: 50%; width: 36px; height: 120px; padding: 0 6px 0 0; border: 0; background: none;
-  display: grid; place-items: center end; cursor: pointer; opacity: 0; pointer-events: none;
+  position: fixed; z-index: 59; right: 0; top: 50%; display: grid; place-items: center end; width: 36px; height: 120px; padding: 0 6px 0 0;
+  border: 0; background: none; cursor: pointer; opacity: 0; pointer-events: none;
   transform: translate(16px, -50%); transition: opacity 160ms var(--sai), transform 220ms var(--sai);
 }
-.gaveta[data-estado="fechada"] ~ .borda-alca { opacity: 0.75; pointer-events: auto; transform: translate(0, -50%); }
+.gaveta[data-estado="fechada"] ~ .borda-alca { opacity: 0.6; pointer-events: auto; transform: translate(0, -50%); }
 .borda-alca.visivel, .gaveta[data-estado="fechada"] ~ .borda-alca:hover { opacity: 1; transform: translate(0, -50%); }
 .borda-alca svg { width: 26px; height: 72px; overflow: visible; }
-.borda-alca path { fill: none; stroke: #fff; stroke-width: 5; stroke-linecap: round; filter: drop-shadow(-0.5px 1px 2px rgba(0, 0, 0, 0.35)); }
+.borda-alca path { fill: none; stroke: #9a9a9a; stroke-width: 5; stroke-linecap: round; }
+.borda-alca.visivel path { stroke: #6a6a6a; }
 
-/* cards thrown out, and screenshots flying in, move in a layer of their own */
-.quedas { position: absolute; z-index: 30; inset: 0; pointer-events: none; }
+/* cards thrown out, screenshots flying in, cards dragged out: a layer of their own */
+.quedas { position: fixed; z-index: 75; inset: 0; pointer-events: none; }
 .quedas .ficha { transition: none; }
-.voando { position: absolute; left: 0; top: 0; border-radius: 10px; box-shadow: 0 18px 40px -12px rgba(10, 20, 60, 0.5); transform-origin: 0 0; }
-
-/* ── sections ───────────────────────────────────────────────────────────── */
-.secao { max-width: var(--largura-pagina); margin: 0 auto; padding: clamp(5rem, 12vh, 8rem) 1.5rem 0; }
-.secao-cabeca { margin-bottom: 3rem; }
-.secao-cabeca .etiqueta { margin: 0 0 1rem; }
-.secao-titulo { margin: 0; font-size: clamp(2rem, 4.4vw, 3.25rem); line-height: 1.06; font-weight: 600; letter-spacing: -0.04em; text-wrap: balance; }
-.secao-titulo kbd { font-size: 0.6em; border-radius: 10px; padding: 0 0.3em; vertical-align: 0.12em; letter-spacing: 0; }
-
-/* the steps on one rail, a point each */
-.linha { position: relative; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 2rem; margin: 0; padding: 0; list-style: none; }
-.linha::before { content: ""; position: absolute; left: 0; right: 0; top: 7px; height: 1px; background: var(--linha-forte); }
-.trilho { position: relative; display: block; height: 15px; margin-bottom: 1.5rem; }
-.ponto {
-  position: absolute; left: 0; top: 0; width: 15px; height: 15px; border-radius: 50%;
-  background: var(--branco); border: 1px solid var(--linha-forte); transition: background-color 200ms var(--sai), border-color 200ms var(--sai), transform 200ms var(--sai);
+.voando { position: absolute; left: 0; top: 0; overflow: hidden; border-radius: 8px; transform-origin: 0 0; box-shadow: 0 18px 40px -12px rgba(0, 0, 0, 0.4); }
+.arrasto {
+  position: absolute; left: 0; top: 0; overflow: visible; border-radius: 8px; transform-origin: 0 0;
+  box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.15), 0 16px 34px -10px rgba(0, 0, 0, 0.35);
 }
-.passo:hover .ponto { background: var(--tinta); border-color: var(--tinta); transform: scale(1.1); }
-.passo-numero { margin: 0 0 0.6rem; }
-.passo-titulo { margin: 0 0 0.5rem; font-size: 1.125rem; font-weight: 600; letter-spacing: -0.02em; }
-.passo-texto { margin: 0; color: var(--tinta-suave); font-size: 0.9375rem; line-height: 1.65; text-wrap: pretty; }
-
-/* the details, a grid drawn in hairlines */
-.detalhes {
-  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; margin: 0; padding: 0; list-style: none;
-  border: 1px solid var(--linha); border-radius: 16px; overflow: hidden; background: var(--linha);
+.arrasto .retrato { border-radius: 8px; }
+.arrasto-conta {
+  position: absolute; top: -8px; right: -8px; min-width: 22px; height: 22px; padding: 0 6px; border-radius: 999px;
+  background: #ff3b30; color: #fff; font: 600 12px/22px var(--sans); text-align: center;
 }
-.detalhes li { padding: 1.75rem; background: var(--branco); transition: background-color 200ms var(--sai); }
-.detalhes li:hover { background: var(--fundo); }
-.detalhes p { margin: 0; color: var(--tinta-suave); font-size: 0.9375rem; line-height: 1.6; text-wrap: pretty; }
-.detalhes .detalhe-rotulo { margin-bottom: 0.75rem; color: var(--tinta); }
 
-/* install */
-.instalar { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1fr); gap: 1rem; }
-.opcao { min-width: 0; padding: 1.5rem; border: 1px solid var(--linha); border-radius: 16px; background: var(--branco); }
-.opcao-principal { border-color: var(--linha-forte); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 8px 24px -12px rgba(0, 0, 0, 0.12); }
-.opcao p { margin: 0.8rem 0 0; color: var(--tinta-suave); font-size: 0.9375rem; line-height: 1.6; }
-.opcao .opcao-rotulo { margin: 0; color: var(--tinta-muda); }
-.opcao a { text-underline-offset: 3px; text-decoration-color: var(--linha-forte); }
-.opcao a:hover { text-decoration-color: currentColor; }
-.comando {
-  display: flex; align-items: center; gap: 0.5rem; margin-top: 1rem; padding: 0.4rem 0.4rem 0.4rem 0.9rem;
-  border: 1px solid var(--linha); border-radius: 10px; background: var(--fundo);
+/* ── between laptop and phone ───────────────────────────────────────────── */
+@media (max-width: 1100px) and (min-width: 761px) {
+  .j-codigo { display: none; }
+  :root { --janela: clamp(250px, 26vw, 300px); }
+  .titulo { font-size: clamp(2.2rem, 4.4vw, 3.4rem); }
 }
-.comando code { flex: 1; min-width: 0; overflow-x: auto; white-space: nowrap; font: 400 0.8125rem/2 var(--mono); scrollbar-width: none; }
-.comando code::-webkit-scrollbar { display: none; }
-.copiar {
-  flex: none; height: 32px; padding: 0 0.8rem; border: 1px solid var(--linha-forte); border-radius: 8px; background: var(--branco); cursor: pointer;
-  font: 500 0.8125rem var(--sans); transition: background-color 150ms var(--sai), transform 120ms var(--sai);
-}
-.copiar:hover { background: var(--fundo); }
-.copiar:active { transform: scale(0.96); }
 
-.rodape {
-  display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.75rem 2rem;
-  max-width: var(--largura-pagina); margin: clamp(5rem, 12vh, 8rem) auto 0; padding: 2rem 1.5rem 3rem; border-top: 1px solid var(--linha);
-}
-.rodape a { text-underline-offset: 3px; }
-
-.aviso { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; margin: -1px; }
-
-/* ── narrower windows and phones ────────────────────────────────────────── */
-@media (max-width: 960px) {
-  .linha { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 3rem; }
-  .linha::before { display: none; }
-  .detalhes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .instalar { grid-template-columns: minmax(0, 1fr); }
-}
+/* ── phones: the desk is taller than the screen, and scrolls ────────────── */
 @media (max-width: 760px) {
-  .topo-dentro { grid-template-columns: 1fr auto; }
-  .topo-nav { display: none; }
-  .vitrine { padding: 0 0.75rem; }
-  .moldura { padding: 5px; border-radius: 18px; }
-  .palco { aspect-ratio: auto; height: 600px; min-height: 0; }
-  .j-painel { left: 4%; top: 9%; width: 78%; }
-  .j-codigo { left: 10%; top: 40%; width: 80%; }
-  .j-erro { left: 6%; top: 58%; width: 52%; }
+  .mesa { display: flex; flex-direction: column; gap: 14px; height: auto; min-height: 100svh; padding: calc(var(--menus) + 28px) 14px 150px; }
+  .app-da-frente { display: none; }
+  .abertura { position: static; width: auto; transform: none; padding: 0 4px 10px; }
+  .janela { position: relative; left: auto; top: auto; bottom: auto; width: 100%; }
+  .janela-barra { cursor: default; }
+  .j-codigo { display: none; }
   .gaveta { --frente: 50px; }
-  .captura kbd { display: none; }
+  .captura-modo { padding: 0 11px; }
 }
-@media (max-width: 560px) {
-  .linha, .detalhes { grid-template-columns: minmax(0, 1fr); }
-  .rodape { flex-direction: column; }
-  .dicas { flex-direction: column; align-items: flex-start; padding: 0 0.5rem; }
-}
+@media (max-width: 760px) and (max-height: 640px) { .guia { display: none; } }
 
 @media (prefers-reduced-motion: reduce) {
-  html { scroll-behavior: auto; }
-  .gaveta, .painel, .ficha, .ficha-foto, .borda-alca { transition-duration: 0.01ms !important; }
+  .gaveta, .painel, .ficha, .ficha-foto, .borda-alca, .guia { transition-duration: 0.01ms !important; }
 }
 </style>
 </head>
 <body>
-<a class="pular" href="#como">Skip to content</a>
+<a class="pular" href="#titulo">Skip to content</a>
 
-<header class="topo">
-  <div class="topo-dentro">
-    <a class="marca" href="#inicio"><img src="../assets/icone-128.png" alt="" width="22" height="22">Gaveta</a>
-    <nav class="topo-nav" aria-label="Sections">
-      <a href="#como">How it works</a>
-      <a href="#detalhes">Details</a>
-      <a href="#instalar">Install</a>
-    </nav>
-    <div class="topo-acoes">
-      <a class="botao-fino" href="../" hreflang="pt-BR" lang="pt-BR" data-idioma="pt" aria-label="Ler em português">PT</a>
-      <a class="botao-fino botao-escuro" href="https://github.com/Frasca-99/gaveta">
-        <svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
-        GitHub
-      </a>
-    </div>
-  </div>
-</header>
+<div class="mesa" id="mesa">
+  <div class="papel" aria-hidden="true"><span class="mancha m1"></span><span class="mancha m2"></span><span class="mancha m3"></span></div>
 
-<main id="inicio">
+  <header class="menus">
+    <a class="marca" href="https://github.com/Frasca-99/gaveta"><img src="../assets/icone-128.png" alt="" width="18" height="18">Gaveta</a>
+    <span class="app-da-frente" id="app-da-frente">Finder</span>
+    <span class="espaco"></span>
+    <a class="menus-item" href="../" hreflang="pt-BR" lang="pt-BR" data-idioma="pt" aria-label="Ler em português">PT</a>
+    <button class="menus-item menus-gaveta" id="menus-gaveta" type="button" aria-label="Open or close the drawer" aria-pressed="false">
+      <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 9.5h3.2l1 1.6h3.6l1-1.6H14M2.6 4.2 2 9.5v2.8c0 .6.4 1 1 1h10c.6 0 1-.4 1-1V9.5l-.6-5.3c-.1-.5-.5-.8-1-.8H3.6c-.5 0-.9.3-1 .8Z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+    </button>
+    <span class="relogio" id="relogio" aria-hidden="true">Thu 2:32 PM</span>
+  </header>
+
   <section class="abertura" aria-labelledby="titulo">
     <p class="etiqueta">Mac app · free · open source</p>
-    <h1 class="titulo" id="titulo">Your screenshots,<br><span>in a glass drawer.</span></h1>
-    <p class="intro">Every screenshot you take lands in a drawer at the edge of the screen. Pick several and paste them all at once, with a single <kbd>⌘V</kbd>.</p>
-    <div class="acoes">
-      <button class="botao botao-escuro" type="button" data-copiar="curl -fsSL https://raw.githubusercontent.com/Frasca-99/gaveta/main/scripts/get.sh | bash">
-        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 4.5 6 8l-3 3.5M8 12h5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        <span data-rotulo>Install with Terminal</span>
-      </button>
-      <a class="botao" href="#instalar">Other ways to install</a>
-    </div>
+    <h1 class="titulo" id="titulo">Your screenshots,<br><span>in a drawer.</span></h1>
+    <p class="intro">Every screenshot you take lands in a drawer at the edge of the screen. Pick several and paste them all at once.</p>
+    <a class="botao" href="https://github.com/Frasca-99/gaveta">
+      <svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+      GitHub
+    </a>
     <p class="nota">macOS 14 or later · Apple silicon and Intel</p>
+    <p class="credito">Made by Luiz Paulo Frasca Neto · <a href="https://github.com/Frasca-99/gaveta">open source, MIT</a></p>
   </section>
 
-  <section class="vitrine" aria-label="Gaveta at work">
-    <div class="moldura">
-      <div class="palco" id="palco">
-        <div class="papel-de-parede" aria-hidden="true"><span class="mancha m1"></span><span class="mancha m2"></span><span class="mancha m3"></span></div>
-        <div class="barra-menus" aria-hidden="true">
-          <span class="espaco"></span>
-          <svg class="icone-gaveta" viewBox="0 0 16 16"><path d="M2 9.5h3.2l1 1.6h3.6l1-1.6H14M2.6 4.2 2 9.5v2.8c0 .6.4 1 1 1h10c.6 0 1-.4 1-1V9.5l-.6-5.3c-.1-.5-.5-.8-1-.8H3.6c-.5 0-.9.3-1 .8Z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
-          <svg viewBox="0 0 16 16"><path d="M1.5 6.2a9.5 9.5 0 0 1 13 0M3.8 8.6a6.2 6.2 0 0 1 8.4 0M6.1 11a2.8 2.8 0 0 1 3.8 0" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="8" cy="13.2" r="1" fill="currentColor"/></svg>
-          <span class="relogio" id="relogio">Thu 2:32 PM</span>
-        </div>
+  <article class="janela j-loja" id="loja" data-app="Browser" aria-label="Browser: the shop failed to take the payment">
+    <div class="janela-barra">
+      <span class="semaforo" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span class="endereco">shop.example/checkout</span>
+    </div>
+    <div class="loja">
+      <p class="loja-marca">Example Shop</p>
+      <p class="loja-titulo">Checkout</p>
+      <ul class="loja-itens">
+        <li><span>Running shoes</span><span>$79.90</span></li>
+        <li><span>Socks, 3 pairs</span><span>$12.00</span></li>
+        <li class="total"><span>Total</span><span>$91.90</span></li>
+      </ul>
+      <p class="loja-erro" id="loja-erro"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.8 15 14H1z" fill="currentColor"/><path d="M8 6.2v3.6M8 11.6v.1" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg><span>The payment could not go through. <b>Error 500</b></span></p>
+      <button class="loja-pagar" id="loja-pagar" type="button">Pay $91.90</button>
+    </div>
+  </article>
 
-        <figure class="janela j-painel" data-print="painel"><img src="../assets/prints/painel.png" alt="" width="980" height="560" draggable="false"></figure>
-        <figure class="janela j-codigo" data-print="codigo"><img src="../assets/prints/codigo.png" alt="" width="1160" height="520" draggable="false"></figure>
-        <figure class="janela j-erro" data-print="erro"><img src="../assets/prints/erro.png" alt="" width="560" height="470" draggable="false"></figure>
-
-        <div class="selecao" id="selecao" aria-hidden="true"></div>
-        <div class="clarao" id="clarao" aria-hidden="true"></div>
-
-        <button class="captura" id="captura" type="button">
-          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 5V3a1 1 0 0 1 1-1h2M11 2h2a1 1 0 0 1 1 1v2M14 11v2a1 1 0 0 1-1 1h-2M5 14H3a1 1 0 0 1-1-1v-2" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M8 5.5v5M5.5 8h5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
-          Take a screenshot
-          <kbd>⌘⇧4</kbd>
-        </button>
-
-        <aside class="gaveta" id="gaveta" aria-label="Gaveta" data-estado="fechada">
-          <div class="painel" id="painel">
-            <div class="espinha">
-              <svg class="espinha-icone" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 9.5h3.2l1 1.6h3.6l1-1.6H14M2.6 4.2 2 9.5v2.8c0 .6.4 1 1 1h10c.6 0 1-.4 1-1V9.5l-.6-5.3c-.1-.5-.5-.8-1-.8H3.6c-.5 0-.9.3-1 .8Z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
-              <span class="conta" id="conta">3</span>
-              <button class="alca" id="alca" type="button" aria-label="Widen the drawer. A double-click sets it back.">
-                <svg viewBox="0 0 26 40" aria-hidden="true"><path id="alca-linha" d="M13 2 Q13 20 13 38"/></svg>
-              </button>
-            </div>
-            <div class="caixa">
-              <div class="fichas" id="fichas" role="list" aria-label="Screenshots in the drawer"></div>
-              <div class="vazia" id="vazia">
-                <p class="vazia-titulo">Empty drawer</p>
-                <p>Take a screenshot with the button below.</p>
-              </div>
-              <div class="barra" id="barra"></div>
-            </div>
-          </div>
-        </aside>
-        <button class="borda-alca" id="borda-alca" type="button" aria-label="Open the drawer"><svg viewBox="0 0 26 72" aria-hidden="true"><path id="borda-linha" d="M13 2 Q13 36 13 70"/></svg></button>
-        <div class="quedas" id="quedas" aria-hidden="true"></div>
+  <article class="janela j-chamado" id="chamado" data-app="Tickets" aria-label="Tickets: ticket #482">
+    <div class="janela-barra">
+      <span class="semaforo" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span class="janela-nome">Tickets</span>
+    </div>
+    <div class="chamado">
+      <p class="chamado-cabeca"><span>#482</span><span class="chamado-estado">Open</span></p>
+      <p class="chamado-titulo">Checkout won't complete the order</p>
+      <p class="chamado-texto">Clicking Pay shows an error and the order disappears. Screenshots below.</p>
+      <p class="chamado-rotulo">Attachments <span id="anexos-conta"></span></p>
+      <div class="anexos" id="anexos">
+        <p class="anexos-vazio" id="anexos-vazio">Paste here with <kbd>⌘V</kbd>, or drag from the drawer.</p>
+        <button class="colar" id="colar" type="button" hidden>Paste</button>
       </div>
     </div>
-    <ul class="dicas" aria-label="What to try">
-      <li><span>01</span>Take a screenshot</li>
-      <li><span>02</span>Hover over the cards</li>
-      <li><span>03</span>Click to copy, <kbd>⌘</kbd>-click to pick</li>
-      <li><span>04</span>Drag the handle</li>
-    </ul>
-  </section>
+  </article>
 
-  <section class="secao" id="como" aria-labelledby="como-titulo">
-    <div class="secao-cabeca">
-      <p class="etiqueta">How it works</p>
-      <h2 class="secao-titulo" id="como-titulo">From screenshot to <kbd>⌘V</kbd>,<br><span>never touching the Desktop.</span></h2>
+  <figure class="janela j-codigo" id="codigo" data-app="Editor"><img src="../assets/prints/codigo.png" alt="" width="1160" height="520" draggable="false"></figure>
+
+</div>
+
+<!-- what is not on the desk, and so never in a screenshot -->
+<div class="camada" id="camada" hidden>
+  <span class="sombra" data-lado="cima"></span><span class="sombra" data-lado="baixo"></span><span class="sombra" data-lado="esquerda"></span><span class="sombra" data-lado="direita"></span>
+  <span class="retangulo" id="retangulo"></span>
+  <span class="medida" id="medida"></span>
+  <span class="destaque" id="destaque"></span>
+</div>
+<div class="clarao" id="clarao" aria-hidden="true"></div>
+
+<div class="guia" id="guia" role="status">
+  <p class="guia-passo" id="guia-passo">1 of 3 · Take</p>
+  <p class="guia-texto" id="guia-texto">Take a screenshot of this desk: choose <b>Selection</b> and drag over the shop.</p>
+  <button class="guia-fechar" id="guia-fechar" type="button" aria-label="Close the tips"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 3l6 6M9 3 3 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
+</div>
+
+<div class="captura" role="toolbar" aria-label="Take a screenshot">
+  <button class="captura-modo" type="button" data-modo="tela">
+    <svg viewBox="0 0 16 16" aria-hidden="true"><rect x="1.5" y="2.5" width="13" height="9" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M5.5 14h5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+    Screen
+  </button>
+  <button class="captura-modo" type="button" data-modo="janela" aria-pressed="false">
+    <svg viewBox="0 0 16 16" aria-hidden="true"><rect x="1.5" y="2.5" width="13" height="11" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M1.5 5.5h13" stroke="currentColor" stroke-width="1.3"/></svg>
+    Window
+  </button>
+  <button class="captura-modo" type="button" data-modo="selecao" aria-pressed="false">
+    <svg viewBox="0 0 16 16" aria-hidden="true"><rect x="2" y="3" width="12" height="10" rx="1" fill="none" stroke="currentColor" stroke-width="1.3" stroke-dasharray="2 2"/></svg>
+    Selection
+  </button>
+</div>
+
+<aside class="gaveta" id="gaveta" aria-label="Drawer" data-estado="fechada">
+  <div class="painel" id="painel">
+    <div class="espinha">
+      <svg class="espinha-icone" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 9.5h3.2l1 1.6h3.6l1-1.6H14M2.6 4.2 2 9.5v2.8c0 .6.4 1 1 1h10c.6 0 1-.4 1-1V9.5l-.6-5.3c-.1-.5-.5-.8-1-.8H3.6c-.5 0-.9.3-1 .8Z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+      <span class="conta" id="conta">3</span>
+      <button class="alca" id="alca" type="button" aria-label="Widen the drawer. A double-click sets it back.">
+        <svg viewBox="0 0 26 40" aria-hidden="true"><path id="alca-linha" d="M13 2 Q13 20 13 38"/></svg>
+      </button>
     </div>
-    <ol class="linha">
-      <li class="passo">
-        <span class="trilho" aria-hidden="true"><span class="ponto"></span></span>
-        <p class="passo-numero">01 · Take</p>
-        <h3 class="passo-titulo">Take a screenshot</h3>
-        <p class="passo-texto">The usual way, with <kbd>⌘⇧4</kbd>. It flies into the drawer at the edge of the screen instead of piling up on the Desktop.</p>
-      </li>
-      <li class="passo">
-        <span class="trilho" aria-hidden="true"><span class="ponto"></span></span>
-        <p class="passo-numero">02 · Open</p>
-        <h3 class="passo-titulo">Touch the edge</h3>
-        <p class="passo-texto">The pointer at the right edge pulls a handle, and the glass drawer slides out, taking the color of what is behind it. Or <kbd>⌃⌥G</kbd>.</p>
-      </li>
-      <li class="passo">
-        <span class="trilho" aria-hidden="true"><span class="ponto"></span></span>
-        <p class="passo-numero">03 · Pick</p>
-        <h3 class="passo-titulo">Pick several</h3>
-        <p class="passo-texto">A click copies one screenshot. <kbd>⌘</kbd>-click, <kbd>⇧</kbd>-click or Select all pick several.</p>
-      </li>
-      <li class="passo">
-        <span class="trilho" aria-hidden="true"><span class="ponto"></span></span>
-        <p class="passo-numero">04 · Paste</p>
-        <h3 class="passo-titulo">Paste them all at once</h3>
-        <p class="passo-texto">Copy all, and a single <kbd>⌘V</kbd> pastes them in the order you took them: into a chat, an email, a ticket.</p>
-      </li>
-    </ol>
-  </section>
-
-  <section class="secao" id="detalhes" aria-labelledby="detalhes-titulo">
-    <div class="secao-cabeca">
-      <p class="etiqueta">Details</p>
-      <h2 class="secao-titulo" id="detalhes-titulo">Small touches,<br><span>the Mac way.</span></h2>
+    <div class="caixa">
+      <div class="fichas" id="fichas" role="list" aria-label="Screenshots in the drawer"></div>
+      <div class="vazia" id="vazia">
+        <p class="vazia-titulo">Empty drawer</p>
+        <p>Take a screenshot with the bar below.</p>
+      </div>
+      <div class="barra" id="barra"></div>
     </div>
-    <ul class="detalhes">
-      <li><p class="detalhe-rotulo">Glass</p><p>The Liquid Glass of macOS 26: the drawer takes the color of what is behind it and all but disappears over your work.</p></li>
-      <li><p class="detalhe-rotulo">Elastic handle</p><p>Drag the handle to widen the drawer. It bends with your speed, gives at the limit and swings back.</p></li>
-      <li><p class="detalhe-rotulo">Whole cards</p><p>Every screenshot shows whole, never cropped. The card under the pointer opens up for you to see.</p></li>
-      <li><p class="detalhe-rotulo">No friction</p><p>Deleting with the X never stalls: the card falls and the next one is already there.</p></li>
-      <li><p class="detalhe-rotulo">Drag</p><p>Take one or several screenshots to any app or folder.</p></li>
-      <li><p class="detalhe-rotulo">Only on your Mac</p><p>No internet, no account. Your screenshots stay on your Mac.</p></li>
-    </ul>
-  </section>
-
-  <section class="secao" id="instalar" aria-labelledby="instalar-titulo">
-    <div class="secao-cabeca">
-      <p class="etiqueta">Install</p>
-      <h2 class="secao-titulo" id="instalar-titulo">Install it in a minute.</h2>
-    </div>
-    <div class="instalar">
-      <article class="opcao opcao-principal">
-        <p class="opcao-rotulo">With Terminal · recommended</p>
-        <div class="comando">
-          <code>curl -fsSL https://raw.githubusercontent.com/Frasca-99/gaveta/main/scripts/get.sh | bash</code>
-          <button class="copiar" type="button" data-copiar="curl -fsSL https://raw.githubusercontent.com/Frasca-99/gaveta/main/scripts/get.sh | bash" aria-label="Copy the command"><span data-rotulo>Copy</span></button>
-        </div>
-        <p>Downloads the latest version, puts it in Applications and opens it, without the macOS warning.</p>
-      </article>
-      <article class="opcao">
-        <p class="opcao-rotulo">Downloading the zip</p>
-        <p>Download <a href="https://github.com/Frasca-99/gaveta/releases/latest">Gaveta.zip</a> and drag it to Applications. The first time: System Settings → Privacy &amp; Security → Open Anyway.</p>
-      </article>
-      <article class="opcao">
-        <p class="opcao-rotulo">Building it</p>
-        <div class="comando"><code>git clone https://github.com/Frasca-99/gaveta.git && cd gaveta && scripts/install.sh</code></div>
-        <p>With Swift installed. An app built on your Mac opens without a warning.</p>
-      </article>
-    </div>
-  </section>
-</main>
-
-<footer class="rodape">
-  <span>Made by Luiz Paulo Frasca Neto · <a href="https://github.com/Frasca-99/gaveta">open source, MIT</a></span>
-  <span>macOS 14+ · no internet, no account</span>
-</footer>
-
+  </div>
+</aside>
+<button class="borda-alca" id="borda-alca" type="button" aria-label="Open the drawer"><svg viewBox="0 0 26 72" aria-hidden="true"><path id="borda-linha" d="M13 2 Q13 36 13 70"/></svg></button>
+<div class="quedas" id="quedas" aria-hidden="true"></div>
 <p class="aviso" id="aviso" role="status"></p>
 
-<script>// The Gaveta landing: copy buttons, the language link, and a Mac screen where
-// the glass drawer works as the app does: take a screenshot and it flies into
-// the drawer at the screen's right edge, laid out the way the app lays its
-// cards out; pick, copy, throw out, widen it by its elastic grip.
+<script>// The Gaveta landing: one screen, a Mac desk where the glass drawer works as
+// the app does. The bar below takes a screenshot of the desk (all of it, a
+// window, or a selection): a still copy of what is there, which flies into the
+// drawer at the right edge, laid out the way the app lays its cards out. Pick,
+// copy, throw out, widen the drawer by its elastic grip, and paste into the
+// ticket with ⌘V or by dragging a card onto it.
 (() => {
   "use strict";
 
@@ -639,6 +553,7 @@ kbd {
   const wait = (ms) => new Promise((done) => setTimeout(done, ms));
   const still = matchMedia("(prefers-reduced-motion: reduce)");
   const fine = matchMedia("(hover: hover) and (pointer: fine)");
+  const phone = () => innerWidth <= 760;
   const ROOT = document.documentElement.dataset.raiz || "";
   const aviso = $("#aviso");
   const announce = (text) => {
@@ -646,34 +561,9 @@ kbd {
     requestAnimationFrame(() => { aviso.textContent = text; });
   };
 
-  // ── the page around it ──────────────────────────────────────────────────
-
   $("[data-idioma]").addEventListener("click", (event) => {
     try { localStorage.setItem("gaveta-idioma", event.currentTarget.dataset.idioma); } catch {}
   });
-
-  const topo = $(".topo");
-  const scrolled = () => topo.classList.toggle("rolou", scrollY > 8);
-  addEventListener("scroll", scrolled, { passive: true });
-  scrolled();
-
-  for (const button of $$("[data-copiar]")) {
-    const label = $("[data-rotulo]", button);
-    const original = label.textContent;
-    const short = button.classList.contains("copiar");
-    let timer = 0;
-    button.addEventListener("click", async () => {
-      try {
-        await navigator.clipboard.writeText(button.dataset.copiar);
-        label.textContent = short ? "Copied" : "Copied: paste it in Terminal";
-        announce("Command copied. Paste it in Terminal.");
-      } catch {
-        label.textContent = "Copy it by hand";
-      }
-      clearTimeout(timer);
-      timer = setTimeout(() => { label.textContent = original; }, 2000);
-    });
-  }
 
   const relogio = $("#relogio");
   const tick = () => {
@@ -683,20 +573,146 @@ kbd {
   tick();
   setInterval(tick, 20000);
 
-  // ── the drawer ──────────────────────────────────────────────────────────
+  // ── the desk ────────────────────────────────────────────────────────────
 
+  const mesa = $("#mesa");
+  const mesaBox = () => mesa.getBoundingClientRect();
+  /** A rectangle on the screen, in the desk's own coordinates. */
+  const onDesk = (rect) => {
+    const m = mesaBox();
+    return { x: rect.left - m.left, y: rect.top - m.top, w: rect.width, h: rect.height };
+  };
+  const onScreen = (area) => {
+    const m = mesaBox();
+    return { left: area.x + m.left, top: area.y + m.top, width: area.w, height: area.h };
+  };
+  const shown = (el) => !el.hidden && el.getClientRects().length > 0;
+
+  // Windows come to the front when touched, and move by their title bars.
+  const appName = $("#app-da-frente");
+  const windows = $$(".janela");
+  let stacking = 10;
+  function activate(win) {
+    for (const w of windows) w.classList.toggle("ativa", w === win);
+    if (win) win.style.zIndex = String(++stacking);
+    appName.textContent = win ? win.dataset.app : "Finder";
+  }
+  for (const win of windows) {
+    win.addEventListener("pointerdown", () => activate(win));
+    const handle = $(".janela-barra", win) || win;
+    handle.addEventListener("pointerdown", (event) => {
+      if (event.button !== 0 || phone()) return;
+      event.preventDefault();
+      const start = onDesk(win.getBoundingClientRect());
+      const x0 = event.clientX;
+      const y0 = event.clientY;
+      handle.setPointerCapture(event.pointerId);
+      handle.style.cursor = "grabbing";
+      const move = (e) => {
+        const m = mesaBox();
+        win.style.right = "auto";
+        win.style.bottom = "auto";
+        win.style.left = `${clamp(start.x + e.clientX - x0, 90 - win.offsetWidth, m.width - 90)}px`;
+        win.style.top = `${clamp(start.y + e.clientY - y0, 30, m.height - 40)}px`;
+      };
+      const up = () => {
+        handle.style.cursor = "";
+        handle.removeEventListener("pointermove", move);
+        handle.removeEventListener("pointerup", up);
+        handle.removeEventListener("pointercancel", up);
+      };
+      handle.addEventListener("pointermove", move);
+      handle.addEventListener("pointerup", up);
+      handle.addEventListener("pointercancel", up);
+    });
+  }
+  activate($("#loja"));
+
+  // The shop still fails, every time.
+  const lojaErro = $("#loja-erro");
+  $("#loja-pagar").addEventListener("click", () => {
+    lojaErro.classList.remove("de-novo");
+    void lojaErro.offsetWidth;
+    lojaErro.classList.add("de-novo");
+  });
+
+  // ── prints ──────────────────────────────────────────────────────────────
+
+  let serial = 0;
+  /** Every print by id, the thrown-out ones too, for what was copied before. */
+  const everyPrint = new Map();
   const SAMPLES = {
     canvas: { src: "assets/prints/canvas.png", w: 1380, h: 360 },
     paleta: { src: "assets/prints/paleta.png", w: 520, h: 640 },
-    codigo: { src: "assets/prints/codigo.png", w: 1160, h: 520 },
     painel: { src: "assets/prints/painel.png", w: 980, h: 560 },
-    erro: { src: "assets/prints/erro.png", w: 560, h: 470 },
   };
-  const CAPACITY = 8;
-  let serial = 0;
-  const printOf = (name, age = 0) => ({ ...SAMPLES[name], id: ++serial, date: Date.now() - age * 1000 });
+  function sample(name, age) {
+    const print = { ...SAMPLES[name], id: ++serial, date: Date.now() - age * 1000 };
+    print.src = ROOT + print.src;
+    everyPrint.set(print.id, print);
+    return print;
+  }
 
-  const palco = $("#palco");
+  /** A still copy of the desk, cut to `area`. */
+  function snapshot(area) {
+    const m = mesaBox();
+    const copy = mesa.cloneNode(false);
+    copy.removeAttribute("id");
+    copy.classList.add("mesa-copia");
+    copy.style.width = `${m.width}px`;
+    copy.style.height = `${m.height}px`;
+    copy.style.transform = `translate(${-area.x}px, ${-area.y}px)`;
+    for (const child of mesa.children) if (shown(child)) copy.append(child.cloneNode(true));
+    for (const el of [copy, ...copy.querySelectorAll("*")]) {
+      el.removeAttribute("id");
+      el.removeAttribute("aria-live");
+      el.removeAttribute("role");
+      if (el.matches("a, button")) el.setAttribute("tabindex", "-1");
+    }
+    copy.setAttribute("inert", "");
+    copy.setAttribute("aria-hidden", "true");
+    const frame = document.createElement("span");
+    frame.className = "retrato";
+    frame.style.width = `${area.w}px`;
+    frame.style.height = `${area.h}px`;
+    frame.append(copy);
+    return frame;
+  }
+  function takePrint(area) {
+    const print = { id: ++serial, w: Math.round(area.w), h: Math.round(area.h), date: Date.now(), portrait: snapshot(area) };
+    everyPrint.set(print.id, print);
+    return print;
+  }
+
+  /** Puts the print into `box`, `width` × `height`, filling it or, with `fit`, whole inside it. */
+  function paint(box, print, width, height, fit = false) {
+    let inner = box.firstElementChild;
+    if (!inner) {
+      inner = print.src ? Object.assign(document.createElement("img"), { src: print.src, alt: "", draggable: false }) : document.createElement("span");
+      if (!print.src) {
+        inner.className = "foto-escala";
+        inner.append(print.portrait.cloneNode(true));
+      }
+      box.append(inner);
+    }
+    box.style.width = `${width}px`;
+    box.style.height = `${height}px`;
+    if (print.src) {
+      inner.style.cssText = `width:100%;height:100%;object-fit:${fit ? "contain" : "fill"}`;
+      return;
+    }
+    const k = fit ? Math.min(width / print.w, height / print.h) : width / print.w;
+    inner.style.transform = `translate(${fit ? (width - print.w * k) / 2 : 0}px, ${fit ? (height - print.h * k) / 2 : 0}px) scale(${k})`;
+  }
+  function picture(print, width, height, fit) {
+    const box = document.createElement("span");
+    box.className = "foto";
+    paint(box, print, width, height, fit);
+    return box;
+  }
+
+  // ── the drawer ──────────────────────────────────────────────────────────
+
   const gaveta = $("#gaveta");
   const painel = $("#painel");
   const fichas = $("#fichas");
@@ -704,15 +720,14 @@ kbd {
   const conta = $("#conta");
   const quedas = $("#quedas");
   const alca = $("#alca");
-  const alcaLinha = $("#alca-linha");
   const borda = $("#borda-alca");
-  const bordaLinha = $("#borda-linha");
+  const trayButton = $("#menus-gaveta");
   const pilha = document.createElement("div");
   pilha.className = "pilha";
   fichas.append(pilha);
 
   const drawer = {
-    prints: [printOf("canvas", 2 * 3600), printOf("paleta", 37 * 60), printOf("codigo", 12 * 60)], // back (oldest) to front (newest)
+    prints: [sample("canvas", 2 * 3600), sample("paleta", 37 * 60), sample("painel", 12 * 60)], // back (oldest) to front (newest)
     selection: new Set(),
     copied: new Set(),
     arriving: new Set(),
@@ -722,13 +737,15 @@ kbd {
     width: 300,            // the box the cards stand in
     stretch: 0,            // pulled past a limit
   };
+  const CAPACITY = 9;
 
   const S = { left: 30, right: 14, border: 8, meta: 24, top: 18, bottom: 12, minReveal: 76, gap: 12, words: 96, slot: 96 };
-  const L = { rail: 10, footer: 44, menus: 28, margin: 14 };
-  const front = () => (innerWidth <= 760 ? 50 : 58);
+  const L = { rail: 10, footer: 44, top: 44 };
+  const front = () => (phone() ? 50 : 58);
+  const bottomRoom = () => (phone() ? 84 : 16);
   /** The width the drawer opens at: the app's 300, or less on a screen too narrow for it. */
-  const standard = () => clamp(palco.clientWidth - front() - 26, 220, 300);
-  const widest = () => Math.max(standard(), Math.min(600, palco.clientWidth - front() - 120));
+  const standard = () => clamp(innerWidth - front() - 26, 220, 300);
+  const widest = () => Math.max(standard(), Math.min(600, innerWidth / 2 - front()));
 
   /** The card's measures for a box this wide, as CardStack has them. */
   function measures(box) {
@@ -751,7 +768,7 @@ kbd {
     let w = maxW;
     let h = w / aspect;
     if (h > maxH) { h = maxH; w = h * aspect; }
-    return { w: Math.round(w), h: Math.round(h), slot };
+    return { w: Math.max(1, Math.round(w)), h: Math.max(1, Math.round(h)), slot };
   }
   /** Where each card stands, from the back: the front ones whole, the older ones giving up room down to a band. */
   function stackOf(m, count, hovered, room) {
@@ -791,11 +808,10 @@ kbd {
     card = document.createElement("div");
     card.className = "ficha";
     card.setAttribute("role", "listitem");
-    card.innerHTML = `<img class="ficha-foto" alt="" draggable="false">
+    card.innerHTML = `<span class="ficha-foto"></span>
       <div class="ficha-legenda"><span class="o-que"></span><span class="idade"></span></div>
       <div class="ficha-faixa"><span class="tipo">Screenshot</span><span class="tamanho"></span><span class="idade"></span></div>
       <span class="ficha-bolinha"></span><span class="ficha-x">${CROSS}</span><span class="ficha-copiado">✓ Copied</span>`;
-    $("img", card).src = ROOT + print.src;
     cards.set(print.id, card);
     pilha.append(card);
     return card;
@@ -803,20 +819,23 @@ kbd {
 
   let layout = null;
   let measure = measures(300);
+  let placement = { top: L.top, height: 200 };
+  /** Where each card's picture stands inside its card, from the last render. */
+  const geometry = new Map();
 
   function render() {
     const list = drawer.prints;
     const box = drawer.width + drawer.stretch;
-    const tall = palco.clientHeight;
-    const most = tall - L.menus - L.margin * 2 - 64; // leaves the capture button its room
     measure = measures(box);
+    const most = innerHeight - L.top - bottomRoom();
     const hoveredIndex = list.findIndex((p) => p.id === drawer.hovered);
     const room = most - L.rail * 2 - L.footer;
     const rest = stackOf(measure, list.length, null, room);
     layout = stackOf(measure, list.length, hoveredIndex >= 0 ? hoveredIndex : null, room);
     const restHeight = list.length ? Math.min(L.rail * 2 + rest.height + L.footer, most) : 200;
-    const top = Math.max(L.menus + L.margin, L.menus + (tall - L.menus - 64 - restHeight) / 2);
-    const height = list.length ? Math.min(L.rail * 2 + layout.height + L.footer, tall - top - L.margin) : 200;
+    const top = L.top + Math.max(0, (most - restHeight) / 2);
+    const height = list.length ? Math.min(L.rail * 2 + layout.height + L.footer, innerHeight - top - bottomRoom()) : 200;
+    placement = { top, height };
     gaveta.style.setProperty("--frente", `${front()}px`);
     gaveta.style.setProperty("--largura", `${box}px`);
     gaveta.style.setProperty("--topo", `${top}px`);
@@ -846,10 +865,10 @@ kbd {
       card.classList.toggle("escolhida", selected);
       card.classList.toggle("copiada", drawer.copied.has(print.id));
       card.classList.toggle("chegando", drawer.arriving.has(print.id));
-      const img = $("img", card);
-      img.style.width = `${photo.w}px`;
-      img.style.height = `${photo.h}px`;
-      img.style.transform = `translate(${S.border + (slotW - photo.w) / 2}px, ${photoTop}px)`;
+      const foto = $(".ficha-foto", card);
+      paint(foto, print, photo.w, photo.h);
+      foto.style.transform = `translate(${S.border + (slotW - photo.w) / 2}px, ${photoTop}px)`;
+      geometry.set(print.id, { x: S.border + (slotW - photo.w) / 2, y: photoTop, w: photo.w, h: photo.h });
       const legenda = $(".ficha-legenda", card);
       const faixa = $(".ficha-faixa", card);
       legenda.style.display = whole ? "flex" : "none";
@@ -908,7 +927,7 @@ kbd {
     if (!layout || !drawer.open) return null;
     const r = pilha.getBoundingClientRect();
     const box = fichas.getBoundingClientRect();
-    if (clientY < box.top || clientY > box.bottom) return null;
+    if (clientY < box.top || clientY > box.bottom || clientX < box.left - 12) return null;
     const x = clientX - r.left;
     const y = clientY - r.top;
     const list = drawer.prints;
@@ -937,7 +956,7 @@ kbd {
   const pointer = { x: -1, y: -1 };
   let letGo = 0;
   function hover(clientX, clientY) {
-    if (resizing) return;
+    if (resizing || dragging) return;
     const found = hitAt(clientX, clientY, true);
     if (found) {
       clearTimeout(letGo);
@@ -957,7 +976,9 @@ kbd {
   fichas.addEventListener("pointermove", (event) => { if (event.pointerType === "mouse") hover(event.clientX, event.clientY); });
   fichas.addEventListener("scroll", () => hover(pointer.x, pointer.y), { passive: true });
 
+  let dragged = false;
   pilha.addEventListener("click", (event) => {
+    if (dragged) { dragged = false; return; }
     const found = hitAt(event.clientX, event.clientY, false);
     if (!found) return;
     const { print, part } = found;
@@ -984,31 +1005,119 @@ kbd {
     render();
   }
 
+  // ── copying and pasting: one item per print, oldest first, as in the app ──
+
+  let clipboard = [];
   let copiedTimer = 0;
-  async function copy(ids) {
+  const colar = $("#colar");
+  const anexos = $("#anexos");
+  const anexosVazio = $("#anexos-vazio");
+  const anexosConta = $("#anexos-conta");
+  const chamado = $("#chamado");
+  if (!fine.matches) anexosVazio.textContent = "Copy in the drawer and tap Paste, or drag from the drawer.";
+
+  function copy(ids) {
     const prints = drawer.prints.filter((p) => ids.includes(p.id));
     if (!prints.length) return;
-    drawer.copied = new Set(prints.map((p) => p.id));
+    clipboard = prints.map((p) => p.id);
+    drawer.copied = new Set(clipboard);
     render();
     clearTimeout(copiedTimer);
     copiedTimer = setTimeout(() => { drawer.copied.clear(); render(); }, 1200);
-    // One print goes to the clipboard for real; in the app, one ⌘V pastes them all.
-    if (prints.length === 1 && navigator.clipboard && window.ClipboardItem) {
-      try {
-        const blob = fetch(ROOT + prints[0].src).then((r) => r.blob());
-        await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
-        announce("Screenshot copied. Paste it with ⌘V.");
-        return;
-      } catch {}
-    }
-    announce(prints.length === 1 ? "Screenshot copied." : `${prints.length} screenshots copied. In the app, one ⌘V pastes them all, in order.`);
+    colar.hidden = false;
+    colar.textContent = prints.length > 1 ? `Paste ${prints.length} screenshots` : "Paste";
+    anexos.classList.add("com-copia");
+    guide.done("copiar");
+    announce(prints.length === 1 ? "Screenshot copied. Paste it into the ticket with ⌘V." : `${prints.length} screenshots copied. One ⌘V in the ticket pastes them all.`);
   }
 
-  /** Where something on the screen stands, in the screen's own coordinates. */
-  const within = (rect) => {
-    const p = palco.getBoundingClientRect();
-    return { left: rect.left - p.left, top: rect.top - p.top, width: rect.width, height: rect.height };
-  };
+  let attached = 0;
+  function attach(prints) {
+    if (!prints.length) return;
+    activate(chamado);
+    anexosVazio.hidden = true;
+    const width = Math.max(56, (anexos.clientWidth - 16 - 16) / 3);
+    for (const print of prints) {
+      const figure = document.createElement("figure");
+      figure.className = "anexo chegou";
+      figure.append(picture(print, width, (width * 3) / 4, true));
+      anexos.insertBefore(figure, colar);
+    }
+    attached += prints.length;
+    anexosConta.textContent = `· ${attached}`;
+    anexos.scrollTop = anexos.scrollHeight;
+    guide.done("colar");
+    announce(prints.length === 1 ? "1 screenshot pasted into the ticket." : `${prints.length} screenshots pasted into the ticket, at once.`);
+  }
+  function paste() {
+    const prints = clipboard.map((id) => everyPrint.get(id)).filter(Boolean);
+    if (!prints.length) return;
+    clipboard = [];
+    colar.hidden = true;
+    anexos.classList.remove("com-copia");
+    if (drawer.open && !drawer.hovered) close();
+    attach(prints);
+  }
+  colar.addEventListener("click", paste);
+  document.addEventListener("keydown", (event) => {
+    if ((event.metaKey || event.ctrlKey) && !event.shiftKey && !event.altKey && event.key.toLowerCase() === "v" && clipboard.length) {
+      event.preventDefault();
+      paste();
+    }
+  });
+
+  // Dragging cards out of the drawer: onto the ticket they go in, as attachments.
+  let dragging = false;
+  pilha.addEventListener("pointerdown", (event) => {
+    if (event.button !== 0 || event.pointerType !== "mouse" || event.metaKey || event.ctrlKey || event.shiftKey) return;
+    const found = hitAt(event.clientX, event.clientY, false);
+    if (!found || found.part !== "ficha") return;
+    const x0 = event.clientX;
+    const y0 = event.clientY;
+    let ghost = null;
+    let over = false;
+    const ids = drawer.selection.has(found.print.id) ? drawer.prints.filter((p) => drawer.selection.has(p.id)).map((p) => p.id) : [found.print.id];
+    const move = (e) => {
+      if (!ghost) {
+        if (Math.hypot(e.clientX - x0, e.clientY - y0) < 6) return;
+        dragging = true;
+        dragged = true;
+        drawer.hovered = null;
+        render();
+        const print = found.print;
+        const w = 150;
+        const h = Math.max(30, Math.min(150, (w * print.h) / print.w));
+        ghost = document.createElement("div");
+        ghost.className = "arrasto";
+        ghost.style.width = `${w}px`;
+        ghost.style.height = `${h}px`;
+        const shot = document.createElement("span");
+        shot.className = "retrato";
+        shot.style.cssText = `width:${w}px;height:${h}px`;
+        shot.append(picture(print, w, h, true));
+        ghost.append(shot);
+        if (ids.length > 1) ghost.insertAdjacentHTML("beforeend", `<span class="arrasto-conta">${ids.length}</span>`);
+        quedas.append(ghost);
+      }
+      ghost.style.transform = `translate(${e.clientX - 40}px, ${e.clientY - 24}px) rotate(-3deg)`;
+      const r = chamado.getBoundingClientRect();
+      over = shown(chamado) && e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
+      anexos.classList.toggle("alvo", over);
+    };
+    const up = () => {
+      removeEventListener("pointermove", move, true);
+      removeEventListener("pointerup", up, true);
+      removeEventListener("pointercancel", up, true);
+      anexos.classList.remove("alvo");
+      dragging = false;
+      if (!ghost) return;
+      ghost.remove();
+      if (over) attach(ids.map((id) => everyPrint.get(id)).filter(Boolean));
+    };
+    addEventListener("pointermove", move, true);
+    addEventListener("pointerup", up, true);
+    addEventListener("pointercancel", up, true);
+  });
 
   /** Thrown out: pulled by the corner, eased as it clears the drawer, then falling, turning over. */
   function discard(id) {
@@ -1016,12 +1125,12 @@ kbd {
     if (index < 0) return;
     const card = cards.get(id);
     if (card && !still.matches) {
-      const at = within(card.getBoundingClientRect());
+      const at = card.getBoundingClientRect();
       const flyer = card.cloneNode(true);
       flyer.classList.remove("aberta", "copiada");
       flyer.style.cssText = `width:${at.width}px;height:${at.height}px;left:${at.left}px;top:${at.top}px;transform:none;z-index:1`;
       quedas.append(flyer);
-      const fall = palco.clientHeight - at.top + 40;
+      const fall = innerHeight - at.top + 40;
       flyer.animate([
         { transform: "none", opacity: 1 },
         { transform: "translate(-90px, -30px) rotate(-6deg) scale(1.04)", opacity: 1, offset: 0.3, easing: "cubic-bezier(.55,0,.9,.6)" },
@@ -1038,61 +1147,172 @@ kbd {
     setTimeout(() => hover(pointer.x, pointer.y), 20);
   }
 
-  // ── taking a screenshot: the window is picked out, a flash, and it flies in ──
+  // ── taking a screenshot ─────────────────────────────────────────────────
 
-  const captura = $("#captura");
-  const selecao = $("#selecao");
+  const camada = $("#camada");
+  const retangulo = $("#retangulo");
+  const medida = $("#medida");
+  const destaque = $("#destaque");
   const clarao = $("#clarao");
-  const janelas = $$(".janela");
-  let shots = 0;
-  let busy = false;
-  captura.classList.add("chama");
-  captura.addEventListener("click", async () => {
-    if (busy) return;
-    busy = true;
-    captura.classList.remove("chama");
-    const win = janelas[shots++ % janelas.length];
-    const at = within(win.getBoundingClientRect());
-    const print = printOf(win.dataset.print);
+  const modos = $$(".captura-modo");
+  const sombras = Object.fromEntries($$(".sombra").map((el) => [el.dataset.lado, el]));
+  let mode = null;
+  let dragStart = null;
 
-    if (!still.matches) {
-      selecao.style.cssText = `left:${at.left}px;top:${at.top}px;width:${at.width}px;height:${at.height}px`;
-      await selecao.animate([{ opacity: 0, transform: "scale(1.04)" }, { opacity: 1, transform: "none" }], { duration: 220, easing: "ease-out", fill: "forwards" }).finished;
-      await wait(160);
-      selecao.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 160, fill: "forwards" });
-      clarao.animate([{ opacity: 0 }, { opacity: 0.85 }, { opacity: 0 }], { duration: 260, easing: "ease-out" });
+  function enterMode(next) {
+    if (mode === next) return leaveMode();
+    mode = next;
+    for (const button of modos) if (button.hasAttribute("aria-pressed")) button.setAttribute("aria-pressed", String(button.dataset.modo === next));
+    if (drawer.open) close();
+    camada.hidden = false;
+    camada.classList.toggle("janelas", next === "janela");
+    camada.classList.remove("escolhendo");
+    destaque.style.display = "none";
+    guide.show();
+  }
+  function leaveMode() {
+    mode = null;
+    dragStart = null;
+    for (const button of modos) if (button.hasAttribute("aria-pressed")) button.setAttribute("aria-pressed", "false");
+    camada.hidden = true;
+    guide.show();
+  }
+  for (const button of modos) {
+    button.addEventListener("click", () => {
+      if (button.dataset.modo !== "tela") return enterMode(button.dataset.modo);
+      leaveMode();
+      const m = mesaBox();
+      const x = Math.max(0, -m.left);
+      const y = Math.max(0, -m.top);
+      capture({ x, y, w: Math.min(innerWidth, m.right) - Math.max(0, m.left), h: Math.min(innerHeight, m.bottom) - Math.max(0, m.top) });
+    });
+  }
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && mode) { event.stopImmediatePropagation(); leaveMode(); }
+  }, true);
+
+  /** The window under a point, topmost first. */
+  function windowAt(clientX, clientY) {
+    return windows.filter(shown)
+      .sort((a, b) => (+b.style.zIndex || 0) - (+a.style.zIndex || 0))
+      .find((win) => {
+        const r = win.getBoundingClientRect();
+        return clientX >= r.left && clientX <= r.right && clientY >= r.top && clientY <= r.bottom;
+      });
+  }
+  function selection(a, b) {
+    const m = mesaBox();
+    const x = clamp(Math.min(a.x, b.x), 0, m.width);
+    const y = clamp(Math.min(a.y, b.y), 0, m.height);
+    return { x, y, w: clamp(Math.max(a.x, b.x), 0, m.width) - x, h: clamp(Math.max(a.y, b.y), 0, m.height) - y };
+  }
+  function drawSelection(point) {
+    const r = selection(dragStart, point);
+    const s = onScreen(r);
+    const W = innerWidth;
+    const H = innerHeight;
+    const top = clamp(s.top, 0, H);
+    const bottom = clamp(s.top + s.height, 0, H);
+    sombras.cima.style.transform = `scale(1, ${top / H})`;
+    sombras.baixo.style.transform = `translate(0, ${bottom}px) scale(1, ${(H - bottom) / H})`;
+    sombras.esquerda.style.transform = `translate(0, ${top}px) scale(${s.left / W}, ${(bottom - top) / H})`;
+    sombras.direita.style.transform = `translate(${s.left + s.width}px, ${top}px) scale(${(W - s.left - s.width) / W}, ${(bottom - top) / H})`;
+    retangulo.style.transform = `translate(${s.left}px, ${s.top}px)`;
+    retangulo.style.width = `${s.width}px`;
+    retangulo.style.height = `${s.height}px`;
+    medida.textContent = `${Math.round(r.w)} × ${Math.round(r.h)}`;
+    const p = onScreen({ x: point.x, y: point.y, w: 0, h: 0 });
+    medida.style.transform = `translate(${clamp(p.left + 14, 4, W - 90)}px, ${clamp(p.top + 14, 4, H - 24)}px)`;
+  }
+
+  camada.addEventListener("pointerdown", (event) => {
+    if (mode === "janela") {
+      const win = windowAt(event.clientX, event.clientY);
+      if (!win) return;
+      const area = onDesk(win.getBoundingClientRect());
+      leaveMode();
+      capture(area);
+      return;
     }
+    const m = mesaBox();
+    dragStart = { x: event.clientX - m.left, y: event.clientY - m.top };
+    camada.setPointerCapture(event.pointerId);
+    camada.classList.add("escolhendo");
+    drawSelection(dragStart);
+  });
+  camada.addEventListener("pointermove", (event) => {
+    const m = mesaBox();
+    if (mode === "janela") {
+      const win = windowAt(event.clientX, event.clientY);
+      if (!win) { destaque.style.display = "none"; return; }
+      const r = win.getBoundingClientRect();
+      destaque.style.cssText = `display:block;transform:translate(${r.left}px, ${r.top}px);width:${r.width}px;height:${r.height}px`;
+      return;
+    }
+    if (dragStart) drawSelection({ x: event.clientX - m.left, y: event.clientY - m.top });
+  });
+  camada.addEventListener("pointerup", (event) => {
+    if (mode !== "selecao" || !dragStart) return;
+    const m = mesaBox();
+    const area = selection(dragStart, { x: event.clientX - m.left, y: event.clientY - m.top });
+    leaveMode();
+    if (area.w >= 10 && area.h >= 10) capture(area);
+  });
 
+  /** The shutter: a flash over what was taken, then the print flies into the drawer. */
+  function capture(area) {
+    const from = onScreen(area);
+    const print = takePrint(area);
+    if (!still.matches) {
+      Object.assign(clarao.style, { left: `${from.left}px`, top: `${from.top}px`, width: `${from.width}px`, height: `${from.height}px` });
+      clarao.animate([{ opacity: 0.9 }, { opacity: 0 }], { duration: 320, easing: "ease-out" });
+    }
+    guide.done("tirar");
+    requestAnimationFrame(() => setTimeout(() => receive(print, from), 0));
+  }
+
+  async function receive(print, from) {
     if (drawer.prints.length >= CAPACITY) drawer.prints.splice(0, drawer.prints.length - CAPACITY + 1);
     drawer.prints.push(print);
-    drawer.arriving.add(print.id);
     drawer.hovered = null;
-    const wasOpen = drawer.open;
-    if (!wasOpen) open(true); else render();
-    fichas.scrollTop = fichas.scrollHeight;
-
-    if (!still.matches) {
-      if (!wasOpen) await wait(380);
+    announce("Screenshot kept in the drawer.");
+    if (still.matches) {
+      open(true);
       render();
-      fichas.scrollTop = fichas.scrollHeight;
-      const target = within($("img", cards.get(print.id)).getBoundingClientRect());
-      const flyer = $("img", win).cloneNode();
-      flyer.className = "voando";
-      flyer.style.cssText = `width:${at.width}px;height:${at.height}px`;
-      quedas.append(flyer);
-      const scale = target.width / at.width;
-      await flyer.animate([
-        { transform: `translate(${at.left}px, ${at.top}px)`, borderRadius: "10px" },
-        { transform: `translate(${at.left + (target.left - at.left) * 0.35}px, ${at.top - 30}px) scale(${0.5 + scale * 0.5})`, offset: 0.4 },
-        { transform: `translate(${target.left}px, ${target.top}px) scale(${scale})`, borderRadius: `${6 / scale}px` },
-      ], { duration: 620, easing: "cubic-bezier(.3,.7,.2,1)" }).finished;
-      flyer.remove();
+      return;
     }
+    drawer.arriving.add(print.id);
+    open(true);
+    render();
+    fichas.scrollTop = fichas.scrollHeight;
+    // Where the front card's picture will stand once the drawer has slid out:
+    // from the layout, since the drawer is still on its way there.
+    const at = geometry.get(print.id);
+    const index = drawer.prints.indexOf(print);
+    const scroll = Math.max(0, layout.height - (placement.height - L.rail * 2 - L.footer));
+    const target = {
+      left: document.documentElement.clientWidth - 10 - drawer.width + S.left + at.x,
+      top: placement.top + L.rail + layout.tops[index] - scroll + at.y,
+      width: at.w,
+      height: at.h,
+    };
+    const flyer = picture(print, from.width, from.height);
+    flyer.className = "voando";
+    quedas.append(flyer);
+    const k = target.width / from.width;
+    const ky = target.height / from.height;
+    await flyer.animate([
+      { transform: `translate(${from.left}px, ${from.top}px)`, opacity: 1 },
+      { transform: `translate(${from.left + (target.left - from.left) * 0.3}px, ${from.top - 24}px) scale(${0.55 + k * 0.45}, ${0.55 + ky * 0.45})`, offset: 0.35 },
+      { transform: `translate(${target.left}px, ${target.top}px) scale(${k}, ${ky})`, opacity: 1 },
+    ], { duration: 640, easing: "cubic-bezier(.3,.7,.2,1)" }).finished;
+    flyer.remove();
     drawer.arriving.delete(print.id);
     render();
-    announce("Screenshot in the drawer.");
-    busy = false;
-  });
+    gaveta.classList.remove("tranco");
+    void gaveta.offsetWidth;
+    gaveta.classList.add("tranco");
+  }
 
   // ── opening and closing ─────────────────────────────────────────────────
 
@@ -1102,6 +1322,7 @@ kbd {
     drawer.pinned = drawer.pinned || pinned;
     visited = false;
     clearTimeout(away);
+    trayButton.setAttribute("aria-pressed", "true");
     if (drawer.open) return;
     drawer.open = true;
     render();
@@ -1116,9 +1337,11 @@ kbd {
     drawer.hovered = null;
     drawer.selection.clear();
     gaveta.dataset.estado = "fechada";
+    trayButton.setAttribute("aria-pressed", "false");
     render();
   }
   borda.addEventListener("click", () => open(true));
+  trayButton.addEventListener("click", () => (drawer.open ? close() : open(true)));
 
   // The pointer resting on the screen's right edge pulls the handle taut, then the drawer springs out.
   const DWELL = 260;
@@ -1142,12 +1365,10 @@ kbd {
   addEventListener("pointermove", (event) => {
     pointer.x = event.clientX;
     pointer.y = event.clientY;
-    if (event.pointerType !== "mouse" || resizing) return;
-    const screen = palco.getBoundingClientRect();
-    const onScreen = event.clientX >= screen.left && event.clientX <= screen.right && event.clientY >= screen.top + L.menus && event.clientY <= screen.bottom;
+    if (event.pointerType !== "mouse" || resizing || dragging || mode) return;
     if (!drawer.open) {
-      if (onScreen && event.clientX >= screen.right - 8) {
-        borda.style.top = `${clamp(event.clientY - screen.top, 90, screen.height - 90)}px`;
+      if (event.clientX >= innerWidth - 4 && event.clientY > L.top) {
+        borda.style.top = `${clamp(event.clientY, 100, innerHeight - 100)}px`;
         if (!dwellSince) {
           dwellSince = performance.now();
           borda.classList.add("visivel");
@@ -1157,13 +1378,15 @@ kbd {
       return;
     }
     const r = painel.getBoundingClientRect();
-    const inside = event.clientX >= r.left - 24 && event.clientX <= r.right + 8 && event.clientY >= r.top - 24 && event.clientY <= r.bottom + 24;
+    const inside = event.clientX >= r.left - 24 && event.clientY >= r.top - 24 && event.clientY <= r.bottom + 24;
     if (inside) { visited = true; clearTimeout(away); away = 0; return; }
     if (drawer.pinned) return;
     if (!away) away = setTimeout(() => { away = 0; close(); }, 500);
   }, { passive: true });
-  palco.addEventListener("pointerdown", (event) => {
-    if (drawer.open && !gaveta.contains(event.target) && !captura.contains(event.target)) close();
+  document.addEventListener("pointerdown", (event) => {
+    if (!drawer.open || gaveta.contains(event.target)) return;
+    if (event.target.closest(".captura, #menus-gaveta, .borda-alca, .guia, .colar")) return;
+    close();
   });
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape" && drawer.open) close();
@@ -1174,8 +1397,8 @@ kbd {
 
   /** A line that bends like an elastic band, its middle ahead of its ends. */
   const elastic = (path, length, centre) => ({ path, length, centre, value: 0, speed: 0, target: 0, frame: 0 });
-  const gripBend = elastic(alcaLinha, 40, 13);
-  const bordaBend = elastic(bordaLinha, 72, 13);
+  const gripBend = elastic($("#alca-linha"), 40, 13);
+  const bordaBend = elastic($("#borda-linha"), 72, 13);
   function drawBend(b) {
     b.path.setAttribute("d", `M${b.centre} 2 Q${(b.centre + b.value * 2).toFixed(2)} ${b.length / 2} ${b.centre} ${b.length - 2}`);
   }
@@ -1263,18 +1486,67 @@ kbd {
     render();
   });
 
+  // ── the guide: take, copy, paste ────────────────────────────────────────
+
+  const guide = (() => {
+    const box = $("#guia");
+    const step = $("#guia-passo");
+    const text = $("#guia-texto");
+    const done = new Set();
+    let off = false;
+    let hideTimer = 0;
+    const STEPS = [
+      ["tirar", "1 of 3 · Take", fine.matches
+        ? "Take a screenshot of this desk: choose <b>Selection</b> and drag over the shop."
+        : "Take a screenshot: tap <b>Selection</b> and drag your finger over the shop."],
+      ["copiar", "2 of 3 · Copy", fine.matches
+        ? "Click the screenshot in the drawer to copy it. <b>⌘-click</b> picks several."
+        : "Tap the screenshot in the drawer to copy it, or the circles to pick several."],
+      ["colar", "3 of 3 · Paste", fine.matches
+        ? "Paste into the ticket with <b>⌘V</b>, or drag the screenshot from the drawer onto it."
+        : "Tap <b>Paste</b> in the ticket."],
+    ];
+    function show() {
+      clearTimeout(hideTimer);
+      if (off) { box.hidden = true; return; }
+      box.hidden = false;
+      if (mode) {
+        step.textContent = mode === "janela" ? "Window" : "Selection";
+        text.innerHTML = mode === "janela"
+          ? "Click a window to take it. <b>Esc</b> cancels."
+          : fine.matches ? "Drag over anything. <b>Esc</b> cancels." : "Drag your finger over what you want to keep.";
+        return;
+      }
+      const next = STEPS.find(([key]) => !done.has(key));
+      if (!next) {
+        step.textContent = "Done";
+        text.innerHTML = "That is how it goes on your Mac: every screenshot lands in the drawer, and one <b>⌘V</b> pastes them all.";
+        hideTimer = setTimeout(() => { box.hidden = true; }, 7000);
+        return;
+      }
+      step.textContent = next[1];
+      text.innerHTML = next[2];
+    }
+    $("#guia-fechar").addEventListener("click", () => { off = true; show(); });
+    return {
+      show,
+      done(key) {
+        if (key === "colar" && !done.has("copiar")) done.add("copiar");
+        if (key === "copiar" && !done.has("tirar")) done.add("tirar");
+        done.add(key);
+        show();
+      },
+    };
+  })();
+
   drawBend(gripBend);
   drawBend(bordaBend);
   drawer.width = standard();
   render();
-
-  // The drawer slides out the first time the screen comes into view.
-  const shown = new IntersectionObserver((entries) => {
-    if (!entries.some((entry) => entry.isIntersecting)) return;
-    shown.disconnect();
-    setTimeout(() => open(true), still.matches ? 0 : 500);
-  }, { threshold: 0.45 });
-  shown.observe(palco);
+  guide.show();
+  // The drawer slides out a moment after the page shows, with three prints already in it;
+  // on a phone it would cover the page, so there it waits at the edge.
+  if (!phone()) setTimeout(() => { if (!mode) open(true); }, still.matches ? 0 : 700);
 })();
 </script>
 </body>

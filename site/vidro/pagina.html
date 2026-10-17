@@ -1,171 +1,119 @@
-<a class="pular" href="#como">Pular para o conteúdo</a>
+<a class="pular" href="#titulo">Pular para o conteúdo</a>
 
-<header class="topo">
-  <div class="topo-dentro">
-    <a class="marca" href="#inicio"><img src="assets/icone-128.png" alt="" width="22" height="22">Gaveta</a>
-    <nav class="topo-nav" aria-label="Seções">
-      <a href="#como">Como funciona</a>
-      <a href="#detalhes">Detalhes</a>
-      <a href="#instalar">Instalar</a>
-    </nav>
-    <div class="topo-acoes">
-      <a class="botao-fino" href="{{URL_OUTRO}}" hreflang="{{OUTRO_LANG}}" lang="{{OUTRO_LANG}}" data-idioma="{{OUTRO}}" aria-label="{{OUTRO_NOME}}">{{OUTRO_SIGLA}}</a>
-      <a class="botao-fino botao-escuro" href="{{REPO}}">
-        <svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
-        GitHub
-      </a>
-    </div>
-  </div>
-</header>
+<div class="mesa" id="mesa">
+  <div class="papel" aria-hidden="true"><span class="mancha m1"></span><span class="mancha m2"></span><span class="mancha m3"></span></div>
 
-<main id="inicio">
+  <header class="menus">
+    <a class="marca" href="{{REPO}}"><img src="assets/icone-128.png" alt="" width="18" height="18">Gaveta</a>
+    <span class="app-da-frente" id="app-da-frente">Finder</span>
+    <span class="espaco"></span>
+    <a class="menus-item" href="{{URL_OUTRO}}" hreflang="{{OUTRO_LANG}}" lang="{{OUTRO_LANG}}" data-idioma="{{OUTRO}}" aria-label="{{OUTRO_NOME}}">{{OUTRO_SIGLA}}</a>
+    <button class="menus-item menus-gaveta" id="menus-gaveta" type="button" aria-label="Abrir ou fechar a gaveta" aria-pressed="false">
+      <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 9.5h3.2l1 1.6h3.6l1-1.6H14M2.6 4.2 2 9.5v2.8c0 .6.4 1 1 1h10c.6 0 1-.4 1-1V9.5l-.6-5.3c-.1-.5-.5-.8-1-.8H3.6c-.5 0-.9.3-1 .8Z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+    </button>
+    <span class="relogio" id="relogio" aria-hidden="true">qui 14:32</span>
+  </header>
+
   <section class="abertura" aria-labelledby="titulo">
     <p class="etiqueta">App para Mac · grátis · código aberto</p>
-    <h1 class="titulo" id="titulo">Seus prints,<br><span>numa gaveta de vidro.</span></h1>
-    <p class="intro">Cada print que você tira cai numa gaveta na borda da tela. Escolha vários e cole todos de uma vez, com um único <kbd>⌘V</kbd>.</p>
-    <div class="acoes">
-      <button class="botao botao-escuro" type="button" data-copiar="{{INSTALAR}}">
-        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 4.5 6 8l-3 3.5M8 12h5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        <span data-rotulo>Instalar pelo Terminal</span>
-      </button>
-      <a class="botao" href="#instalar">Outras formas de instalar</a>
-    </div>
+    <h1 class="titulo" id="titulo">Seus prints,<br><span>numa gaveta.</span></h1>
+    <p class="intro">Cada print que você tira cai numa gaveta na borda da tela. Escolha vários e cole todos de uma vez.</p>
+    <a class="botao" href="{{REPO}}">
+      <svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+      GitHub
+    </a>
     <p class="nota">macOS 14 ou mais novo · Apple silicon e Intel</p>
+    <p class="credito">Feita por Luiz Paulo Frasca Neto · <a href="{{REPO}}">código aberto, MIT</a></p>
   </section>
 
-  <section class="vitrine" aria-label="A Gaveta funcionando">
-    <div class="moldura">
-      <div class="palco" id="palco">
-        <div class="papel-de-parede" aria-hidden="true"><span class="mancha m1"></span><span class="mancha m2"></span><span class="mancha m3"></span></div>
-        <div class="barra-menus" aria-hidden="true">
-          <span class="espaco"></span>
-          <svg class="icone-gaveta" viewBox="0 0 16 16"><path d="M2 9.5h3.2l1 1.6h3.6l1-1.6H14M2.6 4.2 2 9.5v2.8c0 .6.4 1 1 1h10c.6 0 1-.4 1-1V9.5l-.6-5.3c-.1-.5-.5-.8-1-.8H3.6c-.5 0-.9.3-1 .8Z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
-          <svg viewBox="0 0 16 16"><path d="M1.5 6.2a9.5 9.5 0 0 1 13 0M3.8 8.6a6.2 6.2 0 0 1 8.4 0M6.1 11a2.8 2.8 0 0 1 3.8 0" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="8" cy="13.2" r="1" fill="currentColor"/></svg>
-          <span class="relogio" id="relogio">qui 14:32</span>
-        </div>
+  <article class="janela j-loja" id="loja" data-app="Navegador" aria-label="Navegador: a loja deu erro no pagamento">
+    <div class="janela-barra">
+      <span class="semaforo" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span class="endereco">loja.exemplo/checkout</span>
+    </div>
+    <div class="loja">
+      <p class="loja-marca">Loja Exemplo</p>
+      <p class="loja-titulo">Finalizar compra</p>
+      <ul class="loja-itens">
+        <li><span>Tênis de corrida</span><span>R$&nbsp;399,90</span></li>
+        <li><span>Meias, 3 pares</span><span>R$&nbsp;59,90</span></li>
+        <li class="total"><span>Total</span><span>R$&nbsp;459,80</span></li>
+      </ul>
+      <p class="loja-erro" id="loja-erro"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.8 15 14H1z" fill="currentColor"/><path d="M8 6.2v3.6M8 11.6v.1" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg><span>Não foi possível concluir o pagamento. <b>Erro 500</b></span></p>
+      <button class="loja-pagar" id="loja-pagar" type="button">Pagar R$&nbsp;459,80</button>
+    </div>
+  </article>
 
-        <figure class="janela j-painel" data-print="painel"><img src="assets/prints/painel.png" alt="" width="980" height="560" draggable="false"></figure>
-        <figure class="janela j-codigo" data-print="codigo"><img src="assets/prints/codigo.png" alt="" width="1160" height="520" draggable="false"></figure>
-        <figure class="janela j-erro" data-print="erro"><img src="assets/prints/erro.png" alt="" width="560" height="470" draggable="false"></figure>
-
-        <div class="selecao" id="selecao" aria-hidden="true"></div>
-        <div class="clarao" id="clarao" aria-hidden="true"></div>
-
-        <button class="captura" id="captura" type="button">
-          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 5V3a1 1 0 0 1 1-1h2M11 2h2a1 1 0 0 1 1 1v2M14 11v2a1 1 0 0 1-1 1h-2M5 14H3a1 1 0 0 1-1-1v-2" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M8 5.5v5M5.5 8h5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
-          Tirar print
-          <kbd>⌘⇧4</kbd>
-        </button>
-
-        <aside class="gaveta" id="gaveta" aria-label="Gaveta" data-estado="fechada">
-          <div class="painel" id="painel">
-            <div class="espinha">
-              <svg class="espinha-icone" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 9.5h3.2l1 1.6h3.6l1-1.6H14M2.6 4.2 2 9.5v2.8c0 .6.4 1 1 1h10c.6 0 1-.4 1-1V9.5l-.6-5.3c-.1-.5-.5-.8-1-.8H3.6c-.5 0-.9.3-1 .8Z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
-              <span class="conta" id="conta">3</span>
-              <button class="alca" id="alca" type="button" aria-label="Alargar a gaveta. Clique duplo volta ao normal.">
-                <svg viewBox="0 0 26 40" aria-hidden="true"><path id="alca-linha" d="M13 2 Q13 20 13 38"/></svg>
-              </button>
-            </div>
-            <div class="caixa">
-              <div class="fichas" id="fichas" role="list" aria-label="Prints na gaveta"></div>
-              <div class="vazia" id="vazia">
-                <p class="vazia-titulo">Gaveta vazia</p>
-                <p>Tire um print com o botão lá embaixo.</p>
-              </div>
-              <div class="barra" id="barra"></div>
-            </div>
-          </div>
-        </aside>
-        <button class="borda-alca" id="borda-alca" type="button" aria-label="Abrir a gaveta"><svg viewBox="0 0 26 72" aria-hidden="true"><path id="borda-linha" d="M13 2 Q13 36 13 70"/></svg></button>
-        <div class="quedas" id="quedas" aria-hidden="true"></div>
+  <article class="janela j-chamado" id="chamado" data-app="Chamados" aria-label="Chamados: o chamado #482">
+    <div class="janela-barra">
+      <span class="semaforo" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span class="janela-nome">Chamados</span>
+    </div>
+    <div class="chamado">
+      <p class="chamado-cabeca"><span>#482</span><span class="chamado-estado">Aberto</span></p>
+      <p class="chamado-titulo">O checkout não finaliza a compra</p>
+      <p class="chamado-texto">Ao clicar em Pagar, aparece um erro e o pedido some. Prints abaixo.</p>
+      <p class="chamado-rotulo">Anexos <span id="anexos-conta"></span></p>
+      <div class="anexos" id="anexos">
+        <p class="anexos-vazio" id="anexos-vazio">Cole aqui com <kbd>⌘V</kbd>, ou arraste da gaveta.</p>
+        <button class="colar" id="colar" type="button" hidden>Colar</button>
       </div>
     </div>
-    <ul class="dicas" aria-label="O que testar">
-      <li><span>01</span>Tire um print</li>
-      <li><span>02</span>Passe o mouse nas fichas</li>
-      <li><span>03</span>Clique para copiar, <kbd>⌘</kbd>-clique para escolher</li>
-      <li><span>04</span>Arraste a alça</li>
-    </ul>
-  </section>
+  </article>
 
-  <section class="secao" id="como" aria-labelledby="como-titulo">
-    <div class="secao-cabeca">
-      <p class="etiqueta">Como funciona</p>
-      <h2 class="secao-titulo" id="como-titulo">Do print ao <kbd>⌘V</kbd>,<br><span>sem passar pela Mesa.</span></h2>
+  <figure class="janela j-codigo" id="codigo" data-app="Editor"><img src="assets/prints/codigo.png" alt="" width="1160" height="520" draggable="false"></figure>
+
+</div>
+
+<!-- what is not on the desk, and so never in a screenshot -->
+<div class="camada" id="camada" hidden>
+  <span class="sombra" data-lado="cima"></span><span class="sombra" data-lado="baixo"></span><span class="sombra" data-lado="esquerda"></span><span class="sombra" data-lado="direita"></span>
+  <span class="retangulo" id="retangulo"></span>
+  <span class="medida" id="medida"></span>
+  <span class="destaque" id="destaque"></span>
+</div>
+<div class="clarao" id="clarao" aria-hidden="true"></div>
+
+<div class="guia" id="guia" role="status">
+  <p class="guia-passo" id="guia-passo">1 de 3 · Tirar</p>
+  <p class="guia-texto" id="guia-texto">Tire um print desta mesa: escolha <b>Seleção</b> e arraste sobre a loja.</p>
+  <button class="guia-fechar" id="guia-fechar" type="button" aria-label="Fechar as dicas"><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 3l6 6M9 3 3 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
+</div>
+
+<div class="captura" role="toolbar" aria-label="Tirar print">
+  <button class="captura-modo" type="button" data-modo="tela">
+    <svg viewBox="0 0 16 16" aria-hidden="true"><rect x="1.5" y="2.5" width="13" height="9" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M5.5 14h5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+    Tela
+  </button>
+  <button class="captura-modo" type="button" data-modo="janela" aria-pressed="false">
+    <svg viewBox="0 0 16 16" aria-hidden="true"><rect x="1.5" y="2.5" width="13" height="11" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M1.5 5.5h13" stroke="currentColor" stroke-width="1.3"/></svg>
+    Janela
+  </button>
+  <button class="captura-modo" type="button" data-modo="selecao" aria-pressed="false">
+    <svg viewBox="0 0 16 16" aria-hidden="true"><rect x="2" y="3" width="12" height="10" rx="1" fill="none" stroke="currentColor" stroke-width="1.3" stroke-dasharray="2 2"/></svg>
+    Seleção
+  </button>
+</div>
+
+<aside class="gaveta" id="gaveta" aria-label="Gaveta" data-estado="fechada">
+  <div class="painel" id="painel">
+    <div class="espinha">
+      <svg class="espinha-icone" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 9.5h3.2l1 1.6h3.6l1-1.6H14M2.6 4.2 2 9.5v2.8c0 .6.4 1 1 1h10c.6 0 1-.4 1-1V9.5l-.6-5.3c-.1-.5-.5-.8-1-.8H3.6c-.5 0-.9.3-1 .8Z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+      <span class="conta" id="conta">3</span>
+      <button class="alca" id="alca" type="button" aria-label="Alargar a gaveta. Clique duplo volta ao normal.">
+        <svg viewBox="0 0 26 40" aria-hidden="true"><path id="alca-linha" d="M13 2 Q13 20 13 38"/></svg>
+      </button>
     </div>
-    <ol class="linha">
-      <li class="passo">
-        <span class="trilho" aria-hidden="true"><span class="ponto"></span></span>
-        <p class="passo-numero">01 · Tirar</p>
-        <h3 class="passo-titulo">Tire o print</h3>
-        <p class="passo-texto">Do jeito de sempre, com <kbd>⌘⇧4</kbd>. Ele voa para a gaveta, na borda da tela, em vez de encher a Mesa.</p>
-      </li>
-      <li class="passo">
-        <span class="trilho" aria-hidden="true"><span class="ponto"></span></span>
-        <p class="passo-numero">02 · Abrir</p>
-        <h3 class="passo-titulo">Encoste na borda</h3>
-        <p class="passo-texto">O ponteiro na borda direita puxa uma alça, e a gaveta de vidro sai, tomando a cor do que está atrás. Ou <kbd>⌃⌥G</kbd>.</p>
-      </li>
-      <li class="passo">
-        <span class="trilho" aria-hidden="true"><span class="ponto"></span></span>
-        <p class="passo-numero">03 · Escolher</p>
-        <h3 class="passo-titulo">Escolha vários</h3>
-        <p class="passo-texto">Um clique copia um print. <kbd>⌘</kbd>-clique, <kbd>⇧</kbd>-clique ou Selecionar todos escolhem vários.</p>
-      </li>
-      <li class="passo">
-        <span class="trilho" aria-hidden="true"><span class="ponto"></span></span>
-        <p class="passo-numero">04 · Colar</p>
-        <h3 class="passo-titulo">Cole tudo de uma vez</h3>
-        <p class="passo-texto">Copiar todos, e um único <kbd>⌘V</kbd> cola os prints na ordem em que foram tirados: no chat, no e-mail, no chamado.</p>
-      </li>
-    </ol>
-  </section>
-
-  <section class="secao" id="detalhes" aria-labelledby="detalhes-titulo">
-    <div class="secao-cabeca">
-      <p class="etiqueta">Detalhes</p>
-      <h2 class="secao-titulo" id="detalhes-titulo">Pequenos cuidados,<br><span>do jeito do Mac.</span></h2>
+    <div class="caixa">
+      <div class="fichas" id="fichas" role="list" aria-label="Prints na gaveta"></div>
+      <div class="vazia" id="vazia">
+        <p class="vazia-titulo">Gaveta vazia</p>
+        <p>Tire um print com a barra lá embaixo.</p>
+      </div>
+      <div class="barra" id="barra"></div>
     </div>
-    <ul class="detalhes">
-      <li><p class="detalhe-rotulo">Vidro</p><p>O Liquid Glass do macOS 26: a gaveta toma a cor do que está atrás e quase some sobre o seu trabalho.</p></li>
-      <li><p class="detalhe-rotulo">Alça elástica</p><p>Arraste a alça para alargar a gaveta. Ela entorta com a velocidade, cede no limite e volta com um balanço.</p></li>
-      <li><p class="detalhe-rotulo">Fichas inteiras</p><p>Cada print aparece inteiro, nunca cortado. A ficha sob o ponteiro se abre para você ver.</p></li>
-      <li><p class="detalhe-rotulo">Sem atrito</p><p>Apagar com o X não trava nada: a ficha cai e a próxima já está pronta.</p></li>
-      <li><p class="detalhe-rotulo">Arraste</p><p>Leve um ou vários prints para qualquer app ou pasta.</p></li>
-      <li><p class="detalhe-rotulo">Só no seu Mac</p><p>Sem internet e sem conta. Os prints ficam no seu Mac.</p></li>
-    </ul>
-  </section>
-
-  <section class="secao" id="instalar" aria-labelledby="instalar-titulo">
-    <div class="secao-cabeca">
-      <p class="etiqueta">Instalar</p>
-      <h2 class="secao-titulo" id="instalar-titulo">Instale em um minuto.</h2>
-    </div>
-    <div class="instalar">
-      <article class="opcao opcao-principal">
-        <p class="opcao-rotulo">Pelo Terminal · recomendado</p>
-        <div class="comando">
-          <code>{{INSTALAR}}</code>
-          <button class="copiar" type="button" data-copiar="{{INSTALAR}}" aria-label="Copiar o comando"><span data-rotulo>Copiar</span></button>
-        </div>
-        <p>Baixa a última versão, coloca em Aplicativos e abre, sem o aviso do macOS.</p>
-      </article>
-      <article class="opcao">
-        <p class="opcao-rotulo">Baixando o zip</p>
-        <p>Baixe o <a href="{{RELEASES}}">Gaveta.zip</a> e arraste para Aplicativos. Na primeira vez: Ajustes do Sistema → Privacidade e Segurança → Abrir Mesmo Assim.</p>
-      </article>
-      <article class="opcao">
-        <p class="opcao-rotulo">Compilando</p>
-        <div class="comando"><code>git clone {{REPO}}.git && cd gaveta && scripts/install.sh</code></div>
-        <p>Com o Swift instalado. Um app compilado no seu Mac abre sem aviso.</p>
-      </article>
-    </div>
-  </section>
-</main>
-
-<footer class="rodape">
-  <span>Feita por Luiz Paulo Frasca Neto · <a href="{{REPO}}">código aberto, MIT</a></span>
-  <span>macOS 14+ · sem internet, sem conta</span>
-</footer>
-
+  </div>
+</aside>
+<button class="borda-alca" id="borda-alca" type="button" aria-label="Abrir a gaveta"><svg viewBox="0 0 26 72" aria-hidden="true"><path id="borda-linha" d="M13 2 Q13 36 13 70"/></svg></button>
+<div class="quedas" id="quedas" aria-hidden="true"></div>
 <p class="aviso" id="aviso" role="status"></p>

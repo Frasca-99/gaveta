@@ -1,7 +1,9 @@
-// The Gaveta landing: copy buttons, the language link, and a Mac screen where
-// the glass drawer works as the app does: take a screenshot and it flies into
-// the drawer at the screen's right edge, laid out the way the app lays its
-// cards out; pick, copy, throw out, widen it by its elastic grip.
+// The Gaveta landing: one screen, a Mac desk where the glass drawer works as
+// the app does. The bar below takes a screenshot of the desk (all of it, a
+// window, or a selection): a still copy of what is there, which flies into the
+// drawer at the right edge, laid out the way the app lays its cards out. Pick,
+// copy, throw out, widen the drawer by its elastic grip, and paste into the
+// ticket with ⌘V or by dragging a card onto it.
 (() => {
   "use strict";
 
@@ -11,6 +13,7 @@
   const wait = (ms) => new Promise((done) => setTimeout(done, ms));
   const still = matchMedia("(prefers-reduced-motion: reduce)");
   const fine = matchMedia("(hover: hover) and (pointer: fine)");
+  const phone = () => innerWidth <= 760;
   const ROOT = document.documentElement.dataset.raiz || "";
   const aviso = $("#aviso");
   const announce = (text) => {
@@ -18,34 +21,9 @@
     requestAnimationFrame(() => { aviso.textContent = text; });
   };
 
-  // ── the page around it ──────────────────────────────────────────────────
-
   $("[data-idioma]").addEventListener("click", (event) => {
     try { localStorage.setItem("gaveta-idioma", event.currentTarget.dataset.idioma); } catch {}
   });
-
-  const topo = $(".topo");
-  const scrolled = () => topo.classList.toggle("rolou", scrollY > 8);
-  addEventListener("scroll", scrolled, { passive: true });
-  scrolled();
-
-  for (const button of $$("[data-copiar]")) {
-    const label = $("[data-rotulo]", button);
-    const original = label.textContent;
-    const short = button.classList.contains("copiar");
-    let timer = 0;
-    button.addEventListener("click", async () => {
-      try {
-        await navigator.clipboard.writeText(button.dataset.copiar);
-        label.textContent = short ? "Copiado" : "Copiado: cole no Terminal";
-        announce("Comando copiado. Cole no Terminal.");
-      } catch {
-        label.textContent = "Copie à mão";
-      }
-      clearTimeout(timer);
-      timer = setTimeout(() => { label.textContent = original; }, 2000);
-    });
-  }
 
   const relogio = $("#relogio");
   const tick = () => {
@@ -55,20 +33,146 @@
   tick();
   setInterval(tick, 20000);
 
-  // ── the drawer ──────────────────────────────────────────────────────────
+  // ── the desk ────────────────────────────────────────────────────────────
 
+  const mesa = $("#mesa");
+  const mesaBox = () => mesa.getBoundingClientRect();
+  /** A rectangle on the screen, in the desk's own coordinates. */
+  const onDesk = (rect) => {
+    const m = mesaBox();
+    return { x: rect.left - m.left, y: rect.top - m.top, w: rect.width, h: rect.height };
+  };
+  const onScreen = (area) => {
+    const m = mesaBox();
+    return { left: area.x + m.left, top: area.y + m.top, width: area.w, height: area.h };
+  };
+  const shown = (el) => !el.hidden && el.getClientRects().length > 0;
+
+  // Windows come to the front when touched, and move by their title bars.
+  const appName = $("#app-da-frente");
+  const windows = $$(".janela");
+  let stacking = 10;
+  function activate(win) {
+    for (const w of windows) w.classList.toggle("ativa", w === win);
+    if (win) win.style.zIndex = String(++stacking);
+    appName.textContent = win ? win.dataset.app : "Finder";
+  }
+  for (const win of windows) {
+    win.addEventListener("pointerdown", () => activate(win));
+    const handle = $(".janela-barra", win) || win;
+    handle.addEventListener("pointerdown", (event) => {
+      if (event.button !== 0 || phone()) return;
+      event.preventDefault();
+      const start = onDesk(win.getBoundingClientRect());
+      const x0 = event.clientX;
+      const y0 = event.clientY;
+      handle.setPointerCapture(event.pointerId);
+      handle.style.cursor = "grabbing";
+      const move = (e) => {
+        const m = mesaBox();
+        win.style.right = "auto";
+        win.style.bottom = "auto";
+        win.style.left = `${clamp(start.x + e.clientX - x0, 90 - win.offsetWidth, m.width - 90)}px`;
+        win.style.top = `${clamp(start.y + e.clientY - y0, 30, m.height - 40)}px`;
+      };
+      const up = () => {
+        handle.style.cursor = "";
+        handle.removeEventListener("pointermove", move);
+        handle.removeEventListener("pointerup", up);
+        handle.removeEventListener("pointercancel", up);
+      };
+      handle.addEventListener("pointermove", move);
+      handle.addEventListener("pointerup", up);
+      handle.addEventListener("pointercancel", up);
+    });
+  }
+  activate($("#loja"));
+
+  // The shop still fails, every time.
+  const lojaErro = $("#loja-erro");
+  $("#loja-pagar").addEventListener("click", () => {
+    lojaErro.classList.remove("de-novo");
+    void lojaErro.offsetWidth;
+    lojaErro.classList.add("de-novo");
+  });
+
+  // ── prints ──────────────────────────────────────────────────────────────
+
+  let serial = 0;
+  /** Every print by id, the thrown-out ones too, for what was copied before. */
+  const everyPrint = new Map();
   const SAMPLES = {
     canvas: { src: "assets/prints/canvas.png", w: 1380, h: 360 },
     paleta: { src: "assets/prints/paleta.png", w: 520, h: 640 },
-    codigo: { src: "assets/prints/codigo.png", w: 1160, h: 520 },
     painel: { src: "assets/prints/painel.png", w: 980, h: 560 },
-    erro: { src: "assets/prints/erro.png", w: 560, h: 470 },
   };
-  const CAPACITY = 8;
-  let serial = 0;
-  const printOf = (name, age = 0) => ({ ...SAMPLES[name], id: ++serial, date: Date.now() - age * 1000 });
+  function sample(name, age) {
+    const print = { ...SAMPLES[name], id: ++serial, date: Date.now() - age * 1000 };
+    print.src = ROOT + print.src;
+    everyPrint.set(print.id, print);
+    return print;
+  }
 
-  const palco = $("#palco");
+  /** A still copy of the desk, cut to `area`. */
+  function snapshot(area) {
+    const m = mesaBox();
+    const copy = mesa.cloneNode(false);
+    copy.removeAttribute("id");
+    copy.classList.add("mesa-copia");
+    copy.style.width = `${m.width}px`;
+    copy.style.height = `${m.height}px`;
+    copy.style.transform = `translate(${-area.x}px, ${-area.y}px)`;
+    for (const child of mesa.children) if (shown(child)) copy.append(child.cloneNode(true));
+    for (const el of [copy, ...copy.querySelectorAll("*")]) {
+      el.removeAttribute("id");
+      el.removeAttribute("aria-live");
+      el.removeAttribute("role");
+      if (el.matches("a, button")) el.setAttribute("tabindex", "-1");
+    }
+    copy.setAttribute("inert", "");
+    copy.setAttribute("aria-hidden", "true");
+    const frame = document.createElement("span");
+    frame.className = "retrato";
+    frame.style.width = `${area.w}px`;
+    frame.style.height = `${area.h}px`;
+    frame.append(copy);
+    return frame;
+  }
+  function takePrint(area) {
+    const print = { id: ++serial, w: Math.round(area.w), h: Math.round(area.h), date: Date.now(), portrait: snapshot(area) };
+    everyPrint.set(print.id, print);
+    return print;
+  }
+
+  /** Puts the print into `box`, `width` × `height`, filling it or, with `fit`, whole inside it. */
+  function paint(box, print, width, height, fit = false) {
+    let inner = box.firstElementChild;
+    if (!inner) {
+      inner = print.src ? Object.assign(document.createElement("img"), { src: print.src, alt: "", draggable: false }) : document.createElement("span");
+      if (!print.src) {
+        inner.className = "foto-escala";
+        inner.append(print.portrait.cloneNode(true));
+      }
+      box.append(inner);
+    }
+    box.style.width = `${width}px`;
+    box.style.height = `${height}px`;
+    if (print.src) {
+      inner.style.cssText = `width:100%;height:100%;object-fit:${fit ? "contain" : "fill"}`;
+      return;
+    }
+    const k = fit ? Math.min(width / print.w, height / print.h) : width / print.w;
+    inner.style.transform = `translate(${fit ? (width - print.w * k) / 2 : 0}px, ${fit ? (height - print.h * k) / 2 : 0}px) scale(${k})`;
+  }
+  function picture(print, width, height, fit) {
+    const box = document.createElement("span");
+    box.className = "foto";
+    paint(box, print, width, height, fit);
+    return box;
+  }
+
+  // ── the drawer ──────────────────────────────────────────────────────────
+
   const gaveta = $("#gaveta");
   const painel = $("#painel");
   const fichas = $("#fichas");
@@ -76,15 +180,14 @@
   const conta = $("#conta");
   const quedas = $("#quedas");
   const alca = $("#alca");
-  const alcaLinha = $("#alca-linha");
   const borda = $("#borda-alca");
-  const bordaLinha = $("#borda-linha");
+  const trayButton = $("#menus-gaveta");
   const pilha = document.createElement("div");
   pilha.className = "pilha";
   fichas.append(pilha);
 
   const drawer = {
-    prints: [printOf("canvas", 2 * 3600), printOf("paleta", 37 * 60), printOf("codigo", 12 * 60)], // back (oldest) to front (newest)
+    prints: [sample("canvas", 2 * 3600), sample("paleta", 37 * 60), sample("painel", 12 * 60)], // back (oldest) to front (newest)
     selection: new Set(),
     copied: new Set(),
     arriving: new Set(),
@@ -94,13 +197,15 @@
     width: 300,            // the box the cards stand in
     stretch: 0,            // pulled past a limit
   };
+  const CAPACITY = 9;
 
   const S = { left: 30, right: 14, border: 8, meta: 24, top: 18, bottom: 12, minReveal: 76, gap: 12, words: 96, slot: 96 };
-  const L = { rail: 10, footer: 44, menus: 28, margin: 14 };
-  const front = () => (innerWidth <= 760 ? 50 : 58);
+  const L = { rail: 10, footer: 44, top: 44 };
+  const front = () => (phone() ? 50 : 58);
+  const bottomRoom = () => (phone() ? 84 : 16);
   /** The width the drawer opens at: the app's 300, or less on a screen too narrow for it. */
-  const standard = () => clamp(palco.clientWidth - front() - 26, 220, 300);
-  const widest = () => Math.max(standard(), Math.min(600, palco.clientWidth - front() - 120));
+  const standard = () => clamp(innerWidth - front() - 26, 220, 300);
+  const widest = () => Math.max(standard(), Math.min(600, innerWidth / 2 - front()));
 
   /** The card's measures for a box this wide, as CardStack has them. */
   function measures(box) {
@@ -123,7 +228,7 @@
     let w = maxW;
     let h = w / aspect;
     if (h > maxH) { h = maxH; w = h * aspect; }
-    return { w: Math.round(w), h: Math.round(h), slot };
+    return { w: Math.max(1, Math.round(w)), h: Math.max(1, Math.round(h)), slot };
   }
   /** Where each card stands, from the back: the front ones whole, the older ones giving up room down to a band. */
   function stackOf(m, count, hovered, room) {
@@ -163,11 +268,10 @@
     card = document.createElement("div");
     card.className = "ficha";
     card.setAttribute("role", "listitem");
-    card.innerHTML = `<img class="ficha-foto" alt="" draggable="false">
+    card.innerHTML = `<span class="ficha-foto"></span>
       <div class="ficha-legenda"><span class="o-que"></span><span class="idade"></span></div>
       <div class="ficha-faixa"><span class="tipo">Print</span><span class="tamanho"></span><span class="idade"></span></div>
       <span class="ficha-bolinha"></span><span class="ficha-x">${CROSS}</span><span class="ficha-copiado">✓ Copiado</span>`;
-    $("img", card).src = ROOT + print.src;
     cards.set(print.id, card);
     pilha.append(card);
     return card;
@@ -175,20 +279,23 @@
 
   let layout = null;
   let measure = measures(300);
+  let placement = { top: L.top, height: 200 };
+  /** Where each card's picture stands inside its card, from the last render. */
+  const geometry = new Map();
 
   function render() {
     const list = drawer.prints;
     const box = drawer.width + drawer.stretch;
-    const tall = palco.clientHeight;
-    const most = tall - L.menus - L.margin * 2 - 64; // leaves the capture button its room
     measure = measures(box);
+    const most = innerHeight - L.top - bottomRoom();
     const hoveredIndex = list.findIndex((p) => p.id === drawer.hovered);
     const room = most - L.rail * 2 - L.footer;
     const rest = stackOf(measure, list.length, null, room);
     layout = stackOf(measure, list.length, hoveredIndex >= 0 ? hoveredIndex : null, room);
     const restHeight = list.length ? Math.min(L.rail * 2 + rest.height + L.footer, most) : 200;
-    const top = Math.max(L.menus + L.margin, L.menus + (tall - L.menus - 64 - restHeight) / 2);
-    const height = list.length ? Math.min(L.rail * 2 + layout.height + L.footer, tall - top - L.margin) : 200;
+    const top = L.top + Math.max(0, (most - restHeight) / 2);
+    const height = list.length ? Math.min(L.rail * 2 + layout.height + L.footer, innerHeight - top - bottomRoom()) : 200;
+    placement = { top, height };
     gaveta.style.setProperty("--frente", `${front()}px`);
     gaveta.style.setProperty("--largura", `${box}px`);
     gaveta.style.setProperty("--topo", `${top}px`);
@@ -218,10 +325,10 @@
       card.classList.toggle("escolhida", selected);
       card.classList.toggle("copiada", drawer.copied.has(print.id));
       card.classList.toggle("chegando", drawer.arriving.has(print.id));
-      const img = $("img", card);
-      img.style.width = `${photo.w}px`;
-      img.style.height = `${photo.h}px`;
-      img.style.transform = `translate(${S.border + (slotW - photo.w) / 2}px, ${photoTop}px)`;
+      const foto = $(".ficha-foto", card);
+      paint(foto, print, photo.w, photo.h);
+      foto.style.transform = `translate(${S.border + (slotW - photo.w) / 2}px, ${photoTop}px)`;
+      geometry.set(print.id, { x: S.border + (slotW - photo.w) / 2, y: photoTop, w: photo.w, h: photo.h });
       const legenda = $(".ficha-legenda", card);
       const faixa = $(".ficha-faixa", card);
       legenda.style.display = whole ? "flex" : "none";
@@ -280,7 +387,7 @@
     if (!layout || !drawer.open) return null;
     const r = pilha.getBoundingClientRect();
     const box = fichas.getBoundingClientRect();
-    if (clientY < box.top || clientY > box.bottom) return null;
+    if (clientY < box.top || clientY > box.bottom || clientX < box.left - 12) return null;
     const x = clientX - r.left;
     const y = clientY - r.top;
     const list = drawer.prints;
@@ -309,7 +416,7 @@
   const pointer = { x: -1, y: -1 };
   let letGo = 0;
   function hover(clientX, clientY) {
-    if (resizing) return;
+    if (resizing || dragging) return;
     const found = hitAt(clientX, clientY, true);
     if (found) {
       clearTimeout(letGo);
@@ -329,7 +436,9 @@
   fichas.addEventListener("pointermove", (event) => { if (event.pointerType === "mouse") hover(event.clientX, event.clientY); });
   fichas.addEventListener("scroll", () => hover(pointer.x, pointer.y), { passive: true });
 
+  let dragged = false;
   pilha.addEventListener("click", (event) => {
+    if (dragged) { dragged = false; return; }
     const found = hitAt(event.clientX, event.clientY, false);
     if (!found) return;
     const { print, part } = found;
@@ -356,31 +465,119 @@
     render();
   }
 
+  // ── copying and pasting: one item per print, oldest first, as in the app ──
+
+  let clipboard = [];
   let copiedTimer = 0;
-  async function copy(ids) {
+  const colar = $("#colar");
+  const anexos = $("#anexos");
+  const anexosVazio = $("#anexos-vazio");
+  const anexosConta = $("#anexos-conta");
+  const chamado = $("#chamado");
+  if (!fine.matches) anexosVazio.textContent = "Copie na gaveta e toque em Colar, ou arraste da gaveta.";
+
+  function copy(ids) {
     const prints = drawer.prints.filter((p) => ids.includes(p.id));
     if (!prints.length) return;
-    drawer.copied = new Set(prints.map((p) => p.id));
+    clipboard = prints.map((p) => p.id);
+    drawer.copied = new Set(clipboard);
     render();
     clearTimeout(copiedTimer);
     copiedTimer = setTimeout(() => { drawer.copied.clear(); render(); }, 1200);
-    // One print goes to the clipboard for real; in the app, one ⌘V pastes them all.
-    if (prints.length === 1 && navigator.clipboard && window.ClipboardItem) {
-      try {
-        const blob = fetch(ROOT + prints[0].src).then((r) => r.blob());
-        await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
-        announce("Print copiado. Cole com ⌘V.");
-        return;
-      } catch {}
-    }
-    announce(prints.length === 1 ? "Print copiado." : `${prints.length} prints copiados. No app, um ⌘V cola todos, na ordem.`);
+    colar.hidden = false;
+    colar.textContent = prints.length > 1 ? `Colar ${prints.length} prints` : "Colar";
+    anexos.classList.add("com-copia");
+    guide.done("copiar");
+    announce(prints.length === 1 ? "Print copiado. Cole no chamado com ⌘V." : `${prints.length} prints copiados. Um ⌘V no chamado cola todos.`);
   }
 
-  /** Where something on the screen stands, in the screen's own coordinates. */
-  const within = (rect) => {
-    const p = palco.getBoundingClientRect();
-    return { left: rect.left - p.left, top: rect.top - p.top, width: rect.width, height: rect.height };
-  };
+  let attached = 0;
+  function attach(prints) {
+    if (!prints.length) return;
+    activate(chamado);
+    anexosVazio.hidden = true;
+    const width = Math.max(56, (anexos.clientWidth - 16 - 16) / 3);
+    for (const print of prints) {
+      const figure = document.createElement("figure");
+      figure.className = "anexo chegou";
+      figure.append(picture(print, width, (width * 3) / 4, true));
+      anexos.insertBefore(figure, colar);
+    }
+    attached += prints.length;
+    anexosConta.textContent = `· ${attached}`;
+    anexos.scrollTop = anexos.scrollHeight;
+    guide.done("colar");
+    announce(prints.length === 1 ? "1 print colado no chamado." : `${prints.length} prints colados no chamado, de uma vez.`);
+  }
+  function paste() {
+    const prints = clipboard.map((id) => everyPrint.get(id)).filter(Boolean);
+    if (!prints.length) return;
+    clipboard = [];
+    colar.hidden = true;
+    anexos.classList.remove("com-copia");
+    if (drawer.open && !drawer.hovered) close();
+    attach(prints);
+  }
+  colar.addEventListener("click", paste);
+  document.addEventListener("keydown", (event) => {
+    if ((event.metaKey || event.ctrlKey) && !event.shiftKey && !event.altKey && event.key.toLowerCase() === "v" && clipboard.length) {
+      event.preventDefault();
+      paste();
+    }
+  });
+
+  // Dragging cards out of the drawer: onto the ticket they go in, as attachments.
+  let dragging = false;
+  pilha.addEventListener("pointerdown", (event) => {
+    if (event.button !== 0 || event.pointerType !== "mouse" || event.metaKey || event.ctrlKey || event.shiftKey) return;
+    const found = hitAt(event.clientX, event.clientY, false);
+    if (!found || found.part !== "ficha") return;
+    const x0 = event.clientX;
+    const y0 = event.clientY;
+    let ghost = null;
+    let over = false;
+    const ids = drawer.selection.has(found.print.id) ? drawer.prints.filter((p) => drawer.selection.has(p.id)).map((p) => p.id) : [found.print.id];
+    const move = (e) => {
+      if (!ghost) {
+        if (Math.hypot(e.clientX - x0, e.clientY - y0) < 6) return;
+        dragging = true;
+        dragged = true;
+        drawer.hovered = null;
+        render();
+        const print = found.print;
+        const w = 150;
+        const h = Math.max(30, Math.min(150, (w * print.h) / print.w));
+        ghost = document.createElement("div");
+        ghost.className = "arrasto";
+        ghost.style.width = `${w}px`;
+        ghost.style.height = `${h}px`;
+        const shot = document.createElement("span");
+        shot.className = "retrato";
+        shot.style.cssText = `width:${w}px;height:${h}px`;
+        shot.append(picture(print, w, h, true));
+        ghost.append(shot);
+        if (ids.length > 1) ghost.insertAdjacentHTML("beforeend", `<span class="arrasto-conta">${ids.length}</span>`);
+        quedas.append(ghost);
+      }
+      ghost.style.transform = `translate(${e.clientX - 40}px, ${e.clientY - 24}px) rotate(-3deg)`;
+      const r = chamado.getBoundingClientRect();
+      over = shown(chamado) && e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
+      anexos.classList.toggle("alvo", over);
+    };
+    const up = () => {
+      removeEventListener("pointermove", move, true);
+      removeEventListener("pointerup", up, true);
+      removeEventListener("pointercancel", up, true);
+      anexos.classList.remove("alvo");
+      dragging = false;
+      if (!ghost) return;
+      ghost.remove();
+      if (over) attach(ids.map((id) => everyPrint.get(id)).filter(Boolean));
+    };
+    addEventListener("pointermove", move, true);
+    addEventListener("pointerup", up, true);
+    addEventListener("pointercancel", up, true);
+  });
 
   /** Thrown out: pulled by the corner, eased as it clears the drawer, then falling, turning over. */
   function discard(id) {
@@ -388,12 +585,12 @@
     if (index < 0) return;
     const card = cards.get(id);
     if (card && !still.matches) {
-      const at = within(card.getBoundingClientRect());
+      const at = card.getBoundingClientRect();
       const flyer = card.cloneNode(true);
       flyer.classList.remove("aberta", "copiada");
       flyer.style.cssText = `width:${at.width}px;height:${at.height}px;left:${at.left}px;top:${at.top}px;transform:none;z-index:1`;
       quedas.append(flyer);
-      const fall = palco.clientHeight - at.top + 40;
+      const fall = innerHeight - at.top + 40;
       flyer.animate([
         { transform: "none", opacity: 1 },
         { transform: "translate(-90px, -30px) rotate(-6deg) scale(1.04)", opacity: 1, offset: 0.3, easing: "cubic-bezier(.55,0,.9,.6)" },
@@ -410,61 +607,172 @@
     setTimeout(() => hover(pointer.x, pointer.y), 20);
   }
 
-  // ── taking a screenshot: the window is picked out, a flash, and it flies in ──
+  // ── taking a screenshot ─────────────────────────────────────────────────
 
-  const captura = $("#captura");
-  const selecao = $("#selecao");
+  const camada = $("#camada");
+  const retangulo = $("#retangulo");
+  const medida = $("#medida");
+  const destaque = $("#destaque");
   const clarao = $("#clarao");
-  const janelas = $$(".janela");
-  let shots = 0;
-  let busy = false;
-  captura.classList.add("chama");
-  captura.addEventListener("click", async () => {
-    if (busy) return;
-    busy = true;
-    captura.classList.remove("chama");
-    const win = janelas[shots++ % janelas.length];
-    const at = within(win.getBoundingClientRect());
-    const print = printOf(win.dataset.print);
+  const modos = $$(".captura-modo");
+  const sombras = Object.fromEntries($$(".sombra").map((el) => [el.dataset.lado, el]));
+  let mode = null;
+  let dragStart = null;
 
-    if (!still.matches) {
-      selecao.style.cssText = `left:${at.left}px;top:${at.top}px;width:${at.width}px;height:${at.height}px`;
-      await selecao.animate([{ opacity: 0, transform: "scale(1.04)" }, { opacity: 1, transform: "none" }], { duration: 220, easing: "ease-out", fill: "forwards" }).finished;
-      await wait(160);
-      selecao.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 160, fill: "forwards" });
-      clarao.animate([{ opacity: 0 }, { opacity: 0.85 }, { opacity: 0 }], { duration: 260, easing: "ease-out" });
+  function enterMode(next) {
+    if (mode === next) return leaveMode();
+    mode = next;
+    for (const button of modos) if (button.hasAttribute("aria-pressed")) button.setAttribute("aria-pressed", String(button.dataset.modo === next));
+    if (drawer.open) close();
+    camada.hidden = false;
+    camada.classList.toggle("janelas", next === "janela");
+    camada.classList.remove("escolhendo");
+    destaque.style.display = "none";
+    guide.show();
+  }
+  function leaveMode() {
+    mode = null;
+    dragStart = null;
+    for (const button of modos) if (button.hasAttribute("aria-pressed")) button.setAttribute("aria-pressed", "false");
+    camada.hidden = true;
+    guide.show();
+  }
+  for (const button of modos) {
+    button.addEventListener("click", () => {
+      if (button.dataset.modo !== "tela") return enterMode(button.dataset.modo);
+      leaveMode();
+      const m = mesaBox();
+      const x = Math.max(0, -m.left);
+      const y = Math.max(0, -m.top);
+      capture({ x, y, w: Math.min(innerWidth, m.right) - Math.max(0, m.left), h: Math.min(innerHeight, m.bottom) - Math.max(0, m.top) });
+    });
+  }
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && mode) { event.stopImmediatePropagation(); leaveMode(); }
+  }, true);
+
+  /** The window under a point, topmost first. */
+  function windowAt(clientX, clientY) {
+    return windows.filter(shown)
+      .sort((a, b) => (+b.style.zIndex || 0) - (+a.style.zIndex || 0))
+      .find((win) => {
+        const r = win.getBoundingClientRect();
+        return clientX >= r.left && clientX <= r.right && clientY >= r.top && clientY <= r.bottom;
+      });
+  }
+  function selection(a, b) {
+    const m = mesaBox();
+    const x = clamp(Math.min(a.x, b.x), 0, m.width);
+    const y = clamp(Math.min(a.y, b.y), 0, m.height);
+    return { x, y, w: clamp(Math.max(a.x, b.x), 0, m.width) - x, h: clamp(Math.max(a.y, b.y), 0, m.height) - y };
+  }
+  function drawSelection(point) {
+    const r = selection(dragStart, point);
+    const s = onScreen(r);
+    const W = innerWidth;
+    const H = innerHeight;
+    const top = clamp(s.top, 0, H);
+    const bottom = clamp(s.top + s.height, 0, H);
+    sombras.cima.style.transform = `scale(1, ${top / H})`;
+    sombras.baixo.style.transform = `translate(0, ${bottom}px) scale(1, ${(H - bottom) / H})`;
+    sombras.esquerda.style.transform = `translate(0, ${top}px) scale(${s.left / W}, ${(bottom - top) / H})`;
+    sombras.direita.style.transform = `translate(${s.left + s.width}px, ${top}px) scale(${(W - s.left - s.width) / W}, ${(bottom - top) / H})`;
+    retangulo.style.transform = `translate(${s.left}px, ${s.top}px)`;
+    retangulo.style.width = `${s.width}px`;
+    retangulo.style.height = `${s.height}px`;
+    medida.textContent = `${Math.round(r.w)} × ${Math.round(r.h)}`;
+    const p = onScreen({ x: point.x, y: point.y, w: 0, h: 0 });
+    medida.style.transform = `translate(${clamp(p.left + 14, 4, W - 90)}px, ${clamp(p.top + 14, 4, H - 24)}px)`;
+  }
+
+  camada.addEventListener("pointerdown", (event) => {
+    if (mode === "janela") {
+      const win = windowAt(event.clientX, event.clientY);
+      if (!win) return;
+      const area = onDesk(win.getBoundingClientRect());
+      leaveMode();
+      capture(area);
+      return;
     }
+    const m = mesaBox();
+    dragStart = { x: event.clientX - m.left, y: event.clientY - m.top };
+    camada.setPointerCapture(event.pointerId);
+    camada.classList.add("escolhendo");
+    drawSelection(dragStart);
+  });
+  camada.addEventListener("pointermove", (event) => {
+    const m = mesaBox();
+    if (mode === "janela") {
+      const win = windowAt(event.clientX, event.clientY);
+      if (!win) { destaque.style.display = "none"; return; }
+      const r = win.getBoundingClientRect();
+      destaque.style.cssText = `display:block;transform:translate(${r.left}px, ${r.top}px);width:${r.width}px;height:${r.height}px`;
+      return;
+    }
+    if (dragStart) drawSelection({ x: event.clientX - m.left, y: event.clientY - m.top });
+  });
+  camada.addEventListener("pointerup", (event) => {
+    if (mode !== "selecao" || !dragStart) return;
+    const m = mesaBox();
+    const area = selection(dragStart, { x: event.clientX - m.left, y: event.clientY - m.top });
+    leaveMode();
+    if (area.w >= 10 && area.h >= 10) capture(area);
+  });
 
+  /** The shutter: a flash over what was taken, then the print flies into the drawer. */
+  function capture(area) {
+    const from = onScreen(area);
+    const print = takePrint(area);
+    if (!still.matches) {
+      Object.assign(clarao.style, { left: `${from.left}px`, top: `${from.top}px`, width: `${from.width}px`, height: `${from.height}px` });
+      clarao.animate([{ opacity: 0.9 }, { opacity: 0 }], { duration: 320, easing: "ease-out" });
+    }
+    guide.done("tirar");
+    requestAnimationFrame(() => setTimeout(() => receive(print, from), 0));
+  }
+
+  async function receive(print, from) {
     if (drawer.prints.length >= CAPACITY) drawer.prints.splice(0, drawer.prints.length - CAPACITY + 1);
     drawer.prints.push(print);
-    drawer.arriving.add(print.id);
     drawer.hovered = null;
-    const wasOpen = drawer.open;
-    if (!wasOpen) open(true); else render();
-    fichas.scrollTop = fichas.scrollHeight;
-
-    if (!still.matches) {
-      if (!wasOpen) await wait(380);
+    announce("Print guardado na gaveta.");
+    if (still.matches) {
+      open(true);
       render();
-      fichas.scrollTop = fichas.scrollHeight;
-      const target = within($("img", cards.get(print.id)).getBoundingClientRect());
-      const flyer = $("img", win).cloneNode();
-      flyer.className = "voando";
-      flyer.style.cssText = `width:${at.width}px;height:${at.height}px`;
-      quedas.append(flyer);
-      const scale = target.width / at.width;
-      await flyer.animate([
-        { transform: `translate(${at.left}px, ${at.top}px)`, borderRadius: "10px" },
-        { transform: `translate(${at.left + (target.left - at.left) * 0.35}px, ${at.top - 30}px) scale(${0.5 + scale * 0.5})`, offset: 0.4 },
-        { transform: `translate(${target.left}px, ${target.top}px) scale(${scale})`, borderRadius: `${6 / scale}px` },
-      ], { duration: 620, easing: "cubic-bezier(.3,.7,.2,1)" }).finished;
-      flyer.remove();
+      return;
     }
+    drawer.arriving.add(print.id);
+    open(true);
+    render();
+    fichas.scrollTop = fichas.scrollHeight;
+    // Where the front card's picture will stand once the drawer has slid out:
+    // from the layout, since the drawer is still on its way there.
+    const at = geometry.get(print.id);
+    const index = drawer.prints.indexOf(print);
+    const scroll = Math.max(0, layout.height - (placement.height - L.rail * 2 - L.footer));
+    const target = {
+      left: document.documentElement.clientWidth - 10 - drawer.width + S.left + at.x,
+      top: placement.top + L.rail + layout.tops[index] - scroll + at.y,
+      width: at.w,
+      height: at.h,
+    };
+    const flyer = picture(print, from.width, from.height);
+    flyer.className = "voando";
+    quedas.append(flyer);
+    const k = target.width / from.width;
+    const ky = target.height / from.height;
+    await flyer.animate([
+      { transform: `translate(${from.left}px, ${from.top}px)`, opacity: 1 },
+      { transform: `translate(${from.left + (target.left - from.left) * 0.3}px, ${from.top - 24}px) scale(${0.55 + k * 0.45}, ${0.55 + ky * 0.45})`, offset: 0.35 },
+      { transform: `translate(${target.left}px, ${target.top}px) scale(${k}, ${ky})`, opacity: 1 },
+    ], { duration: 640, easing: "cubic-bezier(.3,.7,.2,1)" }).finished;
+    flyer.remove();
     drawer.arriving.delete(print.id);
     render();
-    announce("Print na gaveta.");
-    busy = false;
-  });
+    gaveta.classList.remove("tranco");
+    void gaveta.offsetWidth;
+    gaveta.classList.add("tranco");
+  }
 
   // ── opening and closing ─────────────────────────────────────────────────
 
@@ -474,6 +782,7 @@
     drawer.pinned = drawer.pinned || pinned;
     visited = false;
     clearTimeout(away);
+    trayButton.setAttribute("aria-pressed", "true");
     if (drawer.open) return;
     drawer.open = true;
     render();
@@ -488,9 +797,11 @@
     drawer.hovered = null;
     drawer.selection.clear();
     gaveta.dataset.estado = "fechada";
+    trayButton.setAttribute("aria-pressed", "false");
     render();
   }
   borda.addEventListener("click", () => open(true));
+  trayButton.addEventListener("click", () => (drawer.open ? close() : open(true)));
 
   // The pointer resting on the screen's right edge pulls the handle taut, then the drawer springs out.
   const DWELL = 260;
@@ -514,12 +825,10 @@
   addEventListener("pointermove", (event) => {
     pointer.x = event.clientX;
     pointer.y = event.clientY;
-    if (event.pointerType !== "mouse" || resizing) return;
-    const screen = palco.getBoundingClientRect();
-    const onScreen = event.clientX >= screen.left && event.clientX <= screen.right && event.clientY >= screen.top + L.menus && event.clientY <= screen.bottom;
+    if (event.pointerType !== "mouse" || resizing || dragging || mode) return;
     if (!drawer.open) {
-      if (onScreen && event.clientX >= screen.right - 8) {
-        borda.style.top = `${clamp(event.clientY - screen.top, 90, screen.height - 90)}px`;
+      if (event.clientX >= innerWidth - 4 && event.clientY > L.top) {
+        borda.style.top = `${clamp(event.clientY, 100, innerHeight - 100)}px`;
         if (!dwellSince) {
           dwellSince = performance.now();
           borda.classList.add("visivel");
@@ -529,13 +838,15 @@
       return;
     }
     const r = painel.getBoundingClientRect();
-    const inside = event.clientX >= r.left - 24 && event.clientX <= r.right + 8 && event.clientY >= r.top - 24 && event.clientY <= r.bottom + 24;
+    const inside = event.clientX >= r.left - 24 && event.clientY >= r.top - 24 && event.clientY <= r.bottom + 24;
     if (inside) { visited = true; clearTimeout(away); away = 0; return; }
     if (drawer.pinned) return;
     if (!away) away = setTimeout(() => { away = 0; close(); }, 500);
   }, { passive: true });
-  palco.addEventListener("pointerdown", (event) => {
-    if (drawer.open && !gaveta.contains(event.target) && !captura.contains(event.target)) close();
+  document.addEventListener("pointerdown", (event) => {
+    if (!drawer.open || gaveta.contains(event.target)) return;
+    if (event.target.closest(".captura, #menus-gaveta, .borda-alca, .guia, .colar")) return;
+    close();
   });
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape" && drawer.open) close();
@@ -546,8 +857,8 @@
 
   /** A line that bends like an elastic band, its middle ahead of its ends. */
   const elastic = (path, length, centre) => ({ path, length, centre, value: 0, speed: 0, target: 0, frame: 0 });
-  const gripBend = elastic(alcaLinha, 40, 13);
-  const bordaBend = elastic(bordaLinha, 72, 13);
+  const gripBend = elastic($("#alca-linha"), 40, 13);
+  const bordaBend = elastic($("#borda-linha"), 72, 13);
   function drawBend(b) {
     b.path.setAttribute("d", `M${b.centre} 2 Q${(b.centre + b.value * 2).toFixed(2)} ${b.length / 2} ${b.centre} ${b.length - 2}`);
   }
@@ -635,16 +946,65 @@
     render();
   });
 
+  // ── the guide: take, copy, paste ────────────────────────────────────────
+
+  const guide = (() => {
+    const box = $("#guia");
+    const step = $("#guia-passo");
+    const text = $("#guia-texto");
+    const done = new Set();
+    let off = false;
+    let hideTimer = 0;
+    const STEPS = [
+      ["tirar", "1 de 3 · Tirar", fine.matches
+        ? "Tire um print desta mesa: escolha <b>Seleção</b> e arraste sobre a loja."
+        : "Tire um print: toque em <b>Seleção</b> e arraste o dedo sobre a loja."],
+      ["copiar", "2 de 3 · Copiar", fine.matches
+        ? "Clique no print na gaveta para copiar. <b>⌘-clique</b> escolhe vários."
+        : "Toque no print na gaveta para copiar, ou nos círculos para escolher vários."],
+      ["colar", "3 de 3 · Colar", fine.matches
+        ? "Cole no chamado com <b>⌘V</b>, ou arraste o print da gaveta até ele."
+        : "Toque em <b>Colar</b> no chamado."],
+    ];
+    function show() {
+      clearTimeout(hideTimer);
+      if (off) { box.hidden = true; return; }
+      box.hidden = false;
+      if (mode) {
+        step.textContent = mode === "janela" ? "Janela" : "Seleção";
+        text.innerHTML = mode === "janela"
+          ? "Clique numa janela para fotografá-la. <b>Esc</b> cancela."
+          : fine.matches ? "Arraste sobre qualquer coisa. <b>Esc</b> cancela." : "Arraste o dedo sobre o que quer guardar.";
+        return;
+      }
+      const next = STEPS.find(([key]) => !done.has(key));
+      if (!next) {
+        step.textContent = "Pronto";
+        text.innerHTML = "É assim no seu Mac: cada print cai na gaveta, e um <b>⌘V</b> cola todos.";
+        hideTimer = setTimeout(() => { box.hidden = true; }, 7000);
+        return;
+      }
+      step.textContent = next[1];
+      text.innerHTML = next[2];
+    }
+    $("#guia-fechar").addEventListener("click", () => { off = true; show(); });
+    return {
+      show,
+      done(key) {
+        if (key === "colar" && !done.has("copiar")) done.add("copiar");
+        if (key === "copiar" && !done.has("tirar")) done.add("tirar");
+        done.add(key);
+        show();
+      },
+    };
+  })();
+
   drawBend(gripBend);
   drawBend(bordaBend);
   drawer.width = standard();
   render();
-
-  // The drawer slides out the first time the screen comes into view.
-  const shown = new IntersectionObserver((entries) => {
-    if (!entries.some((entry) => entry.isIntersecting)) return;
-    shown.disconnect();
-    setTimeout(() => open(true), still.matches ? 0 : 500);
-  }, { threshold: 0.45 });
-  shown.observe(palco);
+  guide.show();
+  // The drawer slides out a moment after the page shows, with three prints already in it;
+  // on a phone it would cover the page, so there it waits at the edge.
+  if (!phone()) setTimeout(() => { if (!mode) open(true); }, still.matches ? 0 : 700);
 })();
