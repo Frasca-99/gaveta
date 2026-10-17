@@ -61,8 +61,11 @@ final class CardsControlView: NSView, NSDraggingSource {
     // MARK: Finding the card
 
     private func hit(_ event: NSEvent) -> (pin: Pin, part: CardStack.Part)? {
+        hit(at: convert(event.locationInWindow, from: nil))
+    }
+
+    private func hit(at point: NSPoint) -> (pin: Pin, part: CardStack.Part)? {
         guard let drawer else { return nil }
-        let point = convert(event.locationInWindow, from: nil)
         guard let found = stack.hit(point, shift: { self.shift(of: $0, in: drawer) }),
               found.index < cards.count else { return nil }
         return (cards[found.index], found.part)
@@ -98,9 +101,31 @@ final class CardsControlView: NSView, NSDraggingSource {
     }
 
     private func updateHover(_ event: NSEvent) {
+        updateHover(at: convert(event.locationInWindow, from: nil))
+    }
+
+    private func updateHover(at point: NSPoint) {
+        // A drag out, or Quick Look opening under a force click, keeps the
+        // mouse-up from ever reaching this view. With the button no longer
+        // down, that press is over: without this, the card under the pointer
+        // would not light up (nor show its X) until the next click.
+        if pressed != nil, NSEvent.pressedMouseButtons & 1 == 0 { endPress() }
         guard let drawer, drawer.dragging.isEmpty, pressed == nil else { return }
-        let id = hit(event)?.pin.id
+        let id = hit(at: point)?.pin.id
         if drawer.hovered != id { drawer.hovered = id }
+    }
+
+    /// Hover from where the pointer is now, for when it has not moved since.
+    private func refreshHover() {
+        guard let window else { return }
+        updateHover(at: convert(window.mouseLocationOutsideOfEventStream, from: nil))
+    }
+
+    private func endPress() {
+        pressed = nil
+        dragStarted = false
+        pressUsed = false
+        holdTimer?.invalidate()
     }
 
     // MARK: Clicks
@@ -232,6 +257,8 @@ final class CardsControlView: NSView, NSDraggingSource {
     func draggingSession(_ session: NSDraggingSession, endedAt screenPoint: NSPoint, operation: NSDragOperation) {
         drawer?.dragEnded(dragged, operation: operation)
         dragged = []
+        endPress()
+        refreshHover()
     }
 }
 
