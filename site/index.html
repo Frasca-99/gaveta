@@ -325,17 +325,47 @@ button { font: inherit; color: inherit; }
 .ficha-uso {
   position: absolute; z-index: 9; right: 44px; top: calc(var(--menus) + 36%); width: 252px;
   padding: 14px 18px 16px; border-radius: 3px; transform: rotate(1.8deg);
+  user-select: none; -webkit-user-select: none; touch-action: none; cursor: grab;
+}
+/* the paper of both index cards: a red rule under the title, faint blue lines below */
+.ficha-uso, .como-instalar {
   background:
     linear-gradient(transparent 38px, rgba(196, 64, 52, 0.55) 38px, rgba(196, 64, 52, 0.55) 39.5px, transparent 39.5px),
     repeating-linear-gradient(transparent 0 23px, rgba(70, 110, 160, 0.22) 23px 24px) 0 40px / 100% calc(100% - 40px) no-repeat,
     #fffdf6;
   box-shadow: 0 1px 1px rgba(0, 0, 0, 0.06), 0 14px 30px -12px rgba(58, 42, 20, 0.45);
   font: 400 13px/24px var(--datilo); color: var(--tinta-marrom);
-  user-select: none; -webkit-user-select: none; touch-action: none; cursor: grab;
 }
-.ficha-uso-titulo { margin: 0 0 10px; font-size: 14px; letter-spacing: 0.12em; text-transform: uppercase; line-height: 16px; }
+.ficha-uso-titulo, .como-instalar-titulo { margin: 0 0 10px; font-size: 14px; letter-spacing: 0.12em; text-transform: uppercase; line-height: 16px; }
 .ficha-uso ul { list-style: none; margin: 0; padding: 0; }
 .ficha-uso b { font-weight: 700; }
+
+/* how to install: a card that comes out under the buttons, after the download or from the note */
+.nota-link {
+  padding: 0; border: 0; background: none; font: inherit; color: var(--feltro); cursor: pointer;
+  text-decoration: underline; text-decoration-color: rgba(31, 74, 58, 0.35); text-underline-offset: 3px;
+}
+.nota-link:hover { text-decoration-color: currentColor; }
+.como-instalar {
+  position: fixed; inset: auto; left: var(--x, 50%); top: var(--y, 30%); margin: 0;
+  width: min(372px, calc(100vw - 24px)); padding: 14px 22px 16px 20px; border: 0; border-radius: 3px; overflow: visible;
+  translate: -50% 0; rotate: -0.6deg;
+  transition: opacity 180ms ease, translate 260ms cubic-bezier(0.2, 0, 0, 1);
+}
+@starting-style {
+  .como-instalar:popover-open { opacity: 0; translate: -50% -8px; }
+}
+.como-instalar ol { margin: 0; padding: 0 0 0 1.5em; }
+.como-instalar b { font-weight: 700; }
+.como-instalar-baixando { margin: 0; color: var(--feltro); font-weight: 700; }
+.como-instalar-nota { margin: 0; color: var(--meta); }
+.como-instalar-nota a { color: var(--feltro); text-underline-offset: 3px; }
+.como-instalar-fechar {
+  position: absolute; top: 6px; right: 6px; width: 32px; height: 32px; display: grid; place-items: center;
+  padding: 0; border: 0; border-radius: 50%; background: none; color: var(--tinta-marrom); cursor: pointer;
+}
+.como-instalar-fechar:hover { background: rgba(58, 42, 20, 0.08); }
+.como-instalar-fechar svg { width: 10px; height: 10px; }
 
 /* the files on the desk: the two figures */
 .arquivos { position: absolute; z-index: 5; top: calc(var(--menus) + 18px); right: 34px; display: flex; gap: 6px; }
@@ -746,7 +776,7 @@ button { font: inherit; color: inherit; }
   .ficha, .ficha .foto { transition-duration: 0.15s; transition-timing-function: ease; }
   .anexo, .solto.chegando, .realce { animation: none; }
   .solto.voltando, .solto.saindo { transition: none; }
-  .dock-app, .botao { transition: none; }
+  .dock-app, .botao, .como-instalar { transition: none; }
 }
 </style>
 </head>
@@ -759,10 +789,10 @@ button { font: inherit; color: inherit; }
       <h1 id="titulo">Seus prints, <span>numa&nbsp;gaveta.</span></h1>
       <p class="chamada">Cada print que você tira cai numa gaveta na borda da tela. Escolha vários e cole todos de uma vez.</p>
       <div class="acoes">
-        <a class="botao" href="https://github.com/Frasca-99/gaveta/releases/latest"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3v10M5.5 8.5 10 13l4.5-4.5M4 16.5h12"/></svg>Baixar para Mac</a>
+        <a class="botao" href="https://github.com/Frasca-99/gaveta/releases/latest/download/Gaveta.zip" data-baixar><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3v10M5.5 8.5 10 13l4.5-4.5M4 16.5h12"/></svg>Baixar para Mac</a>
         <a class="botao botao-claro" href="https://github.com/Frasca-99/gaveta">Código no GitHub</a>
       </div>
-      <p class="nota">Grátis e de código aberto · macOS&nbsp;14 ou mais novo</p>
+      <p class="nota">Grátis e de código aberto · macOS&nbsp;14 ou mais novo · <button class="nota-link" type="button" popovertarget="como-instalar">Como instalar</button></p>
       <p class="convite" id="convite">Esta mesa funciona: tire um print com a barra lá embaixo.</p>
     </section>
 
@@ -878,7 +908,7 @@ button { font: inherit; color: inherit; }
   <div class="menu-gaveta" id="menu-gaveta" role="menu" aria-label="Gaveta" hidden>
     <button type="button" role="menuitem" data-acao="alternar">Abrir a gaveta <kbd>⌃⌥G</kbd></button>
     <hr>
-    <a role="menuitem" href="https://github.com/Frasca-99/gaveta/releases/latest">Baixar a Gaveta para Mac</a>
+    <a role="menuitem" href="https://github.com/Frasca-99/gaveta/releases/latest/download/Gaveta.zip" data-baixar>Baixar a Gaveta para Mac</a>
     <a role="menuitem" href="https://github.com/Frasca-99/gaveta">Código no GitHub</a>
   </div>
 
@@ -924,6 +954,17 @@ button { font: inherit; color: inherit; }
     <p class="guia-passo" id="guia-passo"></p>
     <p class="guia-texto" id="guia-texto"></p>
     <button class="guia-fechar" type="button" id="guia-fechar" aria-label="Fechar o guia"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M1.5 1.5l7 7M8.5 1.5l-7 7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
+  </div>
+  <div class="como-instalar" id="como-instalar" popover role="dialog" aria-labelledby="como-instalar-titulo">
+    <p class="como-instalar-titulo" id="como-instalar-titulo">Como instalar</p>
+    <p class="como-instalar-baixando" id="como-instalar-baixando" hidden>O Gaveta.zip está baixando.</p>
+    <ol>
+      <li>Abra o <b>Gaveta.zip</b> e arraste a Gaveta para <b>Aplicativos</b>.</li>
+      <li>Abra a Gaveta. Na primeira vez, o macOS avisa que não pôde verificá-la.</li>
+      <li>Em <b>Ajustes do Sistema → Privacidade e Segurança</b>, clique em <b>Abrir Mesmo Assim</b>.</li>
+    </ol>
+    <p class="como-instalar-nota">No macOS&nbsp;14: botão direito na Gaveta → <b>Abrir</b>. O aviso aparece porque a Gaveta é grátis e não tem a assinatura paga da Apple. <a href="https://github.com/Frasca-99/gaveta/releases/latest">Mais no GitHub</a></p>
+    <button class="como-instalar-fechar" type="button" popovertarget="como-instalar" popovertargetaction="hide" aria-label="Fechar"><svg viewBox="0 0 10 10" aria-hidden="true"><path d="M1.5 1.5l7 7M8.5 1.5l-7 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
   </div>
   <div class="voos" id="voos" aria-hidden="true"></div>
   <p class="so-leitor" id="aviso" role="status"></p>
@@ -3034,6 +3075,35 @@ draw(performance.now());
   document.addEventListener("pointerdown", (event) => {
     if (!menuGaveta.hidden && !menuGaveta.contains(event.target) && !menuIcon.contains(event.target)) showMenu(false);
   });
+
+  // ── the download: the zip comes straight from GitHub, and a card says how to open it the first time ──
+
+  const install = $("#como-instalar");
+  if (install.showPopover) {
+    // under the buttons, wherever the opening stands at this width
+    const placeInstall = () => {
+      const buttons = $(".acoes").getBoundingClientRect();
+      install.style.setProperty("--x", `${buttons.left + buttons.width / 2}px`);
+      install.style.setProperty("--y", `${buttons.bottom + 12}px`);
+    };
+    install.addEventListener("beforetoggle", (event) => {
+      if (event.newState === "open") placeInstall();
+      else $("#como-instalar-baixando").hidden = true;
+    });
+    addEventListener("resize", () => { if (install.matches(":popover-open")) placeInstall(); });
+    for (const link of $$("[data-baixar]")) {
+      link.addEventListener("click", () => {
+        if (!menuGaveta.hidden) showMenu(false);
+        if (!install.matches(":popover-open")) install.showPopover();
+        $("#como-instalar-baixando").hidden = false;
+      });
+    }
+  } else {
+    // without popovers the zip still downloads; the release page has the same steps
+    const release = $(".como-instalar-nota a").href;
+    install.remove();
+    $(".nota-link").replaceWith(Object.assign(document.createElement("a"), { href: release, textContent: "Como instalar" }));
+  }
 
   // ── prints ──────────────────────────────────────────────────────────────
 
