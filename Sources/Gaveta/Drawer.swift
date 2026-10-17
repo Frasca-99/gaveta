@@ -302,7 +302,12 @@ final class Drawer: ObservableObject {
     func discard(_ id: UUID, thrown: Bool = false, delay: TimeInterval = 0) {
         guard let pin = pin(id) else { return }
         if isInGavetaFolder(pin) {
-            try? FileManager.default.trashItem(at: pin.url, resultingItemURL: nil)
+            // Off the main thread: moving a file to the Trash is disk work,
+            // and the drawer must answer the pointer the moment the card goes.
+            let url = pin.url
+            DispatchQueue.global(qos: .utility).async {
+                try? FileManager.default.trashItem(at: url, resultingItemURL: nil)
+            }
         }
         guard thrown, let frame = frameOnScreen?(id), let onToss else { return remove(id) }
         departing.insert(id)

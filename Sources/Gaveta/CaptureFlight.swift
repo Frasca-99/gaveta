@@ -210,35 +210,22 @@ final class Flights {
         CATransaction.commit()
     }
 
-    /// Room around a card's picture for its tab above and its shadow.
-    private static let tossPadding = EdgeInsets(top: 30, leading: 14, bottom: 16, trailing: 14)
     private static let tossDuration: CFTimeInterval = 0.64
 
     /// Throws `pin`'s card out of the drawer from `card`, its place on
-    /// screen, after `delay` seconds.
+    /// screen, after `delay` seconds. The card is built from plain layers,
+    /// ready at once: drawing it as an image first held the drawer up for a
+    /// moment on every X, and the next card had to wait.
     func toss(_ pin: Pin, from card: CGRect, on screen: NSScreen, delay: CFTimeInterval, glass: Bool = false) {
         guard !NSWorkspace.shared.accessibilityDisplayShouldReduceMotion else { return }
-        // The card as it stands, whole, without the marks the pointer brings.
-        let pad = Self.tossPadding
-        let face = glass
-            ? AnyView(GlassCardView(pin: pin, reveal: CardStack.cardHeight))
-            : AnyView(CardView(pin: pin, reveal: CardStack.cardHeight, hovered: false, selected: false,
-                               selecting: false, copied: false, dragging: false))
-        let renderer = ImageRenderer(content: face.padding(pad))
-        renderer.scale = screen.backingScaleFactor
-        guard let image = renderer.cgImage else { return }
         let window = overlay(on: screen)
         guard let root = window.contentView?.layer else { return }
         inFlight += 1
 
         let origin = window.frame.origin
-        let frame = CGRect(x: card.minX - pad.leading - origin.x, y: card.minY - pad.bottom - origin.y,
-                           width: card.width + pad.leading + pad.trailing, height: card.height + pad.top + pad.bottom)
-        let flyer = CALayer()
+        let frame = CGRect(x: card.minX - origin.x, y: card.minY - origin.y, width: card.width, height: card.height)
+        let flyer = cardFace(for: pin, glass: glass, scale: screen.backingScaleFactor)
         flyer.frame = frame
-        flyer.contents = image
-        flyer.contentsGravity = .resize
-        flyer.contentsScale = screen.backingScaleFactor
 
         let start = CGPoint(x: frame.midX, y: frame.midY)
         let pulled = CGPoint(x: start.x - 90, y: start.y + 30)
@@ -284,6 +271,77 @@ final class Flights {
             flyer.add(animation, forKey: animation.keyPath)
         }
         CATransaction.commit()
+    }
+
+    /// A card as it stands whole, without the marks the pointer brings, in
+    /// layers (y up): the paper or the glass drawer's card, the picture, the
+    /// words, and the tab on top for the card catalog.
+    private func cardFace(for pin: Pin, glass: Bool, scale: CGFloat) -> CALayer {
+        let size = CGSize(width: CardStack.cardWidth, height: CardStack.cardHeight)
+        var paper = Self.paper
+        var meta = Self.meta
+        var edge = NSColor.black.withAlphaComponent(0.08).cgColor
+        if glass {
+            NSApp.effectiveAppearance.performAsCurrentDrawingAppearance {
+                paper = NSColor.controlBackgroundColor.cgColor
+                meta = NSColor.secondaryLabelColor.cgColor
+                edge = NSColor.labelColor.withAlphaComponent(0.08).cgColor
+            }
+        }
+        let radius = glass ? GlassCardView.radius : 4
+        let face = CALayer()
+        face.bounds = CGRect(origin: .zero, size: size)
+        face.backgroundColor = paper
+        face.cornerRadius = radius
+        face.cornerCurve = .continuous
+        if glass {
+            face.borderWidth = 0.5
+            face.borderColor = edge
+        }
+        face.shadowColor = NSColor.black.cgColor
+        face.shadowOpacity = glass ? 0.16 : 0.28
+        face.shadowRadius = glass ? 10 : 6
+        face.shadowOffset = CGSize(width: 0, height: glass ? 2 : 4)
+        face.shadowPath = CGPath(roundedRect: face.bounds, cornerWidth: radius, cornerHeight: radius, transform: nil)
+        face.contentsScale = scale
+
+        let photo = CardStack.photoSize(for: pin.thumbnail.size, reveal: CardStack.cardHeight)
+        let top = glass ? GlassCardView.photoTop(photo, whole: true) : CardStack.border
+        let picture = CALayer()
+        picture.frame = CGRect(x: CardStack.border + (CardStack.photoWidth - photo.width) / 2, y: size.height - top - photo.height,
+                               width: photo.width, height: photo.height)
+        picture.contents = pin.thumbnail.cgImage(forProposedRect: nil, context: nil, hints: nil)
+        picture.contentsGravity = .resize
+        picture.cornerRadius = glass ? 6 : 2
+        picture.cornerCurve = .continuous
+        picture.masksToBounds = true
+        face.addSublayer(picture)
+
+        let age = RelativeTime.string(for: pin.date, now: Date())
+        let wordsTop = glass ? GlassCardView.captionTop : top + photo.height + 6
+        let caption = Self.text("\(pin.kind) · \(pin.detail)", font: .systemFont(ofSize: 11), color: meta, scale: scale)
+        caption.frame = CGRect(x: CardStack.border + (glass ? 2 : 0), y: size.height - wordsTop - 14, width: size.width - 16, height: 14)
+        face.addSublayer(caption)
+
+        if glass {
+            let when = Self.text(age, font: .systemFont(ofSize: 11), color: meta, scale: scale)
+            when.alignmentMode = .right
+            when.frame = CGRect(x: CardStack.border, y: caption.frame.minY, width: CardStack.photoWidth - 2, height: 14)
+            face.addSublayer(when)
+        } else {
+            let tab = CALayer()
+            tab.frame = CGRect(x: CardStack.tabX, y: size.height, width: CardStack.tabSize.width, height: CardStack.tabSize.height)
+            tab.backgroundColor = paper
+            tab.cornerRadius = 5
+            tab.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
+            let label = Self.text(age, font: NSFont(name: "American Typewriter", size: 11) ?? .systemFont(ofSize: 11),
+                                  color: Self.ink, scale: scale)
+            label.alignmentMode = .center
+            label.frame = tab.bounds.insetBy(dx: 0, dy: 2)
+            tab.addSublayer(label)
+            face.addSublayer(tab)
+        }
+        return face
     }
 
     private func finished() {
