@@ -123,29 +123,42 @@ struct GripControl: NSViewRepresentable {
         private var start: (x: CGFloat, width: CGFloat)?
         private var last: (x: CGFloat, time: TimeInterval) = (0, 0)
         private var stillTimer: Timer?
-        private var tracking: NSTrackingArea?
+        /// Watches where the pointer is while the drawer is out.
+        private var watch: Timer?
+        private var inside = false
 
         override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
 
-        override func updateTrackingAreas() {
-            super.updateTrackingAreas()
-            if let tracking { removeTrackingArea(tracking) }
-            // Like the cards' area: no cursor updates, which AppKit only sends
-            // to the app in front and which kept the grip from hearing the
-            // pointer at all while the Gaveta stays in the background.
-            let area = NSTrackingArea(rect: .zero, options: [.mouseEnteredAndExited, .mouseMoved, .activeAlways, .inVisibleRect],
-                                      owner: self, userInfo: nil)
-            addTrackingArea(area)
-            tracking = area
+        // The Gaveta stays in the background, so it does not hear the pointer
+        // pass the way the app in front does, and that app keeps setting its
+        // own cursor as the mouse moves. So the grip watches the pointer
+        // itself, like the edge of the screen does, and while it is on the
+        // grip it puts the divider cursor back each time.
+        override func viewDidMoveToWindow() {
+            super.viewDidMoveToWindow()
+            watch?.invalidate()
+            watch = nil
+            guard window != nil else { return }
+            let timer = Timer(timeInterval: 1.0 / 60, repeats: true) { [weak self] _ in
+                MainActor.assumeIsolated { self?.look() }
+            }
+            RunLoop.main.add(timer, forMode: .common)
+            watch = timer
         }
 
-        override func mouseEntered(with event: NSEvent) {
-            hover?(true)
-            cursor().set()
+        private func look() {
+            guard let window, window.isVisible, start == nil else { return }
+            let pointer = window.convertPoint(fromScreen: NSEvent.mouseLocation)
+            let now = bounds.contains(convert(pointer, from: nil)) && window.occlusionState.contains(.visible)
+            if now {
+                if !inside { hover?(true) }
+                cursor().set()
+            } else if inside {
+                hover?(false)
+                NSCursor.arrow.set()
+            }
+            inside = now
         }
-        // The drawer's own views put the arrow back as the pointer moves:
-        // the grip sets its cursor again on every move.
-        override func mouseMoved(with event: NSEvent) { cursor().set() }
 
         /// The divider cursor, a bar with an arrow either side, as macOS
         /// gives for moving a divider; at a limit it points only the way the
@@ -156,10 +169,6 @@ struct GripControl: NSViewRepresentable {
             if width >= DrawerLayout.widestBox(for: window?.screen) - 0.5 { return .columnResize(directions: .right) }
             if width <= DrawerLayout.standardBoxWidth + 0.5 { return .columnResize(directions: .left) }
             return .columnResize
-        }
-        override func mouseExited(with event: NSEvent) {
-            hover?(false)
-            if start == nil { NSCursor.arrow.set() }
         }
 
         override func mouseDown(with event: NSEvent) {
