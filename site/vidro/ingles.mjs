@@ -25,6 +25,7 @@ export const pagina = [
   ["Cada print que você tira cai numa gaveta na borda da tela. Escolha vários e cole todos de uma vez.",
     "Every screenshot you take lands in a drawer at the edge of the screen. Pick several and paste them all at once."],
   ["Grátis · macOS 14+", "Free · macOS 14+"],
+  ['aria-label="Copiar o comando de instalação"', 'aria-label="Copy the install command"'],
 
   // the shop
   ['data-app="Navegador" aria-label="Navegador: a loja deu erro no pagamento"', 'data-app="Browser" aria-label="Browser: the shop failed to take the payment"'],
@@ -92,6 +93,8 @@ export const vidro = [
   ['"1 print colado no chamado."', '"1 screenshot pasted into the ticket."'],
   ["`${prints.length} prints colados no chamado, de uma vez.`", "`${prints.length} screenshots pasted into the ticket, at once.`"],
   ['"Print na lixeira."', '"Screenshot in the Trash."'],
+  ['"Comando copiado. Cole no Terminal."', '"Command copied. Paste it in Terminal."'],
+  ['"Comando selecionado. Copie com ⌘C e cole no Terminal."', '"Command selected. Copy it with ⌘C and paste it in Terminal."'],
   ['"Print guardado na gaveta."', '"Screenshot kept in the drawer."'],
 
   // the guide

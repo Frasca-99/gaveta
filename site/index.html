@@ -116,6 +116,30 @@ kbd {
 .botao:hover { background: #262626; }
 .botao:active { transform: scale(0.96); }
 .botao svg { width: 17px; height: 17px; }
+/* the Terminal install line: one copy away, under the button */
+.comando {
+  display: flex; align-items: center; gap: 4px; max-width: 30rem; margin: 1.1rem auto 0; padding: 4px 4px 4px 14px; border-radius: 12px;
+  background: rgba(255, 255, 255, 0.7); box-shadow: 0 0 0 1px var(--linha), 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+.comando-texto {
+  flex: 1; min-width: 0; overflow-x: auto; white-space: nowrap; text-align: left; scrollbar-width: none; overscroll-behavior-x: contain;
+  font: 400 12.5px/34px var(--mono); color: var(--tinta-suave); -webkit-user-select: all; user-select: all;
+}
+.comando-texto::-webkit-scrollbar { display: none; }
+/* the line fades out at the right while there is more of it to scroll to */
+.comando-texto.continua { -webkit-mask-image: linear-gradient(90deg, #000 82%, transparent); mask-image: linear-gradient(90deg, #000 82%, transparent); }
+/* the mask would hide the focus ring, so it goes while the keys are on the line */
+.comando-texto.continua:focus-visible { -webkit-mask-image: none; mask-image: none; }
+.comando-copiar {
+  position: relative; flex: none; display: grid; place-items: center; width: 34px; height: 34px; padding: 0; border: 0; border-radius: 9px;
+  background: none; color: var(--tinta-muda); cursor: pointer; transition: background-color 150ms var(--sai), color 150ms var(--sai), transform 120ms var(--sai);
+}
+.comando-copiar:hover { background: rgba(0, 0, 0, 0.05); color: var(--tinta); }
+.comando-copiar:active { transform: scale(0.96); }
+.comando-copiar svg { grid-area: 1 / 1; width: 16px; height: 16px; transition: opacity 150ms var(--sai), transform 220ms var(--mola); }
+.comando-copiar .icone-ok { opacity: 0; transform: scale(0.5); color: #1a7f37; }
+.comando-copiar.copiado .icone-copiar { opacity: 0; transform: scale(0.5); }
+.comando-copiar.copiado .icone-ok { opacity: 1; transform: none; }
 .nota { margin: 0.9rem 0 0; font-size: 0.8125rem; color: var(--tinta-muda); }
 
 /* ── windows ────────────────────────────────────────────────────────────── */
@@ -432,6 +456,18 @@ kbd {
 }
 
 /* ── between laptop and phone ───────────────────────────────────────────── */
+/* short desktop screens: the hero tightens and rises a little, so the line under
+   the command stays clear of the tip above the bar */
+@media (min-width: 761px) and (max-height: 720px) {
+  .abertura { transform: translate(-50%, calc(-56% - 16px)); }
+  .intro { margin-top: 0.9rem; }
+  .botao { margin-top: 1.25rem; }
+  .comando { margin-top: 0.75rem; }
+  .nota { margin-top: 0.6rem; }
+}
+/* too narrow beside the windows and the drawer for the command to be read */
+@media (min-width: 761px) and (max-width: 900px) { .comando { display: none; } }
+
 @media (max-width: 1100px) and (min-width: 761px) {
   .j-codigo { display: none; }
   :root { --janela: clamp(250px, 26vw, 300px); }
@@ -491,6 +527,13 @@ kbd {
       <svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
       GitHub
     </a>
+    <div class="comando">
+      <code class="comando-texto" id="comando-texto">curl -fsSL https://raw.githubusercontent.com/Frasca-99/gaveta/main/scripts/get.sh | bash</code>
+      <button class="comando-copiar" type="button" data-copiar="curl -fsSL https://raw.githubusercontent.com/Frasca-99/gaveta/main/scripts/get.sh | bash" aria-label="Copiar o comando de instalação">
+        <svg class="icone-copiar" viewBox="0 0 16 16" aria-hidden="true"><rect x="5" y="5" width="8.5" height="9" rx="1.6" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M2.5 10.5V3.6A1.1 1.1 0 0 1 3.6 2.5h6.9" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        <svg class="icone-ok" viewBox="0 0 16 16" aria-hidden="true"><path d="m3.5 8.4 2.9 2.9 6.1-6.4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
     <p class="nota">Grátis · macOS 14+</p>
   </section>
 
@@ -617,6 +660,29 @@ kbd {
     try { localStorage.setItem("gaveta-idioma", event.currentTarget.dataset.idioma); } catch {}
   });
 
+  // The install command: the button copies all of it; where the clipboard is
+  // out of reach, the command is selected for ⌘C instead.
+  const comando = $("#comando-texto");
+  const fades = () => comando.classList.toggle("continua", comando.scrollLeft + comando.clientWidth < comando.scrollWidth - 2);
+  comando.addEventListener("scroll", fades, { passive: true });
+  addEventListener("resize", fades);
+  fades();
+  for (const button of $$("[data-copiar]")) {
+    let timer = 0;
+    button.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(button.dataset.copiar);
+        button.classList.add("copiado");
+        announce("Comando copiado. Cole no Terminal.");
+      } catch {
+        getSelection()?.selectAllChildren(comando);
+        announce("Comando selecionado. Copie com ⌘C e cole no Terminal.");
+      }
+      clearTimeout(timer);
+      timer = setTimeout(() => button.classList.remove("copiado"), 1600);
+    });
+  }
+
   const relogio = $("#relogio");
   const tick = () => {
     relogio.textContent = new Intl.DateTimeFormat(document.documentElement.lang, { weekday: "short", hour: "2-digit", minute: "2-digit" })
@@ -720,6 +786,9 @@ kbd {
     copy.style.height = `${m.height}px`;
     copy.style.transform = `translate(${-area.x}px, ${-area.y}px)`;
     for (const child of mesa.children) if (shown(child)) copy.append(child.cloneNode(true));
+    // a scroll position is not cloned: the command keeps the slice that was on screen as an indent
+    const line = copy.querySelector(".comando-texto");
+    if (line && comando.scrollLeft) line.style.textIndent = `${-comando.scrollLeft}px`;
     for (const el of [copy, ...copy.querySelectorAll("*")]) {
       el.removeAttribute("id");
       el.removeAttribute("aria-live");

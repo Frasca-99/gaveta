@@ -25,6 +25,29 @@
     try { localStorage.setItem("gaveta-idioma", event.currentTarget.dataset.idioma); } catch {}
   });
 
+  // The install command: the button copies all of it; where the clipboard is
+  // out of reach, the command is selected for ⌘C instead.
+  const comando = $("#comando-texto");
+  const fades = () => comando.classList.toggle("continua", comando.scrollLeft + comando.clientWidth < comando.scrollWidth - 2);
+  comando.addEventListener("scroll", fades, { passive: true });
+  addEventListener("resize", fades);
+  fades();
+  for (const button of $$("[data-copiar]")) {
+    let timer = 0;
+    button.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(button.dataset.copiar);
+        button.classList.add("copiado");
+        announce("Comando copiado. Cole no Terminal.");
+      } catch {
+        getSelection()?.selectAllChildren(comando);
+        announce("Comando selecionado. Copie com ⌘C e cole no Terminal.");
+      }
+      clearTimeout(timer);
+      timer = setTimeout(() => button.classList.remove("copiado"), 1600);
+    });
+  }
+
   const relogio = $("#relogio");
   const tick = () => {
     relogio.textContent = new Intl.DateTimeFormat(document.documentElement.lang, { weekday: "short", hour: "2-digit", minute: "2-digit" })
@@ -128,6 +151,9 @@
     copy.style.height = `${m.height}px`;
     copy.style.transform = `translate(${-area.x}px, ${-area.y}px)`;
     for (const child of mesa.children) if (shown(child)) copy.append(child.cloneNode(true));
+    // a scroll position is not cloned: the command keeps the slice that was on screen as an indent
+    const line = copy.querySelector(".comando-texto");
+    if (line && comando.scrollLeft) line.style.textIndent = `${-comando.scrollLeft}px`;
     for (const el of [copy, ...copy.querySelectorAll("*")]) {
       el.removeAttribute("id");
       el.removeAttribute("aria-live");
