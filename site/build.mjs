@@ -2,9 +2,9 @@
  * Builds the Gaveta landing: site/index.html in Portuguese and site/en/index.html
  * in English (its words in vidro/ingles.mjs), each one self-contained page.
  *
- * The page (site/vidro/) is white, in Geist, and at its heart is a Mac screen
- * where the glass drawer works: take a screenshot (the sample windows are in
- * assets/prints/) and it flies into the drawer at the screen's right edge.
+ * The page (site/vidro/) is one screen: a white Mac desk, in the Mac's own
+ * type, where the glass drawer works. A screenshot taken of the desk flies
+ * into the drawer at the right edge and pastes into the ticket.
  *
  *   node site/build.mjs
  *   SITE_URL=https://… node site/build.mjs   (for the link preview's absolute URLs)
@@ -109,9 +109,6 @@ function page(en) {
 <meta name="theme-color" content="#ffffff">
 <link rel="icon" type="image/png" sizes="32x32" href="${up}assets/favicon-32.png">
 <link rel="apple-touch-icon" href="${up}assets/apple-touch-icon.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400..600&family=Geist+Mono:wght@400;500&display=swap">
 <style>${read("vidro/vidro.css")}</style>
 </head>
 <body>
