@@ -116,11 +116,9 @@ struct GlassDrawerView: View {
         }
     }
 
-    /// Where the oak front stands: the drawer's label, typed small as on the
-    /// card catalog, how many there are, and a grip.
+    /// Where the oak front stands: only how many there are, and the grip.
     private var spine: some View {
         VStack(spacing: 14) {
-            TypedLabel(size: 11)
             Text("\(drawer.pins.count)")
                 .font(.system(size: 13, weight: .semibold, design: .rounded))
                 .monospacedDigit()
@@ -136,11 +134,10 @@ struct GlassDrawerView: View {
 
     /// What the capsule says while it is a capsule.
     private var capsuleLabel: some View {
-        VStack(spacing: 8) {
-            TypedLabel(size: 10)
-            Text("\(drawer.pins.count)").font(.system(size: 12, weight: .semibold, design: .rounded)).monospacedDigit()
-        }
-        .foregroundStyle(.secondary)
+        Text("\(drawer.pins.count)")
+            .font(.system(size: 12, weight: .semibold, design: .rounded))
+            .monospacedDigit()
+            .foregroundStyle(.secondary)
         .allowsHitTesting(false)
     }
 
@@ -308,23 +305,6 @@ struct GlassCardView: View {
         .monospacedDigit()
         .foregroundStyle(.secondary)
         .lineLimit(1)
-    }
-}
-
-/// PRINTS, typed on the typewriter of the oak drawer's label and read from
-/// bottom to top the same way: the one thing the two drawers share.
-struct TypedLabel: View {
-    let size: CGFloat
-
-    var body: some View {
-        Text("PRINTS")
-            .font(Typewriter.font(size))
-            .tracking(size * 0.32)
-            .foregroundStyle(.secondary)
-            .fixedSize()
-            .rotationEffect(.degrees(-90))
-            .frame(width: size + 6, height: size * 6.4)
-            .accessibilityHidden(true)
     }
 }
 
