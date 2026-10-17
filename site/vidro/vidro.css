@@ -1,0 +1,429 @@
+/* Gaveta, the landing: a white page in Geist with hairlines and mono labels,
+   and at its heart a Mac screen with a bright wallpaper where the glass
+   drawer works: take a screenshot, it flies in, pick, copy, throw out. */
+
+:root {
+  color-scheme: light;
+  --branco: #ffffff;
+  --fundo: #fafafa;
+  --tinta: #0a0a0a;
+  --tinta-suave: #4d4d4d;
+  --tinta-muda: #8a8a8a;
+  --linha: #ebebeb;
+  --linha-forte: #d9d9d9;
+  --foco: #0b6cf0;
+  --azul: #2f7cf6;
+  --sans: "Geist", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --mono: "Geist Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --mola: cubic-bezier(0.22, 1.18, 0.36, 1);
+  --sai: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --largura-pagina: 1180px;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 5rem; -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--branco); color: var(--tinta);
+  font: 400 1rem/1.6 var(--sans); -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+}
+main { overflow-x: clip; }
+img { display: block; max-width: 100%; }
+a { color: inherit; }
+button { font: inherit; color: inherit; }
+kbd {
+  display: inline-block; min-width: 1.5em; padding: 0 0.35em; border-radius: 6px;
+  border: 1px solid var(--linha-forte); border-bottom-width: 2px; background: var(--branco);
+  font: 500 0.82em/1.5 var(--mono); text-align: center; color: var(--tinta); vertical-align: 0.06em;
+}
+:focus-visible { outline: 2px solid var(--foco); outline-offset: 3px; border-radius: 6px; }
+.pular {
+  position: fixed; z-index: 100; left: 1rem; top: -4rem; padding: 0.5rem 0.9rem; border-radius: 8px;
+  background: var(--tinta); color: var(--branco); text-decoration: none; font-size: 0.875rem;
+}
+.pular:focus { top: 1rem; }
+.etiqueta, .passo-numero, .detalhe-rotulo, .opcao-rotulo, .nota, .dicas, .rodape {
+  font: 500 0.6875rem/1.6 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--tinta-muda);
+}
+
+/* ── header ─────────────────────────────────────────────────────────────── */
+.topo {
+  position: sticky; z-index: 40; top: 0;
+  background: color-mix(in srgb, var(--branco) 82%, transparent);
+  backdrop-filter: saturate(1.8) blur(14px); -webkit-backdrop-filter: saturate(1.8) blur(14px);
+  border-bottom: 1px solid transparent; transition: border-color 200ms var(--sai);
+}
+.topo.rolou { border-bottom-color: var(--linha); }
+.topo-dentro {
+  display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 1rem;
+  max-width: var(--largura-pagina); height: 64px; margin: 0 auto; padding: 0 1.5rem;
+}
+.marca { display: inline-flex; align-items: center; gap: 0.55rem; font-weight: 600; letter-spacing: -0.01em; text-decoration: none; justify-self: start; }
+.marca img { border-radius: 6px; }
+.topo-nav { display: flex; gap: 0.25rem; }
+.topo-nav a {
+  padding: 0.35rem 0.75rem; border-radius: 8px; color: var(--tinta-suave); font-size: 0.875rem; text-decoration: none;
+  transition: color 150ms var(--sai), background-color 150ms var(--sai);
+}
+.topo-nav a:hover { color: var(--tinta); background: var(--fundo); }
+.topo-acoes { display: flex; gap: 0.5rem; justify-self: end; }
+.botao-fino {
+  display: inline-flex; align-items: center; gap: 0.45rem; height: 34px; padding: 0 0.8rem; border-radius: 8px;
+  border: 1px solid var(--linha-forte); background: var(--branco); font: 500 0.8125rem var(--sans); text-decoration: none;
+  transition: background-color 150ms var(--sai), border-color 150ms var(--sai), transform 120ms var(--sai);
+}
+.botao-fino:hover { background: var(--fundo); }
+.botao-fino:active, .botao:active { transform: scale(0.96); }
+.botao-fino svg { width: 15px; height: 15px; }
+.botao-fino.botao-escuro { background: var(--tinta); border-color: var(--tinta); color: var(--branco); }
+.botao-fino.botao-escuro:hover { background: #2a2a2a; }
+
+/* ── opening ────────────────────────────────────────────────────────────── */
+.abertura {
+  position: relative; isolation: isolate; max-width: 880px; margin: 0 auto; padding: clamp(4rem, 10vh, 6.5rem) 1.5rem 3.5rem; text-align: center;
+}
+.abertura::before { /* a faint grid, fading out from the middle */
+  content: ""; position: absolute; z-index: -1; inset: -64px -30vw 0; pointer-events: none;
+  background:
+    linear-gradient(var(--linha) 1px, transparent 1px) 0 0 / 64px 64px,
+    linear-gradient(90deg, var(--linha) 1px, transparent 1px) 0 0 / 64px 64px;
+  mask-image: radial-gradient(ellipse 50% 70% at 50% 30%, #000 10%, transparent 75%);
+  -webkit-mask-image: radial-gradient(ellipse 50% 70% at 50% 30%, #000 10%, transparent 75%);
+  opacity: 0.7;
+}
+.abertura .etiqueta {
+  display: inline-flex; margin: 0 0 1.75rem; padding: 0.3rem 0.8rem; border: 1px solid var(--linha); border-radius: 999px; background: var(--branco);
+}
+.titulo {
+  margin: 0; font-size: clamp(2.6rem, 7vw, 5rem); line-height: 1.02; font-weight: 600; letter-spacing: -0.045em; text-wrap: balance;
+}
+.titulo span, .secao-titulo span { color: var(--tinta-muda); }
+.intro { max-width: 34rem; margin: 1.5rem auto 0; color: var(--tinta-suave); font-size: clamp(1.05rem, 1.6vw, 1.2rem); line-height: 1.6; text-wrap: pretty; }
+.acoes { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.75rem; margin-top: 2.25rem; }
+.botao {
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.55rem; min-height: 46px; padding: 0 1.25rem;
+  border-radius: 10px; border: 1px solid var(--linha-forte); background: var(--branco); cursor: pointer;
+  font: 500 0.9375rem var(--sans); text-decoration: none;
+  transition: background-color 150ms var(--sai), transform 120ms var(--sai);
+}
+.botao:hover { background: var(--fundo); }
+.botao svg { width: 16px; height: 16px; }
+.botao.botao-escuro { background: var(--tinta); border-color: var(--tinta); color: var(--branco); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.14); }
+.botao.botao-escuro:hover { background: #262626; }
+.nota { margin: 1.25rem 0 0; }
+
+/* ── the Mac, with the drawer working on it ─────────────────────────────── */
+.vitrine { max-width: calc(var(--largura-pagina) + 3rem); margin: 0 auto; padding: 0 1.5rem; }
+.moldura {
+  padding: 8px; border-radius: 22px; background: var(--fundo); border: 1px solid var(--linha);
+  box-shadow: 0 40px 80px -40px rgba(10, 30, 80, 0.35), 0 12px 24px -16px rgba(0, 0, 0, 0.18);
+}
+.palco {
+  --barra-menus: 28px;
+  position: relative; overflow: hidden; isolation: isolate; aspect-ratio: 16 / 10; min-height: 560px; border-radius: 14px;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.06); user-select: none; -webkit-user-select: none; touch-action: manipulation;
+}
+.papel-de-parede {
+  position: absolute; z-index: -1; inset: 0; overflow: hidden;
+  background:
+    radial-gradient(110% 80% at 0% 0%, #cfe6ff 0%, transparent 55%),
+    radial-gradient(70% 70% at 100% 0%, #ffd6bd 0%, transparent 55%),
+    radial-gradient(90% 90% at 75% 100%, #6c8cff 0%, transparent 60%),
+    radial-gradient(70% 80% at 0% 100%, #2e5ae6 0%, transparent 62%),
+    linear-gradient(160deg, #eaf2ff 0%, #9bb8ff 60%, #ff9f7a 120%);
+}
+.mancha { position: absolute; border-radius: 50%; filter: blur(40px); opacity: 0.85; }
+.mancha.m1 { width: 38%; aspect-ratio: 1; right: 6%; top: 8%; background: radial-gradient(circle, #ff7a59, transparent 70%); }
+.mancha.m2 { width: 30%; aspect-ratio: 1; right: -4%; bottom: 4%; background: radial-gradient(circle, #8a5cff, transparent 70%); }
+.mancha.m3 { width: 34%; aspect-ratio: 1; left: 18%; bottom: -12%; background: radial-gradient(circle, #36c2ff, transparent 70%); }
+@media (prefers-reduced-motion: no-preference) {
+  .mancha { animation: deriva 18s ease-in-out infinite alternate; }
+  .mancha.m2 { animation-duration: 23s; animation-delay: -6s; }
+  .mancha.m3 { animation-duration: 27s; animation-delay: -12s; }
+}
+@keyframes deriva { to { transform: translate(-6%, 8%) scale(1.12); } }
+
+.barra-menus {
+  position: absolute; z-index: 3; inset: 0 0 auto; height: var(--barra-menus); display: flex; align-items: center; gap: 14px; padding: 0 14px;
+  background: rgba(255, 255, 255, 0.28); backdrop-filter: blur(20px) saturate(1.6); -webkit-backdrop-filter: blur(20px) saturate(1.6);
+  color: #111; font: 500 12px var(--sans); font-variant-numeric: tabular-nums;
+}
+.barra-menus .espaco { flex: 1; }
+.barra-menus svg { width: 15px; height: 15px; }
+
+.janela {
+  position: absolute; margin: 0; border-radius: 10px; overflow: hidden; background: #fff;
+  box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.22), 0 22px 50px -14px rgba(10, 20, 60, 0.45), 0 6px 14px -6px rgba(10, 20, 60, 0.25);
+}
+.janela img { width: 100%; height: auto; pointer-events: none; }
+.j-painel { left: 5%; top: 13%; width: 46%; }
+.j-codigo { left: 44%; top: 8%; width: 40%; }
+.j-erro { left: 31%; top: 47%; width: 27%; }
+
+.selecao {
+  position: absolute; z-index: 20; pointer-events: none; opacity: 0;
+  border: 1px solid rgba(255, 255, 255, 0.95); background: rgba(47, 124, 246, 0.12);
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.22);
+}
+.clarao { position: absolute; z-index: 21; inset: 0; background: #fff; opacity: 0; pointer-events: none; }
+
+.captura {
+  position: absolute; z-index: 10; left: 50%; bottom: 18px; transform: translateX(-50%);
+  display: inline-flex; align-items: center; gap: 0.5rem; height: 40px; padding: 0 0.6rem 0 0.9rem; border: 0; border-radius: 999px; cursor: pointer;
+  background: rgba(255, 255, 255, 0.34); color: #111; font: 500 0.875rem var(--sans); white-space: nowrap;
+  backdrop-filter: blur(22px) saturate(1.8); -webkit-backdrop-filter: blur(22px) saturate(1.8);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85), inset 0 0 0 1px rgba(255, 255, 255, 0.4), 0 10px 30px -10px rgba(10, 20, 60, 0.45);
+  transition: transform 140ms var(--sai), background-color 150ms var(--sai);
+}
+.captura:hover { background: rgba(255, 255, 255, 0.5); }
+.captura:active { transform: translateX(-50%) scale(0.96); }
+.captura svg { width: 16px; height: 16px; }
+.captura kbd { border-color: rgba(0, 0, 0, 0.12); background: rgba(255, 255, 255, 0.6); font-size: 0.72rem; }
+@media (prefers-reduced-motion: no-preference) {
+  .captura.chama::after {
+    content: ""; position: absolute; inset: -4px; border-radius: inherit; border: 2px solid rgba(255, 255, 255, 0.85);
+    animation: chama 1.8s var(--sai) infinite; pointer-events: none;
+  }
+}
+@keyframes chama { from { opacity: 0.9; transform: scale(1); } to { opacity: 0; transform: scale(1.12, 1.4); } }
+
+.dicas {
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem 2rem; margin: 1.5rem 0 0; padding: 0; list-style: none;
+}
+.dicas li span { margin-right: 0.5rem; color: var(--tinta); }
+.dicas kbd { font-size: 0.68rem; text-transform: none; letter-spacing: 0; }
+
+/* ── the glass drawer, at the screen's right edge ────────────────────────── */
+.gaveta {
+  --largura: 300px;          /* the box the cards stand in */
+  --frente: 58px;            /* the spine */
+  --altura: 420px;
+  --raio-esq: 26px;
+  --vidro: rgba(255, 255, 255, 0.26);
+  --vidro-traco: rgba(0, 0, 0, 0.08);
+  position: absolute; z-index: 12; top: var(--topo, 80px); right: 0;
+  width: calc(var(--frente) + var(--largura)); height: var(--altura);
+  pointer-events: none;
+  transition: transform 460ms var(--mola), height 300ms var(--mola), top 300ms var(--mola), width 0ms;
+}
+.gaveta[data-estado="aberta"] { transform: translateX(-10px); pointer-events: auto; }
+/* shut, only the capsule the drawer grows out of is left, just past the edge */
+.gaveta[data-estado="fechada"] { transform: translateX(76px); }
+.gaveta.puxando { transition: transform 460ms var(--mola), height 300ms var(--mola), top 300ms var(--mola); }
+.gaveta.puxando .ficha, .gaveta.puxando .ficha-foto { transition: none; }
+.gaveta.voltando { transition: transform 460ms var(--mola), height 300ms var(--mola), top 300ms var(--mola), width 420ms var(--mola); }
+.painel {
+  position: absolute; inset: 0 0 0 auto; width: 100%; display: flex; overflow: hidden;
+  border-radius: var(--raio-esq) 26px 26px var(--raio-esq);
+  background: var(--vidro);
+  backdrop-filter: blur(24px) saturate(1.9) brightness(1.06);
+  -webkit-backdrop-filter: blur(24px) saturate(1.9) brightness(1.06);
+  box-shadow:
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.5),
+    0 30px 60px -20px rgba(10, 20, 60, 0.45),
+    0 8px 20px -10px rgba(10, 20, 60, 0.3);
+  transition: border-radius 420ms var(--mola), width 520ms var(--mola), height 520ms var(--mola);
+}
+.painel::before { /* the light the glass catches */
+  content: ""; position: absolute; inset: 0; pointer-events: none; border-radius: inherit;
+  background: linear-gradient(155deg, rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0.08) 28%, transparent 55%, rgba(255, 255, 255, 0.14));
+}
+.painel::after { /* its rim, bright where the light hits */
+  content: ""; position: absolute; inset: 0; pointer-events: none; border-radius: inherit; padding: 1.2px;
+  background: linear-gradient(140deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.2) 30%, rgba(255, 255, 255, 0.05) 60%, rgba(255, 255, 255, 0.7));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+}
+.gaveta[data-estado="fechada"] .painel { width: 52px; height: 128px; top: calc(50% - 64px); bottom: auto; }
+.gaveta.puxando .painel, .gaveta.voltando .painel { transition: border-radius 420ms var(--mola), width 520ms var(--mola), height 520ms var(--mola); }
+
+.espinha {
+  position: relative; z-index: 1; flex: none; width: var(--frente);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; color: #1a1a1a;
+}
+.espinha::after { content: ""; position: absolute; right: 0; top: 22px; bottom: 22px; width: 1px; background: var(--vidro-traco); }
+.espinha-icone { width: 17px; height: 17px; opacity: 0.75; }
+.conta { font: 600 13px var(--sans); font-variant-numeric: tabular-nums; margin-bottom: 4px; }
+.alca {
+  width: 38px; height: 60px; padding: 0; border: 0; background: none; cursor: col-resize;
+  display: grid; place-items: center; touch-action: none;
+}
+.alca svg { width: 26px; height: 40px; overflow: visible; }
+.alca path { fill: none; stroke: #000; stroke-opacity: 0.22; stroke-width: 4; stroke-linecap: round; transition: stroke-opacity 150ms var(--sai), stroke-width 150ms var(--sai); }
+.alca:hover path, .gaveta.puxando .alca path { stroke-opacity: 0.5; stroke-width: 5; }
+
+.caixa { position: relative; z-index: 1; flex: 1; min-width: 0; display: flex; flex-direction: column; padding: 10px 0; }
+.fichas { position: relative; flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; scrollbar-width: none; overscroll-behavior: contain; }
+.fichas::-webkit-scrollbar { display: none; }
+.pilha { position: relative; }
+.gaveta:not([data-estado="aberta"]) .caixa, .gaveta:not([data-estado="aberta"]) .espinha > * { opacity: 0; transition: opacity 120ms; }
+.gaveta[data-estado="aberta"] .caixa { opacity: 1; transition: opacity 260ms 120ms; }
+
+.ficha {
+  position: absolute; left: 0; top: 0;
+  border-radius: 12px; background: #fff; color: #111;
+  box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.1), 0 -2px 12px -2px rgba(0, 0, 0, 0.14);
+  transition: transform 260ms var(--mola), opacity 200ms var(--sai), box-shadow 160ms var(--sai);
+  cursor: default; contain: layout;
+}
+.ficha.chegando .ficha-foto { opacity: 0; }
+.ficha.escolhida { box-shadow: 0 0 0 2px var(--azul), 0 -2px 12px -2px rgba(0, 0, 0, 0.14); }
+.ficha-foto {
+  position: absolute; border-radius: 6px; object-fit: fill; box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.1);
+  transition: width 260ms var(--mola), height 260ms var(--mola), transform 260ms var(--mola), opacity 120ms;
+  user-select: none; -webkit-user-drag: none; pointer-events: none;
+}
+.ficha-legenda {
+  position: absolute; display: flex; gap: 8px; font: 400 11px/14px var(--sans); color: #8a8a8a;
+  font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+.ficha-legenda span { overflow: hidden; text-overflow: ellipsis; }
+.ficha-legenda .idade { margin-left: auto; flex: none; }
+.ficha-faixa { position: absolute; display: grid; gap: 2px; font: 400 11px/14px var(--sans); color: #8a8a8a; font-variant-numeric: tabular-nums; }
+.ficha-faixa span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ficha-faixa .tipo { color: #111; font-weight: 500; }
+.ficha-bolinha, .ficha-x {
+  position: absolute; top: 14px; width: 20px; height: 20px; border-radius: 50%;
+  display: grid; place-items: center; opacity: 0; transform: scale(0.6);
+  transition: opacity 150ms var(--sai), transform 150ms var(--sai);
+}
+.ficha-bolinha { left: 14px; background: rgba(0, 0, 0, 0.3); box-shadow: inset 0 0 0 1.5px #fff, 0 0.5px 1.5px rgba(0, 0, 0, 0.35); }
+.ficha-x { right: 14px; background: rgba(0, 0, 0, 0.7); color: #fff; box-shadow: 0 0.5px 1.5px rgba(0, 0, 0, 0.35); }
+.ficha-x svg { width: 9px; height: 9px; }
+.ficha.aberta .ficha-bolinha, .ficha.aberta .ficha-x, .escolhendo .ficha-bolinha, .ficha.escolhida .ficha-bolinha { opacity: 1; transform: none; }
+@media (hover: none) { .ficha .ficha-bolinha, .ficha .ficha-x { opacity: 1; transform: none; } }
+.ficha.escolhida .ficha-bolinha { background: var(--azul); box-shadow: inset 0 0 0 1.5px #fff; }
+.ficha.escolhida .ficha-bolinha::after { content: ""; width: 8px; height: 4px; border: 2px solid #fff; border-top: 0; border-right: 0; transform: translateY(-1px) rotate(-45deg); }
+.ficha-copiado {
+  position: absolute; padding: 6px 12px; border-radius: 999px; background: rgba(0, 0, 0, 0.72); color: #fff;
+  font: 600 12px var(--sans); white-space: nowrap; transform: translate(-50%, -50%) scale(0.8); opacity: 0;
+  transition: opacity 180ms var(--sai), transform 300ms var(--mola); pointer-events: none;
+}
+.ficha.copiada .ficha-copiado { opacity: 1; transform: translate(-50%, -50%); }
+
+.barra {
+  flex: none; height: 44px; display: flex; align-items: center; gap: 7px; padding: 0 12px 0 14px;
+  border-top: 1px solid var(--vidro-traco); margin: 0 4px; font: 400 11px var(--sans); color: rgba(0, 0, 0, 0.5); white-space: nowrap;
+}
+.barra .quantos { color: #111; font: 600 12px var(--sans); font-variant-numeric: tabular-nums; }
+.barra .espaco { flex: 1; }
+.pilula-barra {
+  display: inline-flex; align-items: center; gap: 4px; height: 24px; padding: 0 10px; border: 0; border-radius: 999px;
+  background: rgba(255, 255, 255, 0.55); box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.08); color: #111; font: 500 11px var(--sans); cursor: pointer;
+  transition: transform 120ms var(--sai), background-color 150ms var(--sai);
+}
+.pilula-barra:hover { background: rgba(255, 255, 255, 0.8); }
+.pilula-barra:active { transform: scale(0.96); }
+.pilula-barra.principal { background: var(--azul); color: #fff; box-shadow: none; }
+.pilula-barra.so-icone { padding: 0 7px; }
+.pilula-barra svg { width: 10px; height: 10px; }
+.vazia { display: none; flex: 1; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 0 28px; text-align: center; }
+.vazia p { margin: 0; color: rgba(0, 0, 0, 0.55); font-size: 12px; }
+.vazia .vazia-titulo { color: #111; font: 600 14px var(--sans); }
+.gaveta.esta-vazia .vazia { display: flex; }
+.gaveta.esta-vazia .fichas, .gaveta.esta-vazia .barra { display: none; }
+
+/* the handle at the screen's edge: resting there while the drawer is shut,
+   taut as the pointer leans on the edge */
+.borda-alca {
+  position: absolute; z-index: 11; right: 0; top: 50%; width: 36px; height: 120px; padding: 0 6px 0 0; border: 0; background: none;
+  display: grid; place-items: center end; cursor: pointer; opacity: 0; pointer-events: none;
+  transform: translate(16px, -50%); transition: opacity 160ms var(--sai), transform 220ms var(--sai);
+}
+.gaveta[data-estado="fechada"] ~ .borda-alca { opacity: 0.75; pointer-events: auto; transform: translate(0, -50%); }
+.borda-alca.visivel, .gaveta[data-estado="fechada"] ~ .borda-alca:hover { opacity: 1; transform: translate(0, -50%); }
+.borda-alca svg { width: 26px; height: 72px; overflow: visible; }
+.borda-alca path { fill: none; stroke: #fff; stroke-width: 5; stroke-linecap: round; filter: drop-shadow(-0.5px 1px 2px rgba(0, 0, 0, 0.35)); }
+
+/* cards thrown out, and screenshots flying in, move in a layer of their own */
+.quedas { position: absolute; z-index: 30; inset: 0; pointer-events: none; }
+.quedas .ficha { transition: none; }
+.voando { position: absolute; left: 0; top: 0; border-radius: 10px; box-shadow: 0 18px 40px -12px rgba(10, 20, 60, 0.5); transform-origin: 0 0; }
+
+/* ── sections ───────────────────────────────────────────────────────────── */
+.secao { max-width: var(--largura-pagina); margin: 0 auto; padding: clamp(5rem, 12vh, 8rem) 1.5rem 0; }
+.secao-cabeca { margin-bottom: 3rem; }
+.secao-cabeca .etiqueta { margin: 0 0 1rem; }
+.secao-titulo { margin: 0; font-size: clamp(2rem, 4.4vw, 3.25rem); line-height: 1.06; font-weight: 600; letter-spacing: -0.04em; text-wrap: balance; }
+.secao-titulo kbd { font-size: 0.6em; border-radius: 10px; padding: 0 0.3em; vertical-align: 0.12em; letter-spacing: 0; }
+
+/* the steps on one rail, a point each */
+.linha { position: relative; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 2rem; margin: 0; padding: 0; list-style: none; }
+.linha::before { content: ""; position: absolute; left: 0; right: 0; top: 7px; height: 1px; background: var(--linha-forte); }
+.trilho { position: relative; display: block; height: 15px; margin-bottom: 1.5rem; }
+.ponto {
+  position: absolute; left: 0; top: 0; width: 15px; height: 15px; border-radius: 50%;
+  background: var(--branco); border: 1px solid var(--linha-forte); transition: background-color 200ms var(--sai), border-color 200ms var(--sai), transform 200ms var(--sai);
+}
+.passo:hover .ponto { background: var(--tinta); border-color: var(--tinta); transform: scale(1.1); }
+.passo-numero { margin: 0 0 0.6rem; }
+.passo-titulo { margin: 0 0 0.5rem; font-size: 1.125rem; font-weight: 600; letter-spacing: -0.02em; }
+.passo-texto { margin: 0; color: var(--tinta-suave); font-size: 0.9375rem; line-height: 1.65; text-wrap: pretty; }
+
+/* the details, a grid drawn in hairlines */
+.detalhes {
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; margin: 0; padding: 0; list-style: none;
+  border: 1px solid var(--linha); border-radius: 16px; overflow: hidden; background: var(--linha);
+}
+.detalhes li { padding: 1.75rem; background: var(--branco); transition: background-color 200ms var(--sai); }
+.detalhes li:hover { background: var(--fundo); }
+.detalhes p { margin: 0; color: var(--tinta-suave); font-size: 0.9375rem; line-height: 1.6; text-wrap: pretty; }
+.detalhes .detalhe-rotulo { margin-bottom: 0.75rem; color: var(--tinta); }
+
+/* install */
+.instalar { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1fr); gap: 1rem; }
+.opcao { min-width: 0; padding: 1.5rem; border: 1px solid var(--linha); border-radius: 16px; background: var(--branco); }
+.opcao-principal { border-color: var(--linha-forte); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 8px 24px -12px rgba(0, 0, 0, 0.12); }
+.opcao p { margin: 0.8rem 0 0; color: var(--tinta-suave); font-size: 0.9375rem; line-height: 1.6; }
+.opcao .opcao-rotulo { margin: 0; color: var(--tinta-muda); }
+.opcao a { text-underline-offset: 3px; text-decoration-color: var(--linha-forte); }
+.opcao a:hover { text-decoration-color: currentColor; }
+.comando {
+  display: flex; align-items: center; gap: 0.5rem; margin-top: 1rem; padding: 0.4rem 0.4rem 0.4rem 0.9rem;
+  border: 1px solid var(--linha); border-radius: 10px; background: var(--fundo);
+}
+.comando code { flex: 1; min-width: 0; overflow-x: auto; white-space: nowrap; font: 400 0.8125rem/2 var(--mono); scrollbar-width: none; }
+.comando code::-webkit-scrollbar { display: none; }
+.copiar {
+  flex: none; height: 32px; padding: 0 0.8rem; border: 1px solid var(--linha-forte); border-radius: 8px; background: var(--branco); cursor: pointer;
+  font: 500 0.8125rem var(--sans); transition: background-color 150ms var(--sai), transform 120ms var(--sai);
+}
+.copiar:hover { background: var(--fundo); }
+.copiar:active { transform: scale(0.96); }
+
+.rodape {
+  display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.75rem 2rem;
+  max-width: var(--largura-pagina); margin: clamp(5rem, 12vh, 8rem) auto 0; padding: 2rem 1.5rem 3rem; border-top: 1px solid var(--linha);
+}
+.rodape a { text-underline-offset: 3px; }
+
+.aviso { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; margin: -1px; }
+
+/* ── narrower windows and phones ────────────────────────────────────────── */
+@media (max-width: 960px) {
+  .linha { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 3rem; }
+  .linha::before { display: none; }
+  .detalhes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .instalar { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 760px) {
+  .topo-dentro { grid-template-columns: 1fr auto; }
+  .topo-nav { display: none; }
+  .vitrine { padding: 0 0.75rem; }
+  .moldura { padding: 5px; border-radius: 18px; }
+  .palco { aspect-ratio: auto; height: 600px; min-height: 0; }
+  .j-painel { left: 4%; top: 9%; width: 78%; }
+  .j-codigo { left: 10%; top: 40%; width: 80%; }
+  .j-erro { left: 6%; top: 58%; width: 52%; }
+  .gaveta { --frente: 50px; }
+  .captura kbd { display: none; }
+}
+@media (max-width: 560px) {
+  .linha, .detalhes { grid-template-columns: minmax(0, 1fr); }
+  .rodape { flex-direction: column; }
+  .dicas { flex-direction: column; align-items: flex-start; padding: 0 0.5rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .gaveta, .painel, .ficha, .ficha-foto, .borda-alca { transition-duration: 0.01ms !important; }
+}
