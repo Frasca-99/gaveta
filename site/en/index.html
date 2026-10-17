@@ -102,10 +102,6 @@ kbd {
   position: absolute; z-index: 1; top: 50%; left: calc((20px + var(--janela) + 100vw - var(--reserva)) / 2);
   width: min(560px, calc(100vw - var(--janela) - var(--reserva) - 64px)); transform: translate(-50%, -56%); text-align: center;
 }
-.etiqueta {
-  display: inline-flex; margin: 0 0 1.4rem; padding: 0.25rem 0.75rem; border: 1px solid var(--linha); border-radius: 999px; background: rgba(255, 255, 255, 0.7);
-  font: 500 0.6875rem/1.6 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--tinta-muda);
-}
 .titulo { margin: 0; font-size: clamp(2.4rem, 4.2vw, 4.4rem); line-height: 1.02; font-weight: 600; letter-spacing: -0.045em; text-wrap: balance; }
 .titulo span { color: var(--tinta-muda); }
 .intro { max-width: 30rem; margin: 1.2rem auto 0; color: var(--tinta-suave); font-size: clamp(1rem, 1.25vw, 1.125rem); line-height: 1.6; text-wrap: pretty; }
@@ -434,7 +430,6 @@ kbd {
   </header>
 
   <section class="abertura" aria-labelledby="titulo">
-    <p class="etiqueta">Mac app · free · open source</p>
     <h1 class="titulo" id="titulo">Your screenshots,<br><span>in a drawer.</span></h1>
     <p class="intro">Every screenshot you take lands in a drawer at the edge of the screen. Pick several and paste them all at once.</p>
     <a class="botao" href="https://github.com/Frasca-99/gaveta">

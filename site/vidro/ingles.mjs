@@ -21,7 +21,6 @@ export const pagina = [
   ['aria-label="Abrir ou fechar a gaveta"', 'aria-label="Open or close the drawer"'],
   ["qui 14:32", "Thu 2:32 PM"],
 
-  ["App para Mac · grátis · código aberto", "Mac app · free · open source"],
   ['<h1 class="titulo" id="titulo">Seus prints,<br><span>numa gaveta.</span></h1>', '<h1 class="titulo" id="titulo">Your screenshots,<br><span>in a drawer.</span></h1>'],
   ["Cada print que você tira cai numa gaveta na borda da tela. Escolha vários e cole todos de uma vez.",
     "Every screenshot you take lands in a drawer at the edge of the screen. Pick several and paste them all at once."],
