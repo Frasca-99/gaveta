@@ -103,11 +103,6 @@ button { font: inherit; color: inherit; }
 .botao:hover { background: var(--feltro-fundo); }
 .botao:active { transform: scale(0.96); }
 .botao svg { width: 17px; height: 17px; }
-.botao-claro {
-  padding: 0 20px 0 17px; background: rgba(255, 255, 255, 0.85); color: var(--tinta);
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1) inset, 0 6px 14px -8px rgba(0, 0, 0, 0.3);
-}
-.botao-claro:hover { background: #fff; }
 .nota { margin: 14px 0 0; font-size: 13px; color: var(--grafite); }
 .convite { margin: 6px 0 0; font: 400 13px/1.4 var(--datilo); color: var(--feltro); transition: opacity 200ms ease; }
 /* while the guide's first step says it, the invitation under the buttons steps back */
@@ -197,8 +192,8 @@ button { font: inherit; color: inherit; }
   padding: 14px 18px 16px; border-radius: 3px; transform: rotate(1.8deg);
   user-select: none; -webkit-user-select: none; touch-action: none; cursor: grab;
 }
-/* the paper of both index cards: a red rule under the title, faint blue lines below */
-.ficha-uso, .como-instalar {
+/* the card's paper: a red rule under the title, faint blue lines below */
+.ficha-uso {
   background:
     linear-gradient(transparent 38px, rgba(196, 64, 52, 0.55) 38px, rgba(196, 64, 52, 0.55) 39.5px, transparent 39.5px),
     repeating-linear-gradient(transparent 0 23px, rgba(70, 110, 160, 0.22) 23px 24px) 0 40px / 100% calc(100% - 40px) no-repeat,
@@ -206,36 +201,10 @@ button { font: inherit; color: inherit; }
   box-shadow: 0 1px 1px rgba(0, 0, 0, 0.06), 0 14px 30px -12px rgba(58, 42, 20, 0.45);
   font: 400 13px/24px var(--datilo); color: var(--tinta-marrom);
 }
-.ficha-uso-titulo, .como-instalar-titulo { margin: 0 0 10px; font-size: 14px; letter-spacing: 0.12em; text-transform: uppercase; line-height: 16px; }
+.ficha-uso-titulo { margin: 0 0 10px; font-size: 14px; letter-spacing: 0.12em; text-transform: uppercase; line-height: 16px; }
 .ficha-uso ul { list-style: none; margin: 0; padding: 0; }
 .ficha-uso b { font-weight: 700; }
 
-/* how to install: a card that comes out under the buttons, after the download or from the note */
-.nota-link {
-  padding: 0; border: 0; background: none; font: inherit; color: var(--feltro); cursor: pointer;
-  text-decoration: underline; text-decoration-color: rgba(31, 74, 58, 0.35); text-underline-offset: 3px;
-}
-.nota-link:hover { text-decoration-color: currentColor; }
-.como-instalar {
-  position: fixed; inset: auto; left: var(--x, 50%); top: var(--y, 30%); margin: 0;
-  width: min(372px, calc(100vw - 24px)); padding: 14px 22px 16px 20px; border: 0; border-radius: 3px; overflow: visible;
-  translate: -50% 0; rotate: -0.6deg;
-  transition: opacity 180ms ease, translate 260ms cubic-bezier(0.2, 0, 0, 1);
-}
-@starting-style {
-  .como-instalar:popover-open { opacity: 0; translate: -50% -8px; }
-}
-.como-instalar ol { margin: 0; padding: 0 0 0 1.5em; }
-.como-instalar b { font-weight: 700; }
-.como-instalar-baixando { margin: 0; color: var(--feltro); font-weight: 700; }
-.como-instalar-nota { margin: 0; color: var(--meta); }
-.como-instalar-nota a { color: var(--feltro); text-underline-offset: 3px; }
-.como-instalar-fechar {
-  position: absolute; top: 6px; right: 6px; width: 32px; height: 32px; display: grid; place-items: center;
-  padding: 0; border: 0; border-radius: 50%; background: none; color: var(--tinta-marrom); cursor: pointer;
-}
-.como-instalar-fechar:hover { background: rgba(58, 42, 20, 0.08); }
-.como-instalar-fechar svg { width: 10px; height: 10px; }
 
 /* the files on the desk: the two figures */
 .arquivos { position: absolute; z-index: 5; top: calc(var(--menus) + 18px); right: 34px; display: flex; gap: 6px; }
@@ -683,5 +652,5 @@ button { font: inherit; color: inherit; }
   .ficha, .ficha .foto { transition-duration: 0.15s; transition-timing-function: ease; }
   .anexo, .solto.chegando, .realce { animation: none; }
   .solto.voltando, .solto.saindo { transition: none; }
-  .dock-app, .botao, .como-instalar, .lixeira-lista li { transition: none; }
+  .dock-app, .botao, .lixeira-lista li { transition: none; }
 }

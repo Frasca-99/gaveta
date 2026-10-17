@@ -288,35 +288,6 @@
     if (!menuGaveta.hidden && !menuGaveta.contains(event.target) && !menuIcon.contains(event.target)) showMenu(false);
   });
 
-  // ── the download: the zip comes straight from GitHub, and a card says how to open it the first time ──
-
-  const install = $("#como-instalar");
-  if (install.showPopover) {
-    // under the buttons, wherever the opening stands at this width
-    const placeInstall = () => {
-      const buttons = $(".acoes").getBoundingClientRect();
-      install.style.setProperty("--x", `${buttons.left + buttons.width / 2}px`);
-      install.style.setProperty("--y", `${buttons.bottom + 12}px`);
-    };
-    install.addEventListener("beforetoggle", (event) => {
-      if (event.newState === "open") placeInstall();
-      else $("#como-instalar-baixando").hidden = true;
-    });
-    addEventListener("resize", () => { if (install.matches(":popover-open")) placeInstall(); });
-    for (const link of $$("[data-baixar]")) {
-      link.addEventListener("click", () => {
-        if (!menuGaveta.hidden) showMenu(false);
-        if (!install.matches(":popover-open")) install.showPopover();
-        $("#como-instalar-baixando").hidden = false;
-      });
-    }
-  } else {
-    // without popovers the zip still downloads; the release page has the same steps
-    const release = $(".como-instalar-nota a").href;
-    install.remove();
-    $(".nota-link").replaceWith(Object.assign(document.createElement("a"), { href: release, textContent: "Como instalar" }));
-  }
-
   // ── prints ──────────────────────────────────────────────────────────────
 
   let serial = 0;

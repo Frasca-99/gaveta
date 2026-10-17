@@ -14,7 +14,7 @@ A landing 1 (minimalista, com as duas figuras de linha) continua na branch `land
 │  ⚠ Erro 500 ...      │     numa gaveta.                          ┌──────────────────┐          ▌ ← borda de
 └──────────────────────┘     Cada print que você tira cai          │ COMO USAR (ficha)│          ▌   carvalho
 ┌──────────────────────┐     numa gaveta na borda da tela...       │ clique copia ... │          ▌   da gaveta
-│ ● ● ●  Chamados      │     [Baixar para Mac]  [GitHub]           └──────────────────┘          ▌
+│ ● ● ●  Chamados      │     [GitHub]                              └──────────────────┘          ▌
 │ #482 O checkout não… │
 │ Anexos: [cole ⌘V]    │              [ Tela | Janela | Seleção ]
 └──────────────────────┘         [ navegador  chamados  pré-visualização │ lixo ]

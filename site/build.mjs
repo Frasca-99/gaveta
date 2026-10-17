@@ -28,15 +28,10 @@ const machine = JSON.parse(read("figuras/como-funciona/como-funciona.parts.json"
 machine.script = notice("vendor/LICENSE-anatomy.txt") + machine.script;
 
 const REPO = "https://github.com/Frasca-99/gaveta";
-// the button hands over the zip itself; the release page keeps the longer notes
-const RELEASE = `${REPO}/releases/latest`;
-const DOWNLOAD = `${RELEASE}/download/Gaveta.zip`;
 const SITE = (process.env.SITE_URL || "").replace(/\/$/, "");
 const SHARE = `${SITE}${SITE ? "/" : ""}assets/compartilhar.png`;
 
 const body = read("mesa/pagina.html")
-  .replaceAll("{{DOWNLOAD}}", DOWNLOAD)
-  .replaceAll("{{RELEASE}}", RELEASE)
   .replaceAll("{{REPO}}", REPO)
   .replace("{{ANATOMIA}}", machine.html);
 
