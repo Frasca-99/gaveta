@@ -100,8 +100,9 @@ struct DrawerView: View {
         }
         .animation(.spring(response: 0.42, dampingFraction: 0.8), value: drawer.isOpen)
         .animation(.spring(response: 0.42, dampingFraction: 0.8), value: drawer.peeking)
-        .animation(.spring(response: 0.34, dampingFraction: 0.84), value: drawer.hovered)
-        .animation(.spring(response: 0.34, dampingFraction: 0.86), value: drawer.pins.count)
+        // Quick enough to keep up with the pointer running down the stack.
+        .animation(.spring(response: 0.24, dampingFraction: 0.86), value: drawer.hovered)
+        .animation(.spring(response: 0.3, dampingFraction: 0.88), value: drawer.pins.count)
     }
 
     /// Open, out by a crack, or shut inside the edge.

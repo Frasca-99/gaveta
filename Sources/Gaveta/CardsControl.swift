@@ -23,6 +23,7 @@ struct CardsControl: NSViewRepresentable {
         view.cards = cards
         view.stack = stack
         drawer.frameOnScreen = { [weak view] id in view?.screenFrame(of: id) }
+        drawer.onRemoved = { [weak view] in view?.refreshSoon() }
     }
 }
 
@@ -142,6 +143,11 @@ final class CardsControlView: NSView, NSDraggingSource {
         }
         RunLoop.main.add(timer, forMode: .common)
         letGo = timer
+    }
+
+    /// Once the stack has been laid out again, after a card left it.
+    func refreshSoon() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.03) { [weak self] in self?.refreshHover() }
     }
 
     /// Hover from where the pointer is now, for when it has not moved since.

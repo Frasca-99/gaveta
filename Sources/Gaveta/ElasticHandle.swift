@@ -135,15 +135,33 @@ struct GripControl: NSViewRepresentable {
         // on it the Gaveta draws the divider cursor in the system's place.
         override func viewDidMoveToWindow() {
             super.viewDidMoveToWindow()
-            watch?.invalidate()
-            watch = nil
+            NotificationCenter.default.removeObserver(self, name: NSWindow.didChangeOcclusionStateNotification, object: nil)
+            stopWatching()
             leave()
-            guard window != nil else { return }
+            guard let window else { return }
+            NotificationCenter.default.addObserver(self, selector: #selector(shownOrHidden),
+                                                   name: NSWindow.didChangeOcclusionStateNotification, object: window)
+            shownOrHidden()
+        }
+
+        /// Watches only while the drawer is on screen: shut, it costs nothing.
+        @objc private func shownOrHidden() {
+            guard let window, window.isVisible, window.occlusionState.contains(.visible) else {
+                stopWatching()
+                leave()
+                return
+            }
+            guard watch == nil else { return }
             let timer = Timer(timeInterval: 1.0 / 60, repeats: true) { [weak self] _ in
                 MainActor.assumeIsolated { self?.look() }
             }
             RunLoop.main.add(timer, forMode: .common)
             watch = timer
+        }
+
+        private func stopWatching() {
+            watch?.invalidate()
+            watch = nil
         }
 
         private func look() {

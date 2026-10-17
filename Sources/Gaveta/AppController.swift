@@ -18,10 +18,15 @@ final class AppController: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private var signalSources: [DispatchSourceSignal] = []
     /// The window waiting to get narrower behind the drawer's spring.
     private var narrowing: DispatchWorkItem?
+    /// Keeps macOS from putting the Gaveta to nap in the background, which
+    /// slows its timers: it watches the screen's edge and answers the pointer.
+    private var awake: NSObjectProtocol?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         // The glass drawer's grip shows the divider cursor though the Gaveta stays in the background.
         BackgroundCursor.allow()
+        awake = ProcessInfo.processInfo.beginActivity(options: [.userInitiatedAllowingIdleSystemSleep],
+                                                      reason: "Watches the screen's edge for the drawer")
         panel = DrawerPanel(rootView: DrawerView(drawer: drawer))
         trigger = EdgeTrigger(panel: panel, drawer: drawer)
         // The glass drawer's grip changes its width: the window keeps up.

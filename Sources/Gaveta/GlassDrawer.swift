@@ -75,8 +75,9 @@ struct GlassDrawerView: View {
         // A little looser than the oak drawer: the glass settles like a drop.
         .animation(.spring(response: 0.44, dampingFraction: 0.76), value: drawer.isOpen)
         .animation(.spring(response: 0.46, dampingFraction: 0.8), value: drawer.peeking)
-        .animation(.spring(response: 0.34, dampingFraction: 0.84), value: drawer.hovered)
-        .animation(.spring(response: 0.34, dampingFraction: 0.86), value: drawer.pins.count)
+        // Quick enough to keep up with the pointer running down the stack.
+        .animation(.spring(response: 0.24, dampingFraction: 0.86), value: drawer.hovered)
+        .animation(.spring(response: 0.3, dampingFraction: 0.88), value: drawer.pins.count)
     }
 
     /// The left corners, the ones the grip pulls: stretched past the
@@ -221,7 +222,9 @@ struct GlassCardView: View {
         let top = Self.photoTop(photo, whole: whole)
         let shape = RoundedRectangle(cornerRadius: Self.radius, style: .continuous)
         ZStack(alignment: .topLeading) {
+            // The shadow comes from the card's shape alone: cheap to draw as cards move.
             shape.fill(Color(nsColor: .controlBackgroundColor))
+                .shadow(color: .black.opacity(0.16), radius: 10, y: -2)
             picture(size: photo)
                 .offset(x: CardStack.border + (slot - photo.width) / 2, y: top)
             caption(whole: whole)
@@ -252,7 +255,6 @@ struct GlassCardView: View {
                 CopiedBadge().position(x: CardStack.border + slot / 2, y: top + photo.height / 2)
             }
         }
-        .shadow(color: .black.opacity(0.16), radius: 10, y: -2)
         .scaleEffect(state.hovered && !state.dragging ? 1.012 : 1, anchor: .bottom)
         .opacity(state.hidden ? 0 : state.dragging ? 0.45 : 1)
         .animation(.easeOut(duration: 0.15), value: state.hovered)

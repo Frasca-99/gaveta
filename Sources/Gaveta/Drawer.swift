@@ -93,6 +93,9 @@ final class Drawer: ObservableObject {
     /// Throws a card out of the drawer from its place on screen, after a
     /// delay in seconds.
     var onToss: ((Pin, CGRect, TimeInterval) -> Void)?
+    /// A card left the drawer: whichever card is now under the pointer opens,
+    /// without waiting for the mouse to move. Set by the cards' control.
+    var onRemoved: (() -> Void)?
 
     /// How many captures the drawer keeps; past it, the oldest goes.
     var capacity = 50
@@ -338,12 +341,14 @@ final class Drawer: ObservableObject {
     // MARK: Helpers
 
     private func remove(_ id: UUID) {
-        withAnimation(.easeIn(duration: 0.4)) {
+        // A quick spring, not a slow ease: the next card is already on its way.
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.88)) {
             pins.removeAll { $0.id == id }
             selection.remove(id)
         }
         if hovered == id { hovered = nil }
         changed()
+        onRemoved?()
     }
 
     private func pin(_ id: UUID) -> Pin? { pins.first { $0.id == id } }

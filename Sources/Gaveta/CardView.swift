@@ -22,7 +22,9 @@ struct CardView: View {
         let whole = CardStack.isWhole(reveal)
         let photo = CardStack.photoSize(for: pin.thumbnail.size, reveal: reveal)
         ZStack(alignment: .topLeading) {
+            // The shadow comes from the paper alone: cheap to draw as cards move.
             RoundedRectangle(cornerRadius: 4, style: .continuous).fill(Palette.paper)
+                .shadow(color: .black.opacity(0.28), radius: 6, y: -4)
             // Centred in its slot, so narrow and wide captures line up and the
             // words beside them start at the same place on every card.
             let slot = whole ? CardStack.photoWidth : CardStack.bandPhotoWidth
@@ -61,7 +63,6 @@ struct CardView: View {
         .overlay(alignment: .topLeading) {
             tab.offset(x: CardStack.tabX, y: -CardStack.tabSize.height)
         }
-        .shadow(color: .black.opacity(0.28), radius: 6, y: -4)
         .opacity(hidden ? 0 : dragging ? 0.45 : 1)
         .animation(.easeOut(duration: 0.15), value: hovered)
         .animation(.easeOut(duration: 0.2), value: copied)
