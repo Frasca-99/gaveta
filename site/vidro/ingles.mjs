@@ -47,7 +47,6 @@ export const pagina = [
   ["Anexos <span", "Attachments <span"],
   ["Cole aqui com <kbd>⌘V</kbd>, ou arraste da gaveta.", "Paste here with <kbd>⌘V</kbd>, or drag from the drawer."],
   ['type="button" hidden>Colar<', 'type="button" hidden>Paste<'],
-  ['Feita por Luiz Paulo Frasca Neto · <a href="{{REPO}}">código aberto, MIT</a>', 'Made by Luiz Paulo Frasca Neto · <a href="{{REPO}}">open source, MIT</a>'],
 
   // the guide and the bar
   ['<p class="guia-passo" id="guia-passo">1 de 3 · Tirar</p>', '<p class="guia-passo" id="guia-passo">1 of 3 · Take</p>'],
