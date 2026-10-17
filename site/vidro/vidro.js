@@ -47,6 +47,11 @@
     return { left: area.x + m.left, top: area.y + m.top, width: area.w, height: area.h };
   };
   const shown = (el) => !el.hidden && el.getClientRects().length > 0;
+  /** While something is being dragged, no text on the page gets selected on the way. */
+  const noSelecting = (on) => {
+    document.documentElement.classList.toggle("sem-selecao", on);
+    if (on) getSelection()?.removeAllRanges();
+  };
 
   // Windows come to the front when touched, and move by their title bars.
   const appName = $("#app-da-frente");
@@ -532,6 +537,7 @@
     if (event.button !== 0 || event.pointerType !== "mouse" || event.metaKey || event.ctrlKey || event.shiftKey) return;
     const found = hitAt(event.clientX, event.clientY, false);
     if (!found || found.part !== "ficha") return;
+    event.preventDefault(); // a press that may become a drag never starts a text selection
     const x0 = event.clientX;
     const y0 = event.clientY;
     let ghost = null;
@@ -541,6 +547,7 @@
       if (!ghost) {
         if (Math.hypot(e.clientX - x0, e.clientY - y0) < 6) return;
         dragging = true;
+        noSelecting(true);
         dragged = true;
         drawer.hovered = null;
         render();
@@ -570,6 +577,7 @@
       removeEventListener("pointercancel", up, true);
       anexos.classList.remove("alvo");
       dragging = false;
+      noSelecting(false);
       if (!ghost) return;
       ghost.remove();
       if (over) attach(ids.map((id) => everyPrint.get(id)).filter(Boolean));
@@ -695,6 +703,7 @@
       return;
     }
     const m = mesaBox();
+    event.preventDefault();
     dragStart = { x: event.clientX - m.left, y: event.clientY - m.top };
     camada.setPointerCapture(event.pointerId);
     camada.classList.add("escolhendo");

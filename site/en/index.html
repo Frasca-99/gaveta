@@ -67,6 +67,7 @@ kbd {
   background: var(--tinta); color: var(--branco); text-decoration: none; font-size: 0.875rem;
 }
 .pular:focus { top: 2.5rem; }
+.sem-selecao, .sem-selecao * { -webkit-user-select: none !important; user-select: none !important; cursor: grabbing !important; }
 .aviso { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; margin: -1px; }
 
 /* ── the desk: one screen, nothing to scroll ────────────────────────────── */
@@ -203,7 +204,7 @@ kbd {
 .captura-modo[aria-pressed="true"] { background: var(--branco); box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.12), 0 1px 3px rgba(0, 0, 0, 0.1); }
 .captura-modo svg { width: 16px; height: 16px; }
 
-.camada { position: fixed; z-index: 70; inset: 0; cursor: crosshair; touch-action: none; }
+.camada { position: fixed; z-index: 70; inset: 0; cursor: crosshair; touch-action: none; -webkit-user-select: none; user-select: none; }
 .camada[hidden] { display: none; }
 .camada.janelas { cursor: default; }
 .sombra { position: absolute; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.2); transform-origin: 0 0; transform: scale(0); }
@@ -584,6 +585,11 @@ kbd {
     return { left: area.x + m.left, top: area.y + m.top, width: area.w, height: area.h };
   };
   const shown = (el) => !el.hidden && el.getClientRects().length > 0;
+  /** While something is being dragged, no text on the page gets selected on the way. */
+  const noSelecting = (on) => {
+    document.documentElement.classList.toggle("sem-selecao", on);
+    if (on) getSelection()?.removeAllRanges();
+  };
 
   // Windows come to the front when touched, and move by their title bars.
   const appName = $("#app-da-frente");
@@ -1069,6 +1075,7 @@ kbd {
     if (event.button !== 0 || event.pointerType !== "mouse" || event.metaKey || event.ctrlKey || event.shiftKey) return;
     const found = hitAt(event.clientX, event.clientY, false);
     if (!found || found.part !== "ficha") return;
+    event.preventDefault(); // a press that may become a drag never starts a text selection
     const x0 = event.clientX;
     const y0 = event.clientY;
     let ghost = null;
@@ -1078,6 +1085,7 @@ kbd {
       if (!ghost) {
         if (Math.hypot(e.clientX - x0, e.clientY - y0) < 6) return;
         dragging = true;
+        noSelecting(true);
         dragged = true;
         drawer.hovered = null;
         render();
@@ -1107,6 +1115,7 @@ kbd {
       removeEventListener("pointercancel", up, true);
       anexos.classList.remove("alvo");
       dragging = false;
+      noSelecting(false);
       if (!ghost) return;
       ghost.remove();
       if (over) attach(ids.map((id) => everyPrint.get(id)).filter(Boolean));
@@ -1232,6 +1241,7 @@ kbd {
       return;
     }
     const m = mesaBox();
+    event.preventDefault();
     dragStart = { x: event.clientX - m.left, y: event.clientY - m.top };
     camada.setPointerCapture(event.pointerId);
     camada.classList.add("escolhendo");
