@@ -16,6 +16,8 @@ final class AppController: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private let flights = Flights()
     private let recorder = ShortcutRecorder()
     private var signalSources: [DispatchSourceSignal] = []
+    /// The window waiting to get narrower behind the drawer's spring.
+    private var narrowing: DispatchWorkItem?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         panel = DrawerPanel(rootView: DrawerView(drawer: drawer))
@@ -23,7 +25,18 @@ final class AppController: NSObject, NSApplicationDelegate, NSMenuDelegate {
         // The glass drawer's grip changes its width: the window keeps up.
         drawer.onWidthChange = { [weak self] in
             guard let self, self.panel.isVisible, let screen = self.panel.screen else { return }
-            self.panel.place(on: screen)
+            self.narrowing?.cancel()
+            if DrawerLayout.windowWidth >= self.panel.frame.width {
+                self.panel.place(on: screen)
+                return
+            }
+            // Narrower: the drawer springs back first, so the window must not cut it.
+            let work = DispatchWorkItem { [weak self] in
+                guard let self, self.panel.isVisible, let screen = self.panel.screen else { return }
+                self.panel.place(on: screen)
+            }
+            self.narrowing = work
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.6, execute: work)
         }
         drawer.applyWidth()
         drawer.onChange = { [weak self] in self?.trigger.drawerChanged() }

@@ -50,6 +50,12 @@ final class Drawer: ObservableObject {
     @Published var glassWidth = Prefs.glassWidth {
         didSet { applyWidth() }
     }
+    /// Pulled past its widest (positive) or narrowest (negative): the
+    /// drawer gives a little, against growing resistance, and springs back
+    /// when let go.
+    @Published var stretch: CGFloat = 0 {
+        didSet { applyWidth() }
+    }
     /// The grip is being dragged: the drawer stays open wherever the pointer goes.
     var resizing = false
     /// The drawer got wider or narrower: its window has to follow.
@@ -57,7 +63,7 @@ final class Drawer: ObservableObject {
 
     /// Hands the box's width to the layout that the views and the pointer read.
     func applyWidth() {
-        let width = style == .glass ? glassWidth : DrawerLayout.standardBoxWidth
+        let width = style == .glass ? glassWidth + stretch : DrawerLayout.standardBoxWidth
         guard DrawerLayout.boxWidth != width else { return }
         DrawerLayout.boxWidth = width
         onWidthChange?()

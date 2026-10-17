@@ -35,6 +35,14 @@ struct ResizeGrip: View {
 
     /// Kept small: the glass drawer is the quiet one.
     private static let most: CGFloat = 7
+    /// Let go past a limit, the drawer comes back with a little bounce.
+    static let springBack = Animation.spring(response: 0.42, dampingFraction: 0.48)
+
+    /// How much the band bends: with the speed of the pull, and with the
+    /// tension while the drawer is held past its limits.
+    private func bend(speed: CGFloat) -> CGFloat {
+        max(-Self.most, min(Self.most, speed / 70 - drawer.stretch / 5))
+    }
 
     var body: some View {
         ElasticLine(bend: bend)
@@ -46,18 +54,20 @@ struct ResizeGrip: View {
                     drawer.resizing = true
                     return drawer.glassWidth
                 },
-                move: { width, speed in
+                move: { width, stretch, speed in
                     drawer.glassWidth = width
-                    bend = max(-Self.most, min(Self.most, speed / 70))
+                    drawer.stretch = stretch
+                    bend = bend(speed: speed)
                 },
-                pause: { bend = 0 },
+                pause: { bend = bend(speed: 0) },
                 end: {
                     drawer.resizing = false
                     Prefs.glassWidth = drawer.glassWidth
                     bend = 0
+                    withAnimation(Self.springBack) { drawer.stretch = 0 }
                 },
                 reset: {
-                    drawer.glassWidth = DrawerLayout.standardBoxWidth
+                    withAnimation(Self.springBack) { drawer.glassWidth = DrawerLayout.standardBoxWidth }
                     Prefs.glassWidth = DrawerLayout.standardBoxWidth
                 }
             ))
@@ -73,8 +83,9 @@ struct ResizeGrip: View {
 struct GripControl: NSViewRepresentable {
     /// The drag starts; returns the width it starts from.
     var begin: () -> CGFloat
-    /// The width for where the pointer is, and how fast it goes (points a second, positive to the right).
-    var move: (_ width: CGFloat, _ speed: CGFloat) -> Void
+    /// The width for where the pointer is, how far past a limit the drawer
+    /// gives, and how fast the pointer goes (points a second, positive to the right).
+    var move: (_ width: CGFloat, _ stretch: CGFloat, _ speed: CGFloat) -> Void
     /// The pointer stopped, still holding.
     var pause: () -> Void
     var end: () -> Void
@@ -92,7 +103,7 @@ struct GripControl: NSViewRepresentable {
 
     final class GripView: NSView {
         var begin: (() -> CGFloat)?
-        var move: ((CGFloat, CGFloat) -> Void)?
+        var move: ((CGFloat, CGFloat, CGFloat) -> Void)?
         var pause: (() -> Void)?
         var end: (() -> Void)?
         var reset: (() -> Void)?
@@ -138,8 +149,13 @@ struct GripControl: NSViewRepresentable {
             last = (x, event.timestamp)
             // The drawer stands against the right edge: pulling left widens it.
             let widest = DrawerLayout.widestBox(for: window?.screen)
-            let width = min(widest, max(DrawerLayout.standardBoxWidth, start.width - (x - start.x)))
-            move?(width.rounded(), speed)
+            let narrowest = DrawerLayout.standardBoxWidth
+            let wanted = start.width - (x - start.x)
+            let width = min(widest, max(narrowest, wanted))
+            // Past a limit it still gives, less and less: a rubber band.
+            // Squeezed, it gives less: the cards narrow with the drawer.
+            let stretch = Self.rubber(wanted - widest) - Self.rubber(narrowest - wanted, most: 24)
+            move?(width.rounded(), stretch, speed)
 
             // No movement for a moment: the band goes slack.
             stillTimer?.invalidate()
@@ -148,6 +164,13 @@ struct GripControl: NSViewRepresentable {
             }
             RunLoop.main.add(timer, forMode: .common)
             stillTimer = timer
+        }
+
+        /// How much a pull `beyond` a limit shows: all of it at first, then
+        /// less and less, never more than `most` points.
+        static func rubber(_ beyond: CGFloat, most: CGFloat = 44) -> CGFloat {
+            guard beyond > 0 else { return 0 }
+            return (1 - 1 / (beyond * 0.55 / most + 1)) * most
         }
 
         override func mouseUp(with event: NSEvent) {

@@ -33,14 +33,16 @@ struct GlassDrawerView: View {
             let pane = out
                 ? CGSize(width: DrawerLayout.drawerWidth, height: placement.height)
                 : CGSize(width: Self.capsule.width, height: min(Self.capsule.height, placement.height))
+            let shape = UnevenRoundedRectangle(topLeadingRadius: leading, bottomLeadingRadius: leading,
+                                               bottomTrailingRadius: Self.radius, topTrailingRadius: Self.radius,
+                                               style: .continuous)
             ZStack(alignment: .trailing) {
-                GlassPane(cornerRadius: Self.radius)
+                GlassPane(shape: shape, cornerRadius: leading)
                     .frame(width: pane.width, height: pane.height)
                 content(maximum: maximum)
                     .frame(width: DrawerLayout.drawerWidth, height: placement.height)
                     .mask(alignment: .trailing) {
-                        RoundedRectangle(cornerRadius: Self.radius, style: .continuous)
-                            .frame(width: pane.width, height: pane.height)
+                        shape.frame(width: pane.width, height: pane.height)
                     }
                     .opacity(out ? 1 : 0)
                     .allowsHitTesting(out)
@@ -68,6 +70,15 @@ struct GlassDrawerView: View {
         .animation(.spring(response: 0.46, dampingFraction: 0.8), value: drawer.peeking)
         .animation(.spring(response: 0.34, dampingFraction: 0.84), value: drawer.hovered)
         .animation(.spring(response: 0.34, dampingFraction: 0.86), value: drawer.pins.count)
+    }
+
+    /// The left corners, the ones the grip pulls: stretched past the
+    /// widest the glass goes taut and they tighten nearly square; squeezed
+    /// past the narrowest they round out. The right ones, against the edge
+    /// of the screen, stay as they are.
+    private var leading: CGFloat {
+        let stretch = drawer.stretch
+        return stretch >= 0 ? max(5, Self.radius - stretch * 0.6) : min(38, Self.radius - stretch * 0.3)
     }
 
     /// Open, out by a crack, or the capsule just past the edge.
@@ -347,11 +358,12 @@ struct GlassBarButton: View {
 /// The glass itself: Liquid Glass from macOS 26, drawn by SwiftUI so it
 /// grows and shrinks with the drawer's own animation; before that, the
 /// system's frosted material.
-struct GlassPane: View {
+struct GlassPane<S: Shape>: View {
+    let shape: S
+    /// For the frosted material, which takes one radius for every corner.
     var cornerRadius: CGFloat
 
     var body: some View {
-        let shape = RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
         if #available(macOS 26, *) {
             Color.clear.glassEffect(.regular, in: shape)
         } else {
