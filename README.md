@@ -23,13 +23,25 @@ Na primeira vez, a Gaveta pergunta se pode mostrar os prints na hora. Se você a
 
 ## Instalar
 
+Três jeitos, do mais rápido ao mais manual. Todos funcionam em Macs com Apple silicon e Intel, com macOS 14 ou mais novo. A Gaveta não usa internet nem pede conta.
+
+### Pelo Terminal
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Frasca-99/gaveta/main/scripts/get.sh | bash
+```
+
+Baixa a última versão, coloca em **Aplicativos** e abre. Não aparece o aviso de "não foi possível verificar", porque um arquivo baixado pelo Terminal não vem marcado como vindo da internet. O script é curto e dá para ler antes: [`scripts/get.sh`](scripts/get.sh). Para atualizar, rode de novo.
+
+### Baixando o zip
+
 1. Baixe o **Gaveta.zip** da [última versão](https://github.com/Frasca-99/gaveta/releases/latest) e abra o arquivo: sai o `Gaveta.app`.
 2. Arraste o `Gaveta.app` para a pasta **Aplicativos**.
 3. Abra a Gaveta.
 
 A Gaveta é gratuita e não é assinada com uma conta de desenvolvedor da Apple, então na primeira vez o macOS avisa que não conseguiu verificá-la. Para abrir mesmo assim, uma vez só:
 
-- **macOS 15 ou mais novo:** tente abrir a Gaveta e feche o aviso. Vá em **Ajustes do Sistema → Privacidade e Segurança**, role até o fim e clique em **Abrir Mesmo Assim** ao lado da Gaveta. Confirme com a sua senha.
+- **macOS 15 ou mais novo:** tente abrir a Gaveta e feche o aviso. Vá em **Ajustes do Sistema → Privacidade e Segurança** (System Settings → Privacy & Security), role até o fim e clique em **Abrir Mesmo Assim** (Open Anyway) ao lado da Gaveta. Confirme com a sua senha.
 - **macOS 14:** clique com o botão direito (ou Control-clique) no `Gaveta.app`, escolha **Abrir** e confirme em **Abrir**.
 
 Depois disso ela abre normalmente. Quem preferir o Terminal libera com:
@@ -37,8 +49,6 @@ Depois disso ela abre normalmente. Quem preferir o Terminal libera com:
 ```bash
 xattr -dr com.apple.quarantine /Applications/Gaveta.app
 ```
-
-Funciona em Macs com Apple silicon e Intel, com macOS 14 ou mais novo, sem internet e sem conta.
 
 ### Compilar você mesmo
 
