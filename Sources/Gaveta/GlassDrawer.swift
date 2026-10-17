@@ -39,6 +39,13 @@ struct GlassDrawerView: View {
             ZStack(alignment: .trailing) {
                 GlassPane(shape: shape, cornerRadius: leading)
                     .frame(width: pane.width, height: pane.height)
+                // The system draws the glass behind the window's own pixels,
+                // which stay clear there, and macOS lets a click on clear
+                // pixels through to the app behind: a click on bare glass (the
+                // grip's strip, between cards) went past the drawer and closed
+                // it. A tint too faint to see makes the glass hold its clicks.
+                shape.fill(Color.black.opacity(0.015))
+                    .frame(width: pane.width, height: pane.height)
                 content(maximum: maximum)
                     .frame(width: DrawerLayout.drawerWidth, height: placement.height)
                     .mask(alignment: .trailing) {

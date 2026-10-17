@@ -37,6 +37,9 @@ final class EdgeTrigger {
         monitors.append(NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] _ in
             MainActor.assumeIsolated {
                 guard let self, self.drawer.dragging.isEmpty else { return }
+                // A click that went through the drawer to the app behind was
+                // still meant for the drawer.
+                if self.drawer.isOpen, self.panel.drawerRect(for: self.drawer).contains(NSEvent.mouseLocation) { return }
                 self.close()
             }
         } as Any)
