@@ -986,8 +986,8 @@
     };
     const STEPS = [
       ["tirar", "janela", "Tire um print", fine.matches
-        ? "Escolha <b>Janela</b> e clique na loja."
-        : "Toque em <b>Janela</b> e depois na loja."],
+        ? "Escolha <b>Janela</b> e clique em qualquer janela."
+        : "Toque em <b>Janela</b> e depois em qualquer janela."],
       ["copiar", "copiar", "Copie ou arraste", fine.matches
         ? "Clique para copiar, ou arraste até o chamado. <b>⌘-clique</b> escolhe vários."
         : "Toque no print para copiar, ou nos círculos para escolher vários."],
