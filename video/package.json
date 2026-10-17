@@ -1,0 +1,16 @@
+{
+  "name": "gaveta-video",
+  "private": true,
+  "description": "O vídeo de lançamento da Gaveta: a mesa gravada por gravar.mjs, montada com Remotion.",
+  "scripts": {
+    "gravar": "node gravar.mjs",
+    "estudio": "remotion studio src/index.ts",
+    "render": "remotion render src/index.ts Gaveta out/gaveta-16x9.mp4 && remotion render src/index.ts GavetaQuadrado out/gaveta-1x1.mp4"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.536",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "remotion": "4.0.536"
+  }
+}

@@ -5,3 +5,10 @@ build/
 .swiftpm/
 .claude/skills/
 site/figuras/hairline-*.html
+site/figuras/como-funciona/shots/
+site/figuras/como-funciona/como-funciona*.html
+.claude/launch.json
+video/node_modules/
+video/out/
+video/public/mesa.mp4
+video/public/roteiro.json

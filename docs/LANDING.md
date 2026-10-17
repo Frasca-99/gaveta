@@ -43,11 +43,11 @@ Minimalista, como uma página de catálogo: muito branco, traço fino e uma
   │  a máquina da Gaveta (Anatomy): o print entra, vira   │
   │  ficha, você escolhe várias e elas saem juntas        │
   └───────────────────────────────────────────────────────┘
-  1 Tire o print · 2 Ele cai na gaveta · 3 Escolha vários · 4 Cole todos
+  1 Tire o print · 2 Ele cai na gaveta · 3 Escolha vários · 4 Copie e cole todos
  ─────────────────────────────────────────────────────────────
   [aba] Gestos            clique copia · bolinha seleciona · ...
  ─────────────────────────────────────────────────────────────
-  [aba] Só no seu Mac     Sem conta. Sem internet.
+  [aba] Só no seu Mac     Sem conta. Sem internet.   [Baixar para Mac]
  ─────────────────────────────────────────────────────────────
   Luiz Paulo Frasca Neto · código aberto (MIT) · GitHub
 ```
@@ -55,9 +55,11 @@ Minimalista, como uma página de catálogo: muito branco, traço fino e uma
 1. **Topo:** o nome e os links para o GitHub e o download.
 2. **Abertura:** título, uma frase, o botão de download e a figura da hairline.
 3. **Como funciona:** a figura da Anatomy e os 4 passos numerados (aqui o número faz sentido, porque é uma sequência real).
-4. **Gestos:** lista curta, em duas colunas.
-5. **Só no seu Mac:** privacidade em duas frases.
-6. **Rodapé:** autor, licença e GitHub.
+4. **Gestos:** oito gestos, na mesma grade dos passos (quatro colunas no computador, uma no celular).
+5. **Só no seu Mac:** privacidade em duas frases, e o botão de download de novo, para quem leu até o fim.
+6. **Rodapé:** autor, licença, GitHub e o crédito das duas ferramentas das figuras.
+
+As duas figuras se demonstram **uma vez só**, quando aparecem na tela, e depois ficam paradas esperando o mouse (animação em loop atrapalha a leitura). Com "reduzir movimento" ligado no sistema, elas nem se mexem.
 
 ## As figuras
 
@@ -87,6 +89,8 @@ Minimalista, como uma página de catálogo: muito branco, traço fino e uma
 - Publicada na Vercel, primeiro como prévia privada e depois no ar.
 - **Download:** o app ainda não é assinado pela Apple. Até lá, o botão leva ao GitHub (quando ele voltar a ser público), ou mostra "Em breve".
 - **Vídeo:** um vídeo curto de você selecionando 3 prints e colando num chat. Fica para depois que o app estiver assinado.
+- **Montar:** `node site/figuras/como-funciona/build.mjs --light` (a figura da Anatomy) e depois `node site/build.mjs`, que gera `site/index.html` com tudo dentro. Para a prévia de link no LinkedIn e no X, passe o endereço final: `SITE_URL=https://… node site/build.mjs`.
+- **Prévia do link:** `site/assets/compartilhar.png`, 1200×630.
 
 ## Etapas
 
