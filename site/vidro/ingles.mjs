@@ -49,7 +49,7 @@ export const pagina = [
 
   // the guide and the bar
   ['<p class="guia-titulo" id="guia-titulo">Tire um print</p>', '<p class="guia-titulo" id="guia-titulo">Take a screenshot</p>'],
-  ['<p class="guia-texto" id="guia-texto">Escolha <b>Seleção</b> e arraste sobre a loja.</p>', '<p class="guia-texto" id="guia-texto">Choose <b>Selection</b> and drag over the shop.</p>'],
+  ['<p class="guia-texto" id="guia-texto">Escolha <b>Janela</b> e clique na loja.</p>', '<p class="guia-texto" id="guia-texto">Choose <b>Window</b> and click the shop.</p>'],
   ['<span class="so-leitor">Passo 1 de 3</span>', '<span class="so-leitor">Step 1 of 3</span>'],
   ['aria-label="Fechar as dicas"', 'aria-label="Close the tips"'],
   ['role="toolbar" aria-label="Tirar print"', 'role="toolbar" aria-label="Take a screenshot"'],
@@ -96,8 +96,8 @@ export const vidro = [
 
   // the guide
   ['"Tire um print", fine.matches', '"Take a screenshot", fine.matches'],
-  ['"Escolha <b>Seleção</b> e arraste sobre a loja."', '"Choose <b>Selection</b> and drag over the shop."'],
-  ['"Toque em <b>Seleção</b> e arraste o dedo sobre a loja."', '"Tap <b>Selection</b> and drag your finger over the shop."'],
+  ['"Escolha <b>Janela</b> e clique na loja."', '"Choose <b>Window</b> and click the shop."'],
+  ['"Toque em <b>Janela</b> e depois na loja."', '"Tap <b>Window</b>, then the shop."'],
   ['"Copie ou arraste"', '"Copy or drag"'],
   ['"Clique para copiar, ou arraste até o chamado. <b>⌘-clique</b> escolhe vários."', '"Click to copy, or drag it onto the ticket. <b>⌘-click</b> picks several."'],
   ['"Toque no print para copiar, ou nos círculos para escolher vários."', '"Tap a screenshot to copy it, or the circles to pick several."'],

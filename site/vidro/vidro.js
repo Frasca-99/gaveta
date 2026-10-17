@@ -701,7 +701,8 @@
   camada.addEventListener("pointerdown", (event) => {
     if (mode === "janela") {
       const win = windowAt(event.clientX, event.clientY);
-      if (!win) return;
+      // a click on the bare desk leaves the mode, so it never holds you
+      if (!win) return leaveMode();
       const area = onDesk(win.getBoundingClientRect());
       leaveMode();
       capture(area);
@@ -984,9 +985,9 @@
       pronto: '<svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="m5.2 8.2 1.9 1.9 3.7-3.9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
     };
     const STEPS = [
-      ["tirar", "selecao", "Tire um print", fine.matches
-        ? "Escolha <b>Seleção</b> e arraste sobre a loja."
-        : "Toque em <b>Seleção</b> e arraste o dedo sobre a loja."],
+      ["tirar", "janela", "Tire um print", fine.matches
+        ? "Escolha <b>Janela</b> e clique na loja."
+        : "Toque em <b>Janela</b> e depois na loja."],
       ["copiar", "copiar", "Copie ou arraste", fine.matches
         ? "Clique para copiar, ou arraste até o chamado. <b>⌘-clique</b> escolhe vários."
         : "Toque no print para copiar, ou nos círculos para escolher vários."],
