@@ -987,11 +987,11 @@
       ["tirar", "selecao", "Tire um print", fine.matches
         ? "Escolha <b>Seleção</b> e arraste sobre a loja."
         : "Toque em <b>Seleção</b> e arraste o dedo sobre a loja."],
-      ["copiar", "copiar", "Copie da gaveta", fine.matches
-        ? "Clique no print para copiar. <b>⌘-clique</b> escolhe vários."
+      ["copiar", "copiar", "Copie ou arraste", fine.matches
+        ? "Clique para copiar, ou arraste até o chamado. <b>⌘-clique</b> escolhe vários."
         : "Toque no print para copiar, ou nos círculos para escolher vários."],
       ["colar", "colar", "Cole no chamado", fine.matches
-        ? "Um <b>⌘V</b> cola tudo de uma vez. Ou arraste o print até ele."
+        ? "Um <b>⌘V</b> cola tudo no chamado, de uma vez."
         : "Toque em <b>Colar</b> no chamado."],
     ];
     /** On a phone the drawer makes room for the tip, so it follows every change in the tip's size. */
