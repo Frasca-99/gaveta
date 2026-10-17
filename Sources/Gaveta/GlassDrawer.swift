@@ -199,34 +199,37 @@ struct GlassCardView: View {
     /// How much of the card shows above the one in front of it.
     let reveal: CGFloat
     var state = CardState()
+    /// The drawer's width this card was laid out for. Its layout reads the
+    /// width from DrawerLayout, which SwiftUI does not watch: as an input, a
+    /// new width redraws every card, even the bands nobody touched.
+    var width = DrawerLayout.boxWidth
 
     static let radius: CGFloat = 12
 
-    /// On a whole card the picture stands in the middle of its slot, so a
-    /// wide capture leaves even room above and below it instead of a blank
+    /// In the whole layout the picture stands in the middle of its slot, so
+    /// a wide capture leaves even room above and below it instead of a blank
     /// under the words; in a band it keeps to the top, where the band shows.
-    static func photoTop(_ photo: CGSize, whole: Bool) -> CGFloat {
-        whole ? CardStack.border + ((CardStack.photoHeight - photo.height) / 2).rounded() : CardStack.border
+    static func photoTop(_ photo: CGSize, slot: CGFloat?) -> CGFloat {
+        guard let slot else { return CardStack.border }
+        return CardStack.border + ((slot - photo.height) / 2).rounded()
     }
 
-    /// The words on a whole card, always at its foot.
-    static var captionTop: CGFloat { CardStack.border + CardStack.photoHeight + 6 }
+    /// The words in the whole layout, just under the picture's slot.
+    static func captionTop(slot: CGFloat) -> CGFloat { CardStack.border + slot + 6 }
 
     var body: some View {
-        let whole = CardStack.isWhole(reveal)
+        let slot = CardStack.slot(for: reveal)
         let photo = CardStack.photoSize(for: pin.thumbnail.size, reveal: reveal)
-        let slot = whole ? CardStack.photoWidth : CardStack.bandPhotoWidth
-        let top = Self.photoTop(photo, whole: whole)
+        let slotWidth = slot == nil ? CardStack.bandPhotoWidth : CardStack.photoWidth
+        let top = Self.photoTop(photo, slot: slot)
         let shape = RoundedRectangle(cornerRadius: Self.radius, style: .continuous)
         ZStack(alignment: .topLeading) {
             // The shadow comes from the card's shape alone: cheap to draw as cards move.
             shape.fill(Color(nsColor: .controlBackgroundColor))
                 .shadow(color: .black.opacity(0.16), radius: 10, y: -2)
             picture(size: photo)
-                .offset(x: CardStack.border + (slot - photo.width) / 2, y: top)
-            caption(whole: whole)
-                .offset(x: whole ? CardStack.border + 2 : CardStack.border + slot + 10,
-                        y: whole ? Self.captionTop : CardStack.border + 3)
+                .offset(x: CardStack.border + (slotWidth - photo.width) / 2, y: top)
+            caption(slot: slot)
         }
         .frame(width: CardStack.cardWidth, height: CardStack.cardHeight, alignment: .topLeading)
         .overlay(shape.strokeBorder(.primary.opacity(0.08), lineWidth: 0.5))
@@ -249,7 +252,7 @@ struct GlassCardView: View {
         }
         .overlay(alignment: .topLeading) {
             if state.copied {
-                CopiedBadge().position(x: CardStack.border + slot / 2, y: top + photo.height / 2)
+                CopiedBadge().position(x: CardStack.border + slotWidth / 2, y: top + photo.height / 2)
             }
         }
         .scaleEffect(state.hovered && !state.dragging ? 1.012 : 1, anchor: .bottom)
@@ -277,26 +280,35 @@ struct GlassCardView: View {
             }
     }
 
-    /// Under the picture on a whole card, with the age at the right; beside
-    /// it, on two lines, in a band.
-    private func caption(whole: Bool) -> some View {
+    /// Under the picture in the whole layout, the age at the right; beside
+    /// it in a band, one short line each: what it is, its size, its age.
+    /// Always within the card, at any width of the drawer: what does not fit
+    /// is cut. Each stands at its own place, so the one fading out as a card
+    /// turns from whole to band, or back, does not slide past the edge.
+    private func caption(slot: CGFloat?) -> some View {
         TimelineView(.periodic(from: .now, by: 30)) { context in
             let age = RelativeTime.string(for: pin.date, now: context.date)
             ZStack(alignment: .topLeading) {
-                if whole {
-                    HStack(spacing: 0) {
+                if let slot {
+                    HStack(spacing: 8) {
                         Text("\(pin.kind) · \(pin.detail)")
-                        Spacer(minLength: 8)
-                        Text(age)
+                            .truncationMode(.tail)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        // The age keeps its room; the words before it give way.
+                        Text(age).layoutPriority(1)
                     }
                     .frame(width: CardStack.photoWidth - 4)
+                    .offset(x: CardStack.border + 2, y: Self.captionTop(slot: slot))
                     .transition(.opacity)
                 } else {
-                    VStack(alignment: .leading, spacing: 3) {
+                    VStack(alignment: .leading, spacing: 2) {
                         Text(pin.kind).fontWeight(.medium).foregroundStyle(.primary)
-                        Text("\(pin.detail) · \(age)")
+                        Text(pin.detail)
+                        Text(age)
                     }
-                    .fixedSize()
+                    .truncationMode(.tail)
+                    .frame(width: CardStack.bandWordsWidth, alignment: .leading)
+                    .offset(x: CardStack.bandWordsX, y: CardStack.border + 3)
                     .transition(.opacity)
                 }
             }

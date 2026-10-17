@@ -75,7 +75,7 @@ final class Flights {
         // tab above the right of its top edge.
         let size = CGSize(width: CardStack.cardWidth, height: CardStack.cardHeight)
         let photo = CardStack.photoSize(for: pin.thumbnail.size, reveal: CardStack.cardHeight)
-        let photoTop = glass ? GlassCardView.photoTop(photo, whole: true) : CardStack.border
+        let photoTop = glass ? GlassCardView.photoTop(photo, slot: CardStack.photoHeight) : CardStack.border
         let photoFrame = CGRect(x: CardStack.border + (CardStack.photoWidth - photo.width) / 2,
                                 y: size.height - photoTop - photo.height,
                                 width: photo.width, height: photo.height)
@@ -107,7 +107,7 @@ final class Flights {
         flyer.addSublayer(picture)
 
         let caption = Self.text("\(pin.kind) · \(pin.detail)", font: .systemFont(ofSize: 11), color: meta, scale: scale)
-        let captionY = glass ? size.height - GlassCardView.captionTop - 14 : photoFrame.minY - 6 - 14
+        let captionY = glass ? size.height - GlassCardView.captionTop(slot: CardStack.photoHeight) - 14 : photoFrame.minY - 6 - 14
         caption.frame = CGRect(x: CardStack.border + (glass ? 2 : 0), y: captionY, width: size.width - 16, height: 14)
         flyer.addSublayer(caption)
 
@@ -306,7 +306,7 @@ final class Flights {
         face.contentsScale = scale
 
         let photo = CardStack.photoSize(for: pin.thumbnail.size, reveal: CardStack.cardHeight)
-        let top = glass ? GlassCardView.photoTop(photo, whole: true) : CardStack.border
+        let top = glass ? GlassCardView.photoTop(photo, slot: CardStack.photoHeight) : CardStack.border
         let picture = CALayer()
         picture.frame = CGRect(x: CardStack.border + (CardStack.photoWidth - photo.width) / 2, y: size.height - top - photo.height,
                                width: photo.width, height: photo.height)
@@ -318,7 +318,7 @@ final class Flights {
         face.addSublayer(picture)
 
         let age = RelativeTime.string(for: pin.date, now: Date())
-        let wordsTop = glass ? GlassCardView.captionTop : top + photo.height + 6
+        let wordsTop = glass ? GlassCardView.captionTop(slot: CardStack.photoHeight) : top + photo.height + 6
         let caption = Self.text("\(pin.kind) · \(pin.detail)", font: .systemFont(ofSize: 11), color: meta, scale: scale)
         caption.frame = CGRect(x: CardStack.border + (glass ? 2 : 0), y: size.height - wordsTop - 14, width: size.width - 16, height: 14)
         face.addSublayer(caption)

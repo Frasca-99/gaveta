@@ -17,6 +17,10 @@ struct CardView: View {
     let dragging: Bool
     /// Flying in or being thrown out: the card keeps its place unseen.
     var hidden = false
+    /// The drawer's width this card was laid out for. Its layout reads the
+    /// width from DrawerLayout, which SwiftUI does not watch: as an input, a
+    /// new width redraws every card, even the bands nobody touched.
+    var width = DrawerLayout.boxWidth
 
     var body: some View {
         let whole = CardStack.isWhole(reveal)
@@ -30,9 +34,7 @@ struct CardView: View {
             let slot = whole ? CardStack.photoWidth : CardStack.bandPhotoWidth
             picture(size: photo)
                 .offset(x: CardStack.border + (slot - photo.width) / 2, y: CardStack.border)
-            caption(whole: whole)
-                .offset(x: whole ? CardStack.border : CardStack.border + slot + 10,
-                        y: whole ? CardStack.border + photo.height + 6 : CardStack.border + 3)
+            caption(whole: whole, under: CardStack.border + photo.height + 6)
         }
         .frame(width: CardStack.cardWidth, height: CardStack.cardHeight, alignment: .topLeading)
         .overlay {
@@ -88,16 +90,24 @@ struct CardView: View {
     }
 
     /// Under the picture on a whole card; beside it, on two lines, in a band.
-    private func caption(whole: Bool) -> some View {
+    /// Always within the card, at any width of the drawer: what does not fit
+    /// is cut, never runs past the edge. Each stands at its own place, so the
+    /// one fading out as a card turns from whole to band, or back, does not
+    /// slide past the edge. `under` is where the words go below the picture.
+    private func caption(whole: Bool, under: CGFloat) -> some View {
         ZStack(alignment: .topLeading) {
             if whole {
                 Text("\(pin.kind) · \(pin.detail)")
+                    .frame(width: CardStack.photoWidth, alignment: .leading)
+                    .offset(x: CardStack.border, y: under)
                     .transition(.opacity)
             } else {
                 VStack(alignment: .leading, spacing: 3) {
                     Text(pin.kind).fontWeight(.medium).foregroundStyle(Palette.ink)
                     Text(pin.detail)
                 }
+                .frame(width: CardStack.bandWordsWidth, alignment: .leading)
+                .offset(x: CardStack.bandWordsX, y: CardStack.border + 3)
                 .transition(.opacity)
             }
         }
@@ -105,7 +115,7 @@ struct CardView: View {
         .monospacedDigit()
         .foregroundStyle(Palette.meta)
         .lineLimit(1)
-        .fixedSize()
+        .truncationMode(.tail)
     }
 
     private var tab: some View {

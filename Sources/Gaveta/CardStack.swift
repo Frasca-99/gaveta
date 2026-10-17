@@ -34,9 +34,16 @@ struct CardStack {
     /// Every tab stands at the card's right, clear of the picture and the
     /// words on the card behind it.
     static var tabX: CGFloat { cardWidth - tabSize.width - 8 }
-    /// In a band, the picture is never wider than this, leaving room for
-    /// the words beside it.
-    static let bandPhotoWidth: CGFloat = 150
+    /// Room always kept beside a band's picture for its words, a few short
+    /// lines: what it is, its size, when it was taken.
+    static let bandWordsRoom: CGFloat = 96
+    /// In a band, the picture is never wider than 150, and always leaves the
+    /// words their room, however narrow the drawer gets.
+    static var bandPhotoWidth: CGFloat { min(150, cardWidth - border * 2 - 10 - bandWordsRoom) }
+    /// Where a band's words start, and how wide they may run before the
+    /// card's edge: everything they hold is cut to fit, never past it.
+    static var bandWordsX: CGFloat { border + bandPhotoWidth + 10 }
+    static var bandWordsWidth: CGFloat { cardWidth - bandWordsX - border }
 
     /// The circle and the cross sit in the card's top corners.
     static let dotBox = CGRect(x: 4, y: 4, width: 38, height: 38)
@@ -94,16 +101,31 @@ struct CardStack {
         count == 0 ? 0 : tops[count - 1] + Self.cardHeight + Self.bottomInset
     }
 
-    /// Shows the whole card, with the words under the picture.
-    static func isWhole(_ reveal: CGFloat) -> Bool { reveal >= cardHeight }
+    /// A card that shows only part of itself keeps the whole layout, the
+    /// picture above and the words under it, while its picture can still
+    /// stand this tall; shorter than that, it turns into a band.
+    static let shortestSlot: CGFloat = 96
+
+    /// The height of the picture's slot on a card that shows `reveal` of
+    /// itself, in the whole layout: all of it on a whole card, less on one
+    /// partly covered, so the picture shrinks a little at a time as the
+    /// drawer fills and the words stay in sight just under it. Nil when the
+    /// card shows as a band.
+    static func slot(for reveal: CGFloat) -> CGFloat? {
+        let room = min(photoHeight, reveal - border - metaHeight)
+        return room >= min(shortestSlot, photoHeight) ? room : nil
+    }
+
+    /// In the whole layout: the picture above, the words under it.
+    static func isWhole(_ reveal: CGFloat) -> Bool { slot(for: reveal) != nil }
 
     /// The whole capture, as large as the shown part of its card allows:
     /// the full width when the card shows whole, a small picture at the left
     /// of a band otherwise. Never cropped.
     static func photoSize(for image: CGSize, reveal: CGFloat) -> CGSize {
-        let whole = isWhole(reveal)
-        let maxWidth = whole ? photoWidth : bandPhotoWidth
-        let maxHeight = whole ? photoHeight : max(28, reveal - border - 4)
+        let slot = slot(for: reveal)
+        let maxWidth = slot == nil ? bandPhotoWidth : photoWidth
+        let maxHeight = slot ?? max(28, reveal - border - 4)
         let aspect = image.width > 0 && image.height > 0 ? image.width / image.height : 16.0 / 10
         var size = CGSize(width: maxWidth, height: maxWidth / aspect)
         if size.height > maxHeight { size = CGSize(width: maxHeight * aspect, height: maxHeight) }
