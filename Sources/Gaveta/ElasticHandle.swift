@@ -130,7 +130,10 @@ struct GripControl: NSViewRepresentable {
         override func updateTrackingAreas() {
             super.updateTrackingAreas()
             if let tracking { removeTrackingArea(tracking) }
-            let area = NSTrackingArea(rect: .zero, options: [.mouseEnteredAndExited, .mouseMoved, .cursorUpdate, .activeAlways, .inVisibleRect],
+            // Like the cards' area: no cursor updates, which AppKit only sends
+            // to the app in front and which kept the grip from hearing the
+            // pointer at all while the Gaveta stays in the background.
+            let area = NSTrackingArea(rect: .zero, options: [.mouseEnteredAndExited, .mouseMoved, .activeAlways, .inVisibleRect],
                                       owner: self, userInfo: nil)
             addTrackingArea(area)
             tracking = area
@@ -143,7 +146,6 @@ struct GripControl: NSViewRepresentable {
         // The drawer's own views put the arrow back as the pointer moves:
         // the grip sets its cursor again on every move.
         override func mouseMoved(with event: NSEvent) { cursor().set() }
-        override func cursorUpdate(with event: NSEvent) { cursor().set() }
 
         /// The divider cursor, a bar with an arrow either side, as macOS
         /// gives for moving a divider; at a limit it points only the way the
