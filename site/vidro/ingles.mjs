@@ -24,7 +24,7 @@ export const pagina = [
   ['<h1 class="titulo" id="titulo">Seus prints,<br><span>numa gaveta.</span></h1>', '<h1 class="titulo" id="titulo">Your screenshots,<br><span>in a drawer.</span></h1>'],
   ["Cada print que você tira cai numa gaveta na borda da tela. Escolha vários e cole todos de uma vez.",
     "Every screenshot you take lands in a drawer at the edge of the screen. Pick several and paste them all at once."],
-  ["macOS 14 ou mais novo · Apple silicon e Intel", "macOS 14 or later · Apple silicon and Intel"],
+  ["Grátis · macOS 14+", "Free · macOS 14+"],
 
   // the shop
   ['data-app="Navegador" aria-label="Navegador: a loja deu erro no pagamento"', 'data-app="Browser" aria-label="Browser: the shop failed to take the payment"'],

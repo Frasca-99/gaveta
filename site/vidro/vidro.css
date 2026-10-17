@@ -90,7 +90,7 @@ kbd {
 .botao:hover { background: #262626; }
 .botao:active { transform: scale(0.96); }
 .botao svg { width: 17px; height: 17px; }
-.nota { margin: 1rem 0 0; font: 500 0.6875rem/1.6 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--tinta-muda); }
+.nota { margin: 0.9rem 0 0; font-size: 0.8125rem; color: var(--tinta-muda); }
 
 /* ── windows ────────────────────────────────────────────────────────────── */
 .janela {
