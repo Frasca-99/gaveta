@@ -32,10 +32,18 @@ enum Prefs {
         set { store.set(newValue, forKey: "copiedImages") }
     }
 
-    /// How the drawer looks: the oak card catalog, or glass.
+    /// How the drawer looks: the oak card catalog, or glass. Until the user
+    /// picks one, glass where the system has Liquid Glass (macOS 26 and
+    /// later); before that the glass would only be frosted, and the oak
+    /// drawer looks better.
     static var drawerStyle: DrawerStyle {
-        get { DrawerStyle(rawValue: store.string(forKey: "drawerStyle") ?? "") ?? .catalog }
+        get { DrawerStyle(rawValue: store.string(forKey: "drawerStyle") ?? "") ?? defaultDrawerStyle }
         set { store.set(newValue.rawValue, forKey: "drawerStyle") }
+    }
+
+    static var defaultDrawerStyle: DrawerStyle {
+        if #available(macOS 26, *) { return .glass }
+        return .catalog
     }
 
     /// The shortcut for the drawer; nil when the user removed it.
