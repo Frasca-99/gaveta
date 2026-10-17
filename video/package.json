@@ -1,11 +1,10 @@
 {
   "name": "gaveta-video",
   "private": true,
-  "description": "O vídeo de lançamento da Gaveta: a mesa gravada por gravar.mjs, montada com Remotion.",
+  "description": "Gaveta em ação: o app de verdade gravado num Mac (gravacao/), montado com Remotion.",
   "scripts": {
-    "gravar": "node gravar.mjs",
     "estudio": "remotion studio src/index.ts",
-    "render": "remotion render src/index.ts Gaveta out/gaveta-16x9.mp4 && remotion render src/index.ts GavetaQuadrado out/gaveta-1x1.mp4"
+    "render": "remotion render src/index.ts Filme out/gaveta-app.mp4 --crf 16 --jpeg-quality 95"
   },
   "dependencies": {
     "@remotion/cli": "4.0.536",

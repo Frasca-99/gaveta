@@ -1,0 +1,175 @@
+[
+ {
+  "op": "mover",
+  "x": 880,
+  "y": 600,
+  "ms": 10
+ },
+ {
+  "op": "marca",
+  "nome": "inicio"
+ },
+ {
+  "op": "esperar",
+  "ms": 700
+ },
+ {
+  "op": "mover",
+  "x": 1469,
+  "y": 470,
+  "ms": 1100,
+  "arco": 0.04
+ },
+ {
+  "op": "esperar",
+  "ms": 1500
+ },
+ {
+  "op": "marca",
+  "nome": "aberta"
+ },
+ {
+  "op": "mover",
+  "x": 1140,
+  "y": 500,
+  "ms": 950
+ },
+ {
+  "op": "esperar",
+  "ms": 700
+ },
+ {
+  "op": "marca",
+  "nome": "alca"
+ },
+ {
+  "op": "apertar"
+ },
+ {
+  "op": "esperar",
+  "ms": 150
+ },
+ {
+  "op": "arrastar",
+  "x": 1010,
+  "y": 503,
+  "ms": 650,
+  "arco": 0.02
+ },
+ {
+  "op": "esperar",
+  "ms": 200
+ },
+ {
+  "op": "arrastar",
+  "x": 845,
+  "y": 506,
+  "ms": 900,
+  "arco": 0.02
+ },
+ {
+  "op": "esperar",
+  "ms": 350
+ },
+ {
+  "op": "marca",
+  "nome": "limite"
+ },
+ {
+  "op": "arrastar",
+  "x": 735,
+  "y": 508,
+  "ms": 800,
+  "arco": 0.02
+ },
+ {
+  "op": "esperar",
+  "ms": 550
+ },
+ {
+  "op": "marca",
+  "nome": "solta"
+ },
+ {
+  "op": "soltar"
+ },
+ {
+  "op": "mover",
+  "x": 858,
+  "y": 470,
+  "ms": 130,
+  "arco": 0
+ },
+ {
+  "op": "esperar",
+  "ms": 1600
+ },
+ {
+  "op": "marca",
+  "nome": "estreitar"
+ },
+ {
+  "op": "mover",
+  "x": 841,
+  "y": 499,
+  "ms": 550
+ },
+ {
+  "op": "esperar",
+  "ms": 500
+ },
+ {
+  "op": "apertar"
+ },
+ {
+  "op": "esperar",
+  "ms": 120
+ },
+ {
+  "op": "arrastar",
+  "x": 1140,
+  "y": 501,
+  "ms": 950,
+  "arco": 0.02
+ },
+ {
+  "op": "esperar",
+  "ms": 200
+ },
+ {
+  "op": "arrastar",
+  "x": 1212,
+  "y": 502,
+  "ms": 650,
+  "arco": 0.02
+ },
+ {
+  "op": "esperar",
+  "ms": 450
+ },
+ {
+  "op": "marca",
+  "nome": "solta2"
+ },
+ {
+  "op": "soltar"
+ },
+ {
+  "op": "esperar",
+  "ms": 1500
+ },
+ {
+  "op": "mover",
+  "x": 1330,
+  "y": 560,
+  "ms": 700
+ },
+ {
+  "op": "esperar",
+  "ms": 700
+ },
+ {
+  "op": "marca",
+  "nome": "fim"
+ }
+]

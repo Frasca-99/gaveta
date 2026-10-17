@@ -10,5 +10,7 @@ site/figuras/como-funciona/como-funciona*.html
 .claude/launch.json
 video/node_modules/
 video/out/
+video/public/app/
+video/gravacao/.build/
 video/public/mesa.mp4
 video/public/roteiro.json
