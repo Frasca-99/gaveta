@@ -80,9 +80,7 @@ kbd {
 }
 .titulo { margin: 0; font-size: clamp(2.4rem, 4.2vw, 4.4rem); line-height: 1.04; font-weight: 600; letter-spacing: -0.032em; text-wrap: balance; }
 .titulo span { color: var(--tinta-muda); }
-.intro { max-width: 30rem; margin: 1.2rem auto 0; color: var(--tinta-suave); font-size: clamp(1rem, 1.25vw, 1.125rem); line-height: 1.6; text-wrap: balance; }
-/* the hook on a line of its own, a shade darker than the rest */
-.intro-gancho { display: block; color: var(--tinta); font-weight: 500; }
+.intro { max-width: 30rem; margin: 1.2rem auto 0; color: var(--tinta-suave); font-size: clamp(1rem, 1.25vw, 1.125rem); line-height: 1.6; text-wrap: pretty; }
 .botao {
   display: inline-flex; align-items: center; gap: 0.55rem; height: 44px; margin-top: 1.75rem; padding: 0 1.2rem; border-radius: 10px;
   background: var(--tinta); color: var(--branco); font: 500 0.9375rem var(--sans); text-decoration: none;

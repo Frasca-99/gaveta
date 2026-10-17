@@ -10,9 +10,9 @@
   if (chosen === "en" || (!chosen && !robot && !portuguese)) location.replace("en/" + location.hash);
 } catch {}</script>
 <title>Gaveta: seus prints numa gaveta, no Mac</title>
-<meta name="description" content="Pare de procurar seus prints. No Mac, eles ficam numa gaveta na borda da tela, prontos para colar: um ou vários de uma vez. Grátis e de código aberto.">
+<meta name="description" content="Cada print que você tira cai numa gaveta na borda da tela do Mac. Escolha vários e cole todos de uma vez. Grátis e de código aberto.">
 <meta property="og:title" content="Gaveta: seus prints numa gaveta, no Mac">
-<meta property="og:description" content="Pare de procurar seus prints. Eles ficam numa gaveta na borda da tela, prontos para colar: um ou vários de uma vez.">
+<meta property="og:description" content="Cada print que você tira cai numa gaveta na borda da tela. Escolha vários e cole todos de uma vez.">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="pt_BR">
 <meta property="og:locale:alternate" content="en_US">
@@ -106,9 +106,7 @@ kbd {
 }
 .titulo { margin: 0; font-size: clamp(2.4rem, 4.2vw, 4.4rem); line-height: 1.04; font-weight: 600; letter-spacing: -0.032em; text-wrap: balance; }
 .titulo span { color: var(--tinta-muda); }
-.intro { max-width: 30rem; margin: 1.2rem auto 0; color: var(--tinta-suave); font-size: clamp(1rem, 1.25vw, 1.125rem); line-height: 1.6; text-wrap: balance; }
-/* the hook on a line of its own, a shade darker than the rest */
-.intro-gancho { display: block; color: var(--tinta); font-weight: 500; }
+.intro { max-width: 30rem; margin: 1.2rem auto 0; color: var(--tinta-suave); font-size: clamp(1rem, 1.25vw, 1.125rem); line-height: 1.6; text-wrap: pretty; }
 .botao {
   display: inline-flex; align-items: center; gap: 0.55rem; height: 44px; margin-top: 1.75rem; padding: 0 1.2rem; border-radius: 10px;
   background: var(--tinta); color: var(--branco); font: 500 0.9375rem var(--sans); text-decoration: none;
@@ -488,7 +486,7 @@ kbd {
 
   <section class="abertura" aria-labelledby="titulo">
     <h1 class="titulo" id="titulo">Seus prints,<br><span>numa gaveta.</span></h1>
-    <p class="intro"><span class="intro-gancho">Pare de procurar seus prints.</span> Eles ficam numa gaveta na borda da tela, prontos para colar: um ou vários de uma vez.</p>
+    <p class="intro">Cada print que você tira cai numa gaveta na borda da tela. Escolha vários e cole todos de uma vez.</p>
     <a class="botao" href="https://github.com/Frasca-99/gaveta">
       <svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
       GitHub

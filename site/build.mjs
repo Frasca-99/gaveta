@@ -29,8 +29,8 @@ const PT = {
   lang: "pt-BR",
   locale: "pt_BR",
   title: "Gaveta: seus prints numa gaveta, no Mac",
-  description: "Pare de procurar seus prints. No Mac, eles ficam numa gaveta na borda da tela, prontos para colar: um ou vários de uma vez. Grátis e de código aberto.",
-  ogDescription: "Pare de procurar seus prints. Eles ficam numa gaveta na borda da tela, prontos para colar: um ou vários de uma vez.",
+  description: "Cada print que você tira cai numa gaveta na borda da tela do Mac. Escolha vários e cole todos de uma vez. Grátis e de código aberto.",
+  ogDescription: "Cada print que você tira cai numa gaveta na borda da tela. Escolha vários e cole todos de uma vez.",
   imageAlt: "A Gaveta aberta na borda da tela de um Mac, uma gaveta de vidro cheia de prints.",
 };
 
