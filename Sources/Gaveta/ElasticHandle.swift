@@ -124,8 +124,19 @@ struct GripControl: NSViewRepresentable {
             tracking = area
         }
 
-        override func mouseEntered(with event: NSEvent) { NSCursor.resizeLeftRight.set() }
-        override func cursorUpdate(with event: NSEvent) { NSCursor.resizeLeftRight.set() }
+        override func mouseEntered(with event: NSEvent) { cursor().set() }
+        override func cursorUpdate(with event: NSEvent) { cursor().set() }
+
+        /// The divider cursor, a bar with an arrow either side, as macOS
+        /// gives for moving a divider; at a limit it points only the way the
+        /// drawer can still go. Before macOS 15, the double arrow.
+        private func cursor() -> NSCursor {
+            guard #available(macOS 15, *) else { return .resizeLeftRight }
+            let width = DrawerLayout.boxWidth
+            if width >= DrawerLayout.widestBox(for: window?.screen) - 0.5 { return .columnResize(directions: .right) }
+            if width <= DrawerLayout.standardBoxWidth + 0.5 { return .columnResize(directions: .left) }
+            return .columnResize
+        }
         override func mouseExited(with event: NSEvent) {
             if start == nil { NSCursor.arrow.set() }
         }
@@ -143,7 +154,6 @@ struct GripControl: NSViewRepresentable {
 
         override func mouseDragged(with event: NSEvent) {
             guard let start else { return }
-            NSCursor.resizeLeftRight.set()
             let x = NSEvent.mouseLocation.x
             let speed = (x - last.x) / max(event.timestamp - last.time, 1.0 / 240)
             last = (x, event.timestamp)
@@ -156,6 +166,7 @@ struct GripControl: NSViewRepresentable {
             // Squeezed, it gives less: the cards narrow with the drawer.
             let stretch = Self.rubber(wanted - widest) - Self.rubber(narrowest - wanted, most: 24)
             move?(width.rounded(), stretch, speed)
+            cursor().set()
 
             // No movement for a moment: the band goes slack.
             stillTimer?.invalidate()
@@ -177,8 +188,25 @@ struct GripControl: NSViewRepresentable {
             stillTimer?.invalidate()
             if start != nil { end?() }
             start = nil
-            if !bounds.contains(convert(event.locationInWindow, from: nil)) { NSCursor.arrow.set() }
+            if bounds.contains(convert(event.locationInWindow, from: nil)) { cursor().set() } else { NSCursor.arrow.set() }
         }
+    }
+}
+
+/// macOS lets only the app in front set the pointer's shape, and the
+/// drawer never comes to the front: it floats over the app being used. So
+/// the Gaveta asks the window server, as other menu bar utilities do, to let
+/// it set the pointer from the background. If the request is not there, the
+/// pointer simply keeps the arrow.
+enum BackgroundCursor {
+    static func allow() {
+        let everywhere = UnsafeMutableRawPointer(bitPattern: -2) // RTLD_DEFAULT
+        guard let connection = dlsym(everywhere, "_CGSDefaultConnection"),
+              let setProperty = dlsym(everywhere, "CGSSetConnectionProperty") else { return }
+        typealias Connection = @convention(c) () -> Int32
+        typealias SetProperty = @convention(c) (Int32, Int32, CFString, CFTypeRef) -> Int32
+        let id = unsafeBitCast(connection, to: Connection.self)()
+        _ = unsafeBitCast(setProperty, to: SetProperty.self)(id, id, "SetsCursorInBackground" as CFString, kCFBooleanTrue)
     }
 }
 

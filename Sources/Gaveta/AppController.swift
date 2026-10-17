@@ -20,6 +20,8 @@ final class AppController: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private var narrowing: DispatchWorkItem?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        // The glass drawer's grip shows the divider cursor though the Gaveta stays in the background.
+        BackgroundCursor.allow()
         panel = DrawerPanel(rootView: DrawerView(drawer: drawer))
         trigger = EdgeTrigger(panel: panel, drawer: drawer)
         // The glass drawer's grip changes its width: the window keeps up.
