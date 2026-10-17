@@ -236,6 +236,8 @@
     button.addEventListener("click", () => {
       const win = document.getElementById(button.dataset.abre);
       if (!win) return;
+      // the Trash opens and closes from the Dock, without going to its red button
+      if (button === $("#lixo") && shown(win)) return closeWindow(win);
       win.classList.remove("fechada");
       openWindow(win);
     });
