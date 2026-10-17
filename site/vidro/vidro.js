@@ -207,7 +207,12 @@
   const S = { left: 30, right: 14, border: 8, meta: 24, top: 18, bottom: 12, minReveal: 76, gap: 12, words: 96, slot: 96 };
   const L = { rail: 10, footer: 44, top: 44 };
   const front = () => (phone() ? 50 : 58);
-  const bottomRoom = () => (phone() ? 84 : 16);
+  /** On a phone the tip floats over the drawer's bottom, so the drawer ends above it. */
+  const guideRoom = () => {
+    const tip = $("#guia");
+    return tip.hidden || getComputedStyle(tip).display === "none" ? 0 : tip.offsetHeight + 10;
+  };
+  const bottomRoom = () => (phone() ? 84 + guideRoom() : 16);
   /** The width the drawer opens at: the app's 300, or less on a screen too narrow for it. */
   const standard = () => clamp(innerWidth - front() - 26, 220, 300);
   const widest = () => Math.max(standard(), Math.min(600, innerWidth / 2 - front()));
@@ -959,42 +964,93 @@
 
   const guide = (() => {
     const box = $("#guia");
-    const step = $("#guia-passo");
+    const icon = $("#guia-icone");
+    const title = $("#guia-titulo");
     const text = $("#guia-texto");
+    const dots = $("#guia-passos");
+    const stepText = $(".so-leitor", dots);
+    const dotList = $$("i", dots);
     const done = new Set();
     let off = false;
+    let finished = false;
     let hideTimer = 0;
+    let shown = "";
+    let last = "";
+    const ICONS = {
+      selecao: '<svg viewBox="0 0 16 16"><rect x="2" y="3" width="12" height="10" rx="1" fill="none" stroke="currentColor" stroke-width="1.4" stroke-dasharray="2 2"/></svg>',
+      janela: '<svg viewBox="0 0 16 16"><rect x="1.5" y="2.5" width="13" height="11" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M1.5 5.5h13" stroke="currentColor" stroke-width="1.4"/></svg>',
+      copiar: '<svg viewBox="0 0 16 16"><rect x="5" y="5" width="8.5" height="9" rx="1.6" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M2.5 10.5V3.6A1.1 1.1 0 0 1 3.6 2.5h6.9" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>',
+      colar: '<svg viewBox="0 0 16 16"><path d="M5.5 3H4.2A1.2 1.2 0 0 0 3 4.2v9.6A1.2 1.2 0 0 0 4.2 15h7.6a1.2 1.2 0 0 0 1.2-1.2V4.2A1.2 1.2 0 0 0 11.8 3h-1.3" fill="none" stroke="currentColor" stroke-width="1.4"/><rect x="5.5" y="1.5" width="5" height="3" rx="1" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>',
+      pronto: '<svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="m5.2 8.2 1.9 1.9 3.7-3.9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    };
     const STEPS = [
-      ["tirar", "1 de 3 · Tirar", fine.matches
-        ? "Tire um print desta mesa: escolha <b>Seleção</b> e arraste sobre a loja."
-        : "Tire um print: toque em <b>Seleção</b> e arraste o dedo sobre a loja."],
-      ["copiar", "2 de 3 · Copiar", fine.matches
-        ? "Clique no print na gaveta para copiar. <b>⌘-clique</b> escolhe vários."
-        : "Toque no print na gaveta para copiar, ou nos círculos para escolher vários."],
-      ["colar", "3 de 3 · Colar", fine.matches
-        ? "Cole no chamado com <b>⌘V</b>, ou arraste o print da gaveta até ele."
+      ["tirar", "selecao", "Tire um print", fine.matches
+        ? "Escolha <b>Seleção</b> e arraste sobre a loja."
+        : "Toque em <b>Seleção</b> e arraste o dedo sobre a loja."],
+      ["copiar", "copiar", "Copie da gaveta", fine.matches
+        ? "Clique no print para copiar. <b>⌘-clique</b> escolhe vários."
+        : "Toque no print para copiar, ou nos círculos para escolher vários."],
+      ["colar", "colar", "Cole no chamado", fine.matches
+        ? "Um <b>⌘V</b> cola tudo de uma vez. Ou arraste o print até ele."
         : "Toque em <b>Colar</b> no chamado."],
     ];
+    /** On a phone the drawer makes room for the tip, so it follows every change in the tip's size. */
+    const reflow = () => { if (drawer.open && phone()) render(); };
+    /**
+     * Writes one tip, only when something in it changed, so the live region does
+     * not repeat itself. A new tip comes in with a short fade; the dots show what
+     * is done, in whatever order it was done.
+     */
+    function write(key, svg, heading, words, step) {
+      const sig = `${key}|${step}|${words}|${[...done].join()}`;
+      if (sig === last) return;
+      last = sig;
+      if (shown !== key) {
+        box.classList.remove("troca");
+        void box.offsetWidth;
+        if (shown && !still.matches) box.classList.add("troca");
+        shown = key;
+      }
+      icon.innerHTML = ICONS[svg];
+      title.textContent = heading;
+      text.innerHTML = words;
+      dots.hidden = step < 0;
+      if (step >= 0) {
+        stepText.textContent = `Passo ${step + 1} de ${STEPS.length}`;
+        dotList.forEach((dot, i) => { dot.className = i === step ? "atual" : done.has(STEPS[i][0]) ? "feito" : ""; });
+      }
+    }
+    function put(...tip) {
+      box.hidden = false;
+      write(...tip);
+      reflow();
+    }
+    /** Hides the tip, taking the keys out of it first if they were on its close button. */
+    function hide() {
+      if (box.contains(document.activeElement)) $(".captura-modo").focus();
+      box.hidden = true;
+      reflow();
+    }
     function show() {
       clearTimeout(hideTimer);
-      if (off) { box.hidden = true; return; }
-      box.hidden = false;
-      if (mode) {
-        step.textContent = mode === "janela" ? "Janela" : "Seleção";
-        text.innerHTML = mode === "janela"
+      if (off) return hide();
+      if (mode === "janela") {
+        return put("janela", "janela", "Janela", fine.matches
           ? "Clique numa janela para fotografá-la. <b>Esc</b> cancela."
-          : fine.matches ? "Arraste sobre qualquer coisa. <b>Esc</b> cancela." : "Arraste o dedo sobre o que quer guardar.";
+          : "Toque numa janela para fotografá-la, ou em <b>Janela</b> de novo para cancelar.", -1);
+      }
+      if (mode) return put("selecao", "selecao", "Seleção", fine.matches ? "Arraste sobre qualquer coisa. <b>Esc</b> cancela." : "Arraste o dedo sobre o que quer guardar.", -1);
+      const index = STEPS.findIndex(([key]) => !done.has(key));
+      if (index < 0) {
+        // "Pronto" shows once; after that, the tip only comes back for the capture modes
+        if (finished) return hide();
+        finished = true;
+        put("pronto", "pronto", "Pronto", "É assim no seu Mac: cada print cai na gaveta, e um <b>⌘V</b> cola todos.", -1);
+        hideTimer = setTimeout(hide, 7000);
         return;
       }
-      const next = STEPS.find(([key]) => !done.has(key));
-      if (!next) {
-        step.textContent = "Pronto";
-        text.innerHTML = "É assim no seu Mac: cada print cai na gaveta, e um <b>⌘V</b> cola todos.";
-        hideTimer = setTimeout(() => { box.hidden = true; }, 7000);
-        return;
-      }
-      step.textContent = next[1];
-      text.innerHTML = next[2];
+      const [key, svg, heading, words] = STEPS[index];
+      put(key, svg, heading, words, index);
     }
     $("#guia-fechar").addEventListener("click", () => { off = true; show(); });
     return {
