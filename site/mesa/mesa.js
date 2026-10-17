@@ -273,6 +273,7 @@
     menuGaveta.hidden = !open;
     menuIcon.setAttribute("aria-expanded", String(open));
     if (open) {
+      if (!menuIdioma.hidden) showLanguages(false);
       const icon = onDesk(menuIcon.getBoundingClientRect());
       menuGaveta.style.left = `${clamp(icon.x - 8, 8, mesaBox().width - menuGaveta.offsetWidth - 8)}px`;
       $("[data-acao='alternar']", menuGaveta).firstChild.textContent = drawer.open ? "Fechar a gaveta " : "Abrir a gaveta ";
@@ -286,7 +287,28 @@
   });
   document.addEventListener("pointerdown", (event) => {
     if (!menuGaveta.hidden && !menuGaveta.contains(event.target) && !menuIcon.contains(event.target)) showMenu(false);
+    if (!menuIdioma.hidden && !menuIdioma.contains(event.target) && !idiomaIcon.contains(event.target)) showLanguages(false);
   });
+
+  // The language, from the menu bar. The choice is kept, so the page opens in it next time.
+  const idiomaIcon = $("#icone-idioma");
+  const menuIdioma = $("#menu-idioma");
+  function showLanguages(open) {
+    menuIdioma.hidden = !open;
+    idiomaIcon.setAttribute("aria-expanded", String(open));
+    if (open) {
+      showMenu(false);
+      const icon = onDesk(idiomaIcon.getBoundingClientRect());
+      menuIdioma.style.left = `${clamp(icon.x - 8, 8, mesaBox().width - menuIdioma.offsetWidth - 8)}px`;
+      $("[aria-checked='true']", menuIdioma).focus({ preventScroll: true });
+    }
+  }
+  idiomaIcon.addEventListener("click", () => showLanguages(menuIdioma.hidden));
+  for (const link of $$("a[data-idioma]", menuIdioma)) {
+    link.addEventListener("click", () => {
+      try { localStorage.setItem("gaveta-idioma", link.dataset.idioma); } catch {}
+    });
+  }
 
   // ── prints ──────────────────────────────────────────────────────────────
 
@@ -1673,7 +1695,10 @@
     const command = event.metaKey || event.ctrlKey;
     if (event.key === "Escape") {
       if (mode) leaveMode();
-      else if (!menuGaveta.hidden) {
+      else if (!menuIdioma.hidden) {
+        showLanguages(false);
+        idiomaIcon.focus();
+      } else if (!menuGaveta.hidden) {
         showMenu(false);
         menuIcon.focus();
       } else if (drawer.open) {

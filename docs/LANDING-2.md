@@ -7,7 +7,7 @@ A landing 1 (minimalista, com as duas figuras de linha) continua na branch `land
 ## A mesa
 
 ```
- Chamados  Arquivo  Editar  Visualizar  Janela  Ajuda        [gaveta] [wi-fi] [bateria]  sex. 16 de out. 12:15
+ Chamados                                                         [gaveta] [PT]  sex. 16 de out. 12:15
 ┌──────────────────────┐                                                   ▫ fichario.svg   ▫ por-dentro.png
 │ ● ● ●  loja.exemplo  │          [ícone]
 │  Finalizar compra    │     Seus prints,                                                        ▌
@@ -20,7 +20,7 @@ A landing 1 (minimalista, com as duas figuras de linha) continua na branch `land
 └──────────────────────┘         [ navegador  chamados  pré-visualização │ lixo ]
 ```
 
-- **Barra de menus:** o nome do app da frente (muda quando você clica numa janela), menus em português, o ícone da Gaveta, Wi-Fi, bateria e o relógio de verdade.
+- **Barra de menus:** só o que funciona: o nome do app da frente (muda quando você clica numa janela), o ícone da Gaveta com o menu dela, o idioma (PT/EN, como o macOS mostra a entrada do teclado) e o relógio de verdade.
 - **Navegador:** uma loja com o erro "não foi possível concluir o pagamento". É o que se fotografa.
 - **Chamados:** o chamado #482, com a área de anexos, logo abaixo da loja, para a gaveta aberta nunca cobri-lo. É onde se cola.
 - **Ficha "Como usar":** uma ficha de fichário pautada, datilografada, com os gestos, à direita.
@@ -43,6 +43,12 @@ Mesmas medidas, cores e tempos do app nativo:
 ## Dicas
 
 Um balão discreto diz o próximo passo, calculado a partir do que está na mesa naquele momento (e não de um roteiro fixo): tirar um print (aponta a barra), abrir a gaveta (encostado na frente de madeira, empurrado por ela quando abre), selecionar vários com ⌘-clique ou Selecionar todos, Copiar todos, colar no chamado com ⌘V, e o que fazer com prints deixados na mesa. O botão de que a dica fala brilha por alguns segundos. Some durante a captura e os arrastos, e dá para fechar.
+
+## Idiomas
+
+Português em `/` e inglês em `/en/`. O texto em inglês fica em `site/mesa/ingles.mjs`, em pares (o trecho em português e a tradução), e o `site/build.mjs` gera as duas páginas a partir da mesma mesa. Se um trecho em português mudar e a tradução não, o build para e diz qual.
+
+Quem abre `/` com o navegador em outra língua vai para `/en/`. Escolher um idioma no menu da barra fica guardado, e a página abre nele da próxima vez. Robôs de busca e de prévia de link não são redirecionados.
 
 ## Celular
 

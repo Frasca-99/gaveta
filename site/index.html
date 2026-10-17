@@ -3,12 +3,19 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<script>try {
+  const chosen = localStorage.getItem("gaveta-idioma");
+  const robot = /bot|crawl|spider|preview|facebookexternalhit|embedly|slurp/i.test(navigator.userAgent);
+  const portuguese = (navigator.languages || [navigator.language]).some((code) => /^pt(-|$)/i.test(code));
+  if (chosen === "en" || (!chosen && !robot && !portuguese)) location.replace("en/" + location.hash);
+} catch {}</script>
 <title>Gaveta: seus prints numa gaveta, no Mac</title>
 <meta name="description" content="Cada print que você tira cai numa gaveta na borda da tela do Mac. Escolha vários e cole todos de uma vez. Grátis e de código aberto.">
 <meta property="og:title" content="Gaveta: seus prints numa gaveta, no Mac">
 <meta property="og:description" content="Cada print que você tira cai numa gaveta na borda da tela. Escolha vários e cole todos de uma vez.">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="pt_BR">
+<meta property="og:locale:alternate" content="en_US">
 <meta property="og:image" content="assets/compartilhar.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -200,7 +207,6 @@ button { font: inherit; color: inherit; }
   font-size: 13px; color: #1d1d1b; user-select: none; -webkit-user-select: none;
 }
 .menus-esquerda, .menus-direita { display: flex; align-items: center; gap: 18px; min-width: 0; white-space: nowrap; }
-.menus-esquerda span { cursor: default; }
 .menus-app { font-weight: 700; }
 .menus-direita { gap: 14px; }
 .menus-direita svg { width: 17px; height: 17px; display: block; }
@@ -209,6 +215,13 @@ button { font: inherit; color: inherit; }
   background: transparent; cursor: default;
 }
 .menus-gaveta:hover, .menus-gaveta[aria-expanded="true"] { background: rgba(0, 0, 0, 0.1); }
+/* the language, the way macOS shows the keyboard's input source */
+.menus-idioma {
+  height: 18px; min-width: 26px; padding: 0 4px; border: 0; border-radius: 4px; cursor: default;
+  background: none; color: inherit; font: 600 10.5px/18px var(--sans); letter-spacing: 0.04em;
+  box-shadow: inset 0 0 0 1.2px currentColor;
+}
+.menus-idioma:hover, .menus-idioma[aria-expanded="true"] { background: rgba(0, 0, 0, 0.1); }
 .relogio { font-variant-numeric: tabular-nums; }
 
 /* the opening: the page's words, written on the desk */
@@ -730,6 +743,9 @@ button { font: inherit; color: inherit; }
 .menu-gaveta a:hover, .menu-gaveta button:hover, .menu-gaveta a:focus-visible, .menu-gaveta button:focus-visible { background: var(--azul); color: #fff; outline: none; }
 .menu-gaveta kbd { font: inherit; opacity: 0.55; }
 .menu-gaveta hr { margin: 4px 8px; border: 0; border-top: 1px solid rgba(0, 0, 0, 0.1); }
+.menu-idioma { min-width: 160px; }
+.menu-idioma a { justify-content: flex-start; gap: 0; padding-left: 24px; position: relative; }
+.menu-idioma a[aria-checked="true"]::before { content: "✓"; position: absolute; left: 8px; }
 
 /* ── smaller desks ─────────────────────────────────────────────────────── */
 /* shorter screens: the shop gives up a line so the ticket below it stays clear */
@@ -760,8 +776,6 @@ button { font: inherit; color: inherit; }
   }
 }
 @media (max-width: 700px) {
-  .menus-esquerda span:not(.menus-app) { display: none; }
-  .menus-direita .sem-espaco { display: none; }
   .abertura { top: calc(var(--menus) + 26px); }
   .abertura-icone { width: 60px; height: 60px; }
   .captura { bottom: 88px; }
@@ -911,14 +925,13 @@ button { font: inherit; color: inherit; }
 
   <header class="menus" id="menus">
     <div class="menus-esquerda" aria-hidden="true">
-      <span class="menus-app" id="app-da-frente">Finder</span><span>Arquivo</span><span>Editar</span><span>Visualizar</span><span>Janela</span><span>Ajuda</span>
+      <span class="menus-app" id="app-da-frente">Finder</span>
     </div>
     <div class="menus-direita">
       <button class="menus-gaveta" type="button" id="icone-gaveta" aria-haspopup="menu" aria-expanded="false" aria-label="Menu da Gaveta">
         <svg viewBox="0 0 18 18" aria-hidden="true"><rect x="2.5" y="4" width="13" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M2.5 9h13" stroke="currentColor" stroke-width="1.3"/><rect x="7" y="10.8" width="4" height="1.5" rx=".75" fill="currentColor"/><rect x="7" y="5.8" width="4" height="1.5" rx=".75" fill="currentColor"/></svg>
       </button>
-      <svg class="sem-espaco" viewBox="0 0 18 18" aria-hidden="true"><path d="M9 14.2 11 12a2.9 2.9 0 0 0-4 0zM5.2 10.2a5.4 5.4 0 0 1 7.6 0l1.3-1.4a7.3 7.3 0 0 0-10.2 0zM2.6 7.4a9 9 0 0 1 12.8 0l1.3-1.4a10.9 10.9 0 0 0-15.4 0z" fill="currentColor"/></svg>
-      <svg class="sem-espaco" viewBox="0 0 26 18" style="width:24px" aria-hidden="true"><rect x="1.5" y="4.5" width="20" height="9" rx="2.6" fill="none" stroke="currentColor" stroke-opacity=".45"/><rect x="3" y="6" width="14" height="6" rx="1.4" fill="currentColor"/><path d="M23 7.5v3a1.6 1.6 0 0 0 0-3z" fill="currentColor" fill-opacity=".45"/></svg>
+      <button class="menus-idioma" type="button" id="icone-idioma" aria-haspopup="menu" aria-expanded="false" aria-label="Idioma: português">PT</button>
       <time class="relogio" id="relogio"></time>
     </div>
   </header>
@@ -927,6 +940,11 @@ button { font: inherit; color: inherit; }
     <button type="button" role="menuitem" data-acao="alternar">Abrir a gaveta <kbd>⌃⌥G</kbd></button>
     <hr>
     <a role="menuitem" href="https://github.com/Frasca-99/gaveta">Código no GitHub</a>
+  </div>
+
+  <div class="menu-gaveta menu-idioma" id="menu-idioma" role="menu" aria-label="Idioma" hidden>
+    <a role="menuitemradio" href="./" hreflang="pt-BR" lang="pt-BR" data-idioma="pt" aria-checked="true">Português</a>
+    <a role="menuitemradio" href="en/" hreflang="en" lang="en" data-idioma="en" aria-checked="false">English</a>
   </div>
 
   <div class="captura" role="toolbar" aria-label="Captura de tela">
@@ -1719,8 +1737,7 @@ var HL = (() => {
 })();
 /* /hairline kernel */
 </script>
-<script>
-// The host for the drawer drawn in fichario.svg: it mounts the figure, shows
+<script>// The host for the drawer drawn in fichario.svg: it mounts the figure, shows
 // what is under the pointer, and walks it once when the window first opens.
 (() => {
   const stage = document.getElementById("fichario");
@@ -3069,6 +3086,7 @@ draw(performance.now());
     menuGaveta.hidden = !open;
     menuIcon.setAttribute("aria-expanded", String(open));
     if (open) {
+      if (!menuIdioma.hidden) showLanguages(false);
       const icon = onDesk(menuIcon.getBoundingClientRect());
       menuGaveta.style.left = `${clamp(icon.x - 8, 8, mesaBox().width - menuGaveta.offsetWidth - 8)}px`;
       $("[data-acao='alternar']", menuGaveta).firstChild.textContent = drawer.open ? "Fechar a gaveta " : "Abrir a gaveta ";
@@ -3082,7 +3100,28 @@ draw(performance.now());
   });
   document.addEventListener("pointerdown", (event) => {
     if (!menuGaveta.hidden && !menuGaveta.contains(event.target) && !menuIcon.contains(event.target)) showMenu(false);
+    if (!menuIdioma.hidden && !menuIdioma.contains(event.target) && !idiomaIcon.contains(event.target)) showLanguages(false);
   });
+
+  // The language, from the menu bar. The choice is kept, so the page opens in it next time.
+  const idiomaIcon = $("#icone-idioma");
+  const menuIdioma = $("#menu-idioma");
+  function showLanguages(open) {
+    menuIdioma.hidden = !open;
+    idiomaIcon.setAttribute("aria-expanded", String(open));
+    if (open) {
+      showMenu(false);
+      const icon = onDesk(idiomaIcon.getBoundingClientRect());
+      menuIdioma.style.left = `${clamp(icon.x - 8, 8, mesaBox().width - menuIdioma.offsetWidth - 8)}px`;
+      $("[aria-checked='true']", menuIdioma).focus({ preventScroll: true });
+    }
+  }
+  idiomaIcon.addEventListener("click", () => showLanguages(menuIdioma.hidden));
+  for (const link of $$("a[data-idioma]", menuIdioma)) {
+    link.addEventListener("click", () => {
+      try { localStorage.setItem("gaveta-idioma", link.dataset.idioma); } catch {}
+    });
+  }
 
   // ── prints ──────────────────────────────────────────────────────────────
 
@@ -4469,7 +4508,10 @@ draw(performance.now());
     const command = event.metaKey || event.ctrlKey;
     if (event.key === "Escape") {
       if (mode) leaveMode();
-      else if (!menuGaveta.hidden) {
+      else if (!menuIdioma.hidden) {
+        showLanguages(false);
+        idiomaIcon.focus();
+      } else if (!menuGaveta.hidden) {
         showMenu(false);
         menuIcon.focus();
       } else if (drawer.open) {
