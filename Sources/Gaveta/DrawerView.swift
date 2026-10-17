@@ -4,8 +4,17 @@ import SwiftUI
 enum DrawerLayout {
     /// The oak front with the label and the pull.
     static let frontWidth: CGFloat = 58
-    /// The felt-lined box the cards stand in.
-    static let boxWidth: CGFloat = 300
+    /// The felt-lined box the cards stand in, as the card catalog has it.
+    static let standardBoxWidth: CGFloat = 300
+    /// How wide the box is now: the card catalog's never changes, the glass
+    /// drawer's follows its grip. The drawer sets it; everything that lays
+    /// the cards out or finds them under the pointer reads it.
+    nonisolated(unsafe) static var boxWidth: CGFloat = standardBoxWidth
+    /// The widest the glass drawer goes on a screen: half of it at most.
+    static func widestBox(for screen: NSScreen?) -> CGFloat {
+        let room = (screen ?? NSScreen.main)?.visibleFrame.width ?? 1440
+        return max(standardBoxWidth, min(600, room / 2 - frontWidth))
+    }
     static var drawerWidth: CGFloat { frontWidth + boxWidth }
     /// Room around the drawer inside its window for its shadow.
     static let shadowRoom: CGFloat = 44

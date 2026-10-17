@@ -41,6 +41,15 @@ enum Prefs {
         set { store.set(newValue.rawValue, forKey: "drawerStyle") }
     }
 
+    /// How wide the glass drawer's box is, after its grip was dragged.
+    static var glassWidth: CGFloat {
+        get {
+            let width = store.double(forKey: "glassWidth")
+            return width > 0 ? CGFloat(width) : DrawerLayout.standardBoxWidth
+        }
+        set { store.set(Double(newValue), forKey: "glassWidth") }
+    }
+
     static var defaultDrawerStyle: DrawerStyle {
         if #available(macOS 26, *) { return .glass }
         return .catalog

@@ -20,6 +20,12 @@ final class AppController: NSObject, NSApplicationDelegate, NSMenuDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         panel = DrawerPanel(rootView: DrawerView(drawer: drawer))
         trigger = EdgeTrigger(panel: panel, drawer: drawer)
+        // The glass drawer's grip changes its width: the window keeps up.
+        drawer.onWidthChange = { [weak self] in
+            guard let self, self.panel.isVisible, let screen = self.panel.screen else { return }
+            self.panel.place(on: screen)
+        }
+        drawer.applyWidth()
         drawer.onChange = { [weak self] in self?.trigger.drawerChanged() }
         drawer.onToss = { [weak self] pin, frame, delay in
             guard let self, let screen = self.panel.screen else { return }

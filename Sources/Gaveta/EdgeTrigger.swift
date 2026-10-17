@@ -10,6 +10,11 @@ final class EdgeTrigger {
     private var timer: Timer?
 
     private var dwellSince: Date?
+    /// How far the mouse has pushed on against the edge, past where the
+    /// pointer stops.
+    private var pushed: CGFloat = 0
+    /// The handle at the edge, taut as the drawer is about to open.
+    private let handle = EdgeHandle()
     private var awaySince: Date?
     private var peekUntil: Date?
     /// Opened on purpose: stays until the pointer has visited and left.
@@ -17,7 +22,9 @@ final class EdgeTrigger {
     private var visited = false
 
     /// How long the pointer rests on the edge before the drawer opens.
-    private let dwell: TimeInterval = 0.2
+    private let dwell: TimeInterval = 0.26
+    /// Pushing this far on against the edge opens it at once.
+    private let pushToOpen: CGFloat = 36
     /// How long the pointer is away before the drawer closes.
     private let grace: TimeInterval = 0.5
 
@@ -32,6 +39,11 @@ final class EdgeTrigger {
                 guard let self, self.drawer.dragging.isEmpty else { return }
                 self.close()
             }
+        } as Any)
+        // The pointer stops at the edge, but the mouse still reports moving:
+        // pushing on is what pulls the handle taut.
+        monitors.append(NSEvent.addGlobalMonitorForEvents(matching: [.mouseMoved]) { [weak self] event in
+            MainActor.assumeIsolated { self?.pushedOn(event.deltaX) }
         } as Any)
         let timer = Timer(timeInterval: 0.06, repeats: true) { [weak self] _ in
             MainActor.assumeIsolated { self?.tick() }
@@ -50,6 +62,8 @@ final class EdgeTrigger {
     /// in, and it goes back. Resting the pointer on the crack opens it.
     func peek() {
         guard !drawer.isOpen else { return }
+        handle.letGo()
+        dwellSince = nil
         if !drawer.peeking {
             if let screen = Self.screenUnderPointer() {
                 panel.place(on: screen)
@@ -68,6 +82,9 @@ final class EdgeTrigger {
     }
 
     func open(pinned: Bool = false, on screen: NSScreen? = nil) {
+        handle.letGo()
+        dwellSince = nil
+        pushed = 0
         self.pinned = self.pinned || pinned
         visited = false
         awaySince = nil
@@ -125,19 +142,23 @@ final class EdgeTrigger {
 
         guard drawer.isOpen else {
             guard !drawer.pins.isEmpty, let screen = Self.screenUnderPointer(), Self.isOnRightEdge(mouse, of: screen) else {
+                if dwellSince != nil { handle.letGo() }
                 dwellSince = nil
+                pushed = 0
                 return
             }
-            if let since = dwellSince, now.timeIntervalSince(since) >= dwell {
-                dwellSince = nil
-                open(on: screen)
-            } else if dwellSince == nil {
+            if dwellSince == nil {
                 dwellSince = now
+                pushed = 0
+                handle.show(at: mouse, on: screen, style: drawer.style)
+            } else {
+                handle.follow(mouse.y, on: screen)
             }
+            pull(now: now)
             return
         }
 
-        if !drawer.dragging.isEmpty { return }
+        if !drawer.dragging.isEmpty || drawer.resizing { return }
         if panel.drawerRect(for: drawer).insetBy(dx: -24, dy: -24).contains(mouse) {
             visited = true
             awaySince = nil
@@ -149,6 +170,25 @@ final class EdgeTrigger {
         } else {
             awaySince = now
         }
+    }
+
+    /// The mouse moved on with the pointer held at the edge.
+    private func pushedOn(_ delta: CGFloat) {
+        guard delta > 0, dwellSince != nil, !drawer.isOpen, !drawer.peeking else { return }
+        pushed += delta
+        pull()
+    }
+
+    /// How taut the handle is: resting on the edge pulls it over the dwell,
+    /// pushing on pulls it faster. Taut, the drawer opens.
+    private func pull(now: Date = Date()) {
+        guard let since = dwellSince else { return }
+        let tension = now.timeIntervalSince(since) / dwell + Double(pushed / pushToOpen)
+        guard tension >= 1 else {
+            handle.pull(CGFloat(tension))
+            return
+        }
+        open(on: Self.screenUnderPointer())
     }
 
     // MARK: Screens

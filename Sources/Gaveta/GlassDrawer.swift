@@ -106,7 +106,7 @@ struct GlassDrawerView: View {
                 .font(.system(size: 13, weight: .semibold, design: .rounded))
                 .monospacedDigit()
                 .contentTransition(.numericText())
-            Capsule().fill(.primary.opacity(0.16)).frame(width: 4, height: 34)
+            ResizeGrip(drawer: drawer)
         }
         .frame(width: DrawerLayout.frontWidth)
         .frame(maxHeight: .infinity)

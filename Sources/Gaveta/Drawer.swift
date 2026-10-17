@@ -41,7 +41,26 @@ final class Drawer: ObservableObject {
     @Published private(set) var pins: [Pin] = []
     @Published var isOpen = false
     @Published var style = Prefs.drawerStyle {
-        didSet { Prefs.drawerStyle = style }
+        didSet {
+            Prefs.drawerStyle = style
+            applyWidth()
+        }
+    }
+    /// How wide the glass drawer's box is; dragging its grip sets it.
+    @Published var glassWidth = Prefs.glassWidth {
+        didSet { applyWidth() }
+    }
+    /// The grip is being dragged: the drawer stays open wherever the pointer goes.
+    var resizing = false
+    /// The drawer got wider or narrower: its window has to follow.
+    var onWidthChange: (() -> Void)?
+
+    /// Hands the box's width to the layout that the views and the pointer read.
+    func applyWidth() {
+        let width = style == .glass ? glassWidth : DrawerLayout.standardBoxWidth
+        guard DrawerLayout.boxWidth != width else { return }
+        DrawerLayout.boxWidth = width
+        onWidthChange?()
     }
     /// Out by a crack, showing a new capture slide in.
     @Published var peeking = false
