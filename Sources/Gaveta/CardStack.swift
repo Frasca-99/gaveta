@@ -129,10 +129,13 @@ struct CardStack {
     /// The frontmost card under a point, and which part of it. Each card's
     /// tab rises over the card behind it, so it is tested before that card;
     /// cards without tabs (the glass drawer's) leave that room empty.
-    func hit(_ point: CGPoint, tabs: Bool = true, shift: (Int) -> CGFloat) -> (index: Int, part: Part)? {
+    /// `wide` takes a card's whole row, from one side of the drawer to the
+    /// other: for the pointer resting on it, not for clicks.
+    func hit(_ point: CGPoint, tabs: Bool = true, wide: Bool = false, shift: (Int) -> CGFloat) -> (index: Int, part: Part)? {
         for index in stride(from: count - 1, through: 0, by: -1) {
             let card = cardRect(index, shift: shift(index))
-            if card.contains(point) {
+            let row = wide ? CGRect(x: 0, y: card.minY, width: DrawerLayout.boxWidth, height: card.height) : card
+            if row.contains(point) {
                 let local = CGPoint(x: point.x - card.minX, y: point.y - card.minY)
                 if Self.dotBox.contains(local) { return (index, .dot) }
                 if Self.closeBox.contains(local) { return (index, .close) }
@@ -144,7 +147,9 @@ struct CardStack {
         if let hovered, hovered < count - 1 {
             let card = cardRect(hovered, shift: shift(hovered))
             let gap = reveal(hovered) - Self.cardHeight
-            if CGRect(x: card.minX, y: card.maxY, width: card.width, height: gap).contains(point) {
+            let left = wide ? 0 : card.minX
+            let width = wide ? DrawerLayout.boxWidth : card.width
+            if CGRect(x: left, y: card.maxY, width: width, height: gap).contains(point) {
                 return (hovered, .card)
             }
         }

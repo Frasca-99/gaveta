@@ -41,6 +41,8 @@ final class CardsControlView: NSView, NSDraggingSource {
     /// go copies nothing.
     private var pressUsed = false
     private var trackingArea: NSTrackingArea?
+    /// Closes the open card a moment after the pointer left every card.
+    private var letGo: Timer?
 
     /// Long enough not to fire on a slow click, short enough to feel deliberate.
     private let holdDelay: TimeInterval = 0.5
@@ -64,9 +66,9 @@ final class CardsControlView: NSView, NSDraggingSource {
         hit(at: convert(event.locationInWindow, from: nil))
     }
 
-    private func hit(at point: NSPoint) -> (pin: Pin, part: CardStack.Part)? {
+    private func hit(at point: NSPoint, wide: Bool = false) -> (pin: Pin, part: CardStack.Part)? {
         guard let drawer else { return nil }
-        guard let found = stack.hit(point, tabs: drawer.style == .catalog, shift: { self.shift(of: $0, in: drawer) }),
+        guard let found = stack.hit(point, tabs: drawer.style == .catalog, wide: wide, shift: { self.shift(of: $0, in: drawer) }),
               found.index < cards.count else { return nil }
         return (cards[found.index], found.part)
     }
@@ -92,7 +94,7 @@ final class CardsControlView: NSView, NSDraggingSource {
 
     override func mouseExited(with event: NSEvent) {
         guard let drawer, drawer.dragging.isEmpty, drawer.hovered != nil else { return }
-        drawer.hovered = nil
+        letGoSoon()
     }
 
     override func scrollWheel(with event: NSEvent) {
@@ -111,8 +113,35 @@ final class CardsControlView: NSView, NSDraggingSource {
         // would not light up (nor show its X) until the next click.
         if pressed != nil, NSEvent.pressedMouseButtons & 1 == 0 { endPress() }
         guard let drawer, drawer.dragging.isEmpty, pressed == nil else { return }
-        let id = hit(at: point)?.pin.id
-        if drawer.hovered != id { drawer.hovered = id }
+        // The whole row is the card's: the open card slides a little left,
+        // and the pointer reaching for its X at the right must not fall off it.
+        if let id = hit(at: point, wide: true)?.pin.id {
+            letGo?.invalidate()
+            letGo = nil
+            if drawer.hovered != id { drawer.hovered = id }
+            return
+        }
+        if drawer.hovered != nil { letGoSoon() }
+    }
+
+    /// On no card, between cards or past the stack's edge: the open card
+    /// waits a moment before it closes, in case the pointer was only passing
+    /// on its way back to it. Another card takes over at once.
+    private func letGoSoon() {
+        guard letGo == nil else { return }
+        let timer = Timer(timeInterval: 0.3, repeats: false) { [weak self] _ in
+            MainActor.assumeIsolated {
+                guard let self else { return }
+                self.letGo = nil
+                guard let drawer = self.drawer, drawer.isOpen, drawer.dragging.isEmpty, self.pressed == nil,
+                      let window = self.window else { return }
+                let point = self.convert(window.mouseLocationOutsideOfEventStream, from: nil)
+                let id = self.bounds.contains(point) ? self.hit(at: point, wide: true)?.pin.id : nil
+                if drawer.hovered != id { drawer.hovered = id }
+            }
+        }
+        RunLoop.main.add(timer, forMode: .common)
+        letGo = timer
     }
 
     /// Hover from where the pointer is now, for when it has not moved since.
