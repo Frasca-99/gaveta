@@ -4351,12 +4351,12 @@ draw(performance.now());
         if (over === lixo) return trashFromDesk(print);
         if (over === corpo) return backToDrawer(print);
         if (over === chamado) {
-          // into an app the file is copied: it stays where it was on the desk
+          // let go on the ticket, the file goes into it and leaves the desk
           activate(chamado);
+          onDeskNow.delete(print.id);
+          item.remove();
           attach([print]);
-          item.classList.add("voltando");
-          item.style.transform = `translate(${entry.spot.x}px, ${entry.spot.y}px)`;
-          setTimeout(() => item.classList.remove("voltando"), 360);
+          guide.update();
           return;
         }
         const m = mesaBox();

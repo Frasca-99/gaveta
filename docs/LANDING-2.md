@@ -38,7 +38,7 @@ Mesmas medidas, cores e tempos do app nativo:
 - Clique copia (carimbo COPIADO). ⌘-clique e ⇧-clique selecionam vários (o círculo da ficha também). Barra de baixo: Selecionar todos, Copiar todos.
 - ⌘V com o chamado na frente cola tudo de uma vez. Arrastar uma ficha (ou as escolhidas) até o chamado também anexa.
 - X, ou arrastar até o Lixo: a ficha é puxada para fora e cai.
-- Arrastar uma ficha para a mesa: ela sai da gaveta e fica na mesa como arquivo, com a miniatura e o nome. Dali vai para o chamado (é copiada e continua na mesa), para o Lixo ou de volta à gaveta pela borda direita. Clique duplo abre na Pré-Visualização.
+- Arrastar uma ficha para a mesa: ela sai da gaveta e fica na mesa como arquivo, com a miniatura e o nome. Dali vai para o chamado (sai da mesa e fica anexada), para o Lixo ou de volta à gaveta pela borda direita. Clique duplo abre na Pré-Visualização.
 
 ## Dicas
 
