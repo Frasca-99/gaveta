@@ -143,7 +143,8 @@ kbd {
   box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.16), 0 20px 44px -18px rgba(0, 0, 0, 0.24), 0 4px 10px -4px rgba(0, 0, 0, 0.08);
 }
 .j-loja { left: 20px; top: calc(var(--menus) + 18px); width: var(--janela); }
-.j-chamado { left: 20px; bottom: 18px; width: var(--janela); }
+.j-conversa { left: 20px; bottom: 18px; display: flex; flex-direction: column; width: var(--janela); height: clamp(250px, calc(100svh - 430px), 360px); }
+@media (min-width: 761px) and (max-height: 800px) { .conversa-hora { display: none; } }
 .j-codigo { right: 22px; top: 20%; width: clamp(320px, 30vw, 460px); border-radius: 10px; cursor: grab; touch-action: none; }
 .j-codigo img { width: 100%; height: auto; pointer-events: none; user-select: none; -webkit-user-drag: none; }
 .janela-barra {
@@ -159,7 +160,7 @@ kbd {
 .janela-nome { flex: 1; margin-right: 45px; text-align: center; font: 600 12.5px var(--sans); color: #333; }
 
 .loja { padding: 14px 18px 18px; }
-.loja-marca, .chamado-rotulo { margin: 0; font: 500 10.5px/1.6 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: #9a9a9a; }
+.loja-marca { margin: 0; font: 500 10.5px/1.6 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: #9a9a9a; }
 .loja-titulo { margin: 2px 0 8px; font-size: 19px; font-weight: 600; letter-spacing: -0.02em; }
 .loja-itens { margin: 0; padding: 0; list-style: none; font-size: 13.5px; }
 .loja-itens li { display: flex; justify-content: space-between; gap: 12px; padding: 7px 0; border-bottom: 1px solid #f1f1f1; font-variant-numeric: tabular-nums; }
@@ -175,32 +176,50 @@ kbd {
 }
 .loja-pagar:active { transform: scale(0.97); }
 
-.chamado { padding: 12px 18px 18px; }
-.chamado-cabeca { display: flex; align-items: center; gap: 8px; margin: 0; font: 500 12px var(--mono); color: #8a8a8a; }
-.chamado-estado { padding: 0 8px; border-radius: 999px; background: #e7f6ec; color: #1a7f37; font: 500 11px/1.7 var(--sans); }
-.chamado-titulo { margin: 4px 0 2px; font-size: 15.5px; font-weight: 600; letter-spacing: -0.01em; }
-.chamado-texto { margin: 0 0 10px; color: #555; font-size: 12.5px; line-height: 1.5; }
-.chamado-rotulo span { color: var(--tinta); }
-.anexos {
-  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; min-height: 76px; max-height: 172px; margin-top: 6px; padding: 8px;
-  overflow-y: auto; border: 1px dashed var(--linha-forte); border-radius: 10px; scrollbar-width: none;
-  transition: border-color 150ms var(--sai), background-color 150ms var(--sai);
+/* the chat: she wants proof, and gets whatever screenshot comes */
+.conversa-contato { display: flex; align-items: center; justify-content: center; gap: 7px; padding: 6px 0; border-bottom: 1px solid #f0f0f0; }
+.conversa-avatar {
+  display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%;
+  background: linear-gradient(160deg, #f7a8c4, #dd6498); color: #fff; font: 600 11px var(--sans);
 }
-.anexos.alvo, .anexos.com-copia { border-color: var(--azul); background: rgba(47, 124, 246, 0.05); }
-.anexos-vazio { grid-column: 1 / -1; align-self: center; margin: 0; text-align: center; font-size: 12px; color: #8a8a8a; }
-.anexos-vazio kbd { font-size: 0.85em; }
-.anexo { position: relative; margin: 0; aspect-ratio: 4 / 3; overflow: hidden; border-radius: 6px; background: #f4f4f4; box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.12); }
-.anexo.chegou { animation: anexo 420ms var(--mola) both; }
-@keyframes anexo { from { opacity: 0; transform: scale(0.6); } }
-.colar {
-  grid-column: 1 / -1; height: 30px; border: 0; border-radius: 7px; background: var(--azul); color: #fff; font: 600 12px var(--sans); cursor: pointer;
+.conversa-nome { font: 600 12px var(--sans); color: #222; }
+.conversa-mensagens {
+  flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 3px; margin: 0; padding: 10px 12px; list-style: none;
+  overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none; transition: background-color 150ms var(--sai), box-shadow 150ms var(--sai);
 }
+.conversa-mensagens::-webkit-scrollbar { display: none; }
+.conversa-hora { align-self: center; margin: 0 0 6px; font: 500 10.5px var(--sans); color: #9a9a9a; }
+.bolha { flex: none; max-width: 80%; padding: 6px 11px; border-radius: 16px; font-size: 12.5px; line-height: 1.35; overflow-wrap: anywhere; }
+.bolha.dela { align-self: flex-start; background: #e9e9eb; color: #111; }
+.bolha.minha { align-self: flex-end; background: #0a84ff; color: #fff; }
+.bolha.dela + .bolha.minha, .bolha.minha + .bolha.dela { margin-top: 6px; }
+.bolha.foto { position: relative; padding: 0; overflow: hidden; border-radius: 14px; background: #f2f2f2; box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.12); }
+.bolha > a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+.bolha.minha > a:focus-visible { outline-color: #fff; }
+.bolha.chegou { animation: chega 420ms var(--mola) both; transform-origin: 100% 100%; }
+.bolha.dela.chegou { transform-origin: 0 100%; }
+@keyframes chega { from { opacity: 0; transform: scale(0.6); } }
+.digitando { display: inline-flex; align-items: center; gap: 3px; padding: 9px 11px; }
+.digitando i { width: 6px; height: 6px; border-radius: 50%; background: #8e8e93; animation: pisca 1.2s infinite; }
+.digitando i:nth-child(2) { animation-delay: 0.15s; }
+.digitando i:nth-child(3) { animation-delay: 0.3s; }
+@keyframes pisca { 0%, 60%, 100% { opacity: 0.3; } 30% { opacity: 1; } }
+.j-conversa.alvo .conversa-mensagens { background: rgba(47, 124, 246, 0.06); box-shadow: inset 0 0 0 2px rgba(47, 124, 246, 0.45); }
+.conversa-campo {
+  display: flex; align-items: center; gap: 6px; height: 32px; margin: 0 10px 10px; padding: 0 4px 0 12px; border: 1px solid #e3e3e3; border-radius: 16px;
+  font-size: 12px; color: #9a9a9a; transition: border-color 150ms var(--sai), background-color 150ms var(--sai), color 150ms var(--sai);
+}
+.conversa-campo.com-copia { border-color: var(--azul); background: rgba(47, 124, 246, 0.05); color: var(--azul); }
+.conversa-dica { flex: 1; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.conversa-dica kbd { font-size: 0.85em; }
+.colar { flex: none; height: 24px; padding: 0 10px; border: 0; border-radius: 12px; background: var(--azul); color: #fff; font: 600 11.5px var(--sans); cursor: pointer; }
 .colar[hidden] { display: none; }
 
 /* a screenshot: a still copy of the desk, scaled into whatever shows it */
-.retrato { position: relative; display: block; overflow: hidden; }
+.retrato { position: relative; display: block; overflow: hidden; color: var(--tinta); font: 400 1rem/1.6 var(--sans); overflow-wrap: normal; text-align: start; letter-spacing: normal; }
 .foto { position: absolute; inset: 0; display: block; overflow: hidden; }
 .foto-escala { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+.foto:has(> .foto-escala:empty) { background: #e9e9eb; }
 .foto > img { width: 100%; height: 100%; object-fit: fill; }
 .mesa-copia { position: absolute !important; left: 0; top: 0; min-height: 0 !important; pointer-events: none; }
 .mesa-copia *, .mesa-copia { animation: none !important; transition: none !important; }
@@ -477,6 +496,7 @@ kbd {
   .janela { position: relative; left: auto; top: auto; bottom: auto; width: 100%; }
   .janela-barra { cursor: default; }
   .j-codigo { display: none; }
+  .j-conversa { height: 380px; }
   .gaveta { --frente: 50px; }
   .captura-modo { padding: 0 11px; }
   /* the dots go up beside the title, so the tip stays short */
@@ -487,6 +507,7 @@ kbd {
 @media (prefers-reduced-motion: reduce) {
   .gaveta, .painel, .ficha, .ficha-foto, .borda-alca, .guia, .guia-passos i { transition-duration: 0.01ms !important; }
   .guia.troca .guia-titulo, .guia.troca .guia-texto, .guia.troca .guia-icone { animation: none; }
+  .bolha.chegou, .digitando i { animation: none; }
 }
 
 /* high contrast: the glass gets an outline, the dots and the chosen mode keep their meaning */
@@ -550,20 +571,26 @@ kbd {
     </div>
   </article>
 
-  <article class="janela j-chamado" id="chamado" data-app="Tickets" aria-label="Tickets: ticket #482">
+  <article class="janela j-conversa" id="conversa" data-app="Messages" aria-label="Messages: chat with Emma">
     <div class="janela-barra">
       <span class="semaforo" aria-hidden="true"><i></i><i></i><i></i></span>
-      <span class="janela-nome">Tickets</span>
+      <span class="janela-nome">Messages</span>
     </div>
-    <div class="chamado">
-      <p class="chamado-cabeca"><span>#482</span><span class="chamado-estado">Open</span></p>
-      <p class="chamado-titulo">Checkout won't complete the order</p>
-      <p class="chamado-texto">Clicking Pay shows an error and the order disappears. Screenshots below.</p>
-      <p class="chamado-rotulo">Attachments <span id="anexos-conta"></span></p>
-      <div class="anexos" id="anexos">
-        <p class="anexos-vazio" id="anexos-vazio">Paste here with <kbd>⌘V</kbd>, or drag from the drawer.</p>
-        <button class="colar" id="colar" type="button" hidden>Paste</button>
-      </div>
+    <div class="conversa-contato">
+      <span class="conversa-avatar" aria-hidden="true">E</span>
+      <span class="conversa-nome">Emma</span>
+    </div>
+    <ol class="conversa-mensagens" id="mensagens" role="log" aria-label="Chat with Emma">
+      <li class="conversa-hora">Today 3:12 AM</li>
+      <li class="bolha dela"><span class="aviso">Emma: </span>Why did you like Chloe's photo at 3&nbsp;am?</li>
+      <li class="bolha dela"><span class="aviso">Emma: </span>And you texted her??</li>
+      <li class="bolha minha"><span class="aviso">You: </span>Babe, I never texted her</li>
+      <li class="bolha minha"><span class="aviso">You: </span>I can prove it. Sending you a screenshot</li>
+      <li class="bolha dela"><span class="aviso">Emma: </span>Go on.</li>
+    </ol>
+    <div class="conversa-campo" id="campo">
+      <span class="conversa-dica" id="campo-dica">Paste the screenshot with <kbd>⌘V</kbd></span>
+      <button class="colar" id="colar" type="button" hidden>Paste</button>
     </div>
   </article>
 
@@ -781,6 +808,23 @@ kbd {
     copy.style.height = `${m.height}px`;
     copy.style.transform = `translate(${-area.x}px, ${-area.y}px)`;
     for (const child of mesa.children) if (shown(child)) copy.append(child.cloneNode(true));
+    // A print can show earlier prints (in the chat, say). Those keep their own picture but not
+    // the prints inside it, so a screenshot does not double in weight with every one sent.
+    for (const nested of copy.querySelectorAll(".foto-escala .foto-escala")) nested.replaceChildren();
+    // The chat keeps the slice of the conversation that was on screen, and only the prints in
+    // that slice keep their picture, so a screenshot stays about the weight of one desk.
+    const list = copy.querySelector(":scope > .j-conversa .conversa-mensagens");
+    if (list) {
+      const first = [...mensagens.children].findIndex((item) => item.getClientRects().length);
+      if (mensagens.scrollTop && first >= 0) list.children[first].style.marginTop = `${-mensagens.scrollTop}px`;
+      const view = onDesk(mensagens.getBoundingClientRect());
+      const meets = (p, q) => p.x < q.x + q.w && q.x < p.x + p.w && p.y < q.y + q.h && q.y < p.y + p.h;
+      const kept = list.querySelectorAll(":scope > .bolha.foto");
+      mensagens.querySelectorAll(":scope > .bolha.foto").forEach((item, i) => {
+        const r = onDesk(item.getBoundingClientRect());
+        if (!(meets(r, view) && meets(r, area))) kept[i]?.querySelector(".foto-escala")?.replaceChildren();
+      });
+    }
     // a scroll position is not cloned: the command keeps the slice that was on screen as an indent
     const line = copy.querySelector(".comando-texto");
     if (line && comando.scrollLeft) line.style.textIndent = `${-comando.scrollLeft}px`;
@@ -799,8 +843,24 @@ kbd {
     frame.append(copy);
     return frame;
   }
+  /** What a screenshot mostly shows: the whole screen, one of the windows, the words, or none of them. */
+  function sourceOf(area) {
+    const m = mesaBox();
+    if (area.w * area.h > m.width * m.height * 0.6) return "tela";
+    let best = "outro";
+    let most = 0.3;
+    for (const [key, el] of [["loja", $("#loja")], ["conversa", $("#conversa")], ["codigo", $("#codigo")], ["abertura", $("#titulo")]]) {
+      if (!el || !shown(el)) continue;
+      const r = onDesk(el.getBoundingClientRect());
+      const wide = Math.max(0, Math.min(r.x + r.w, area.x + area.w) - Math.max(r.x, area.x));
+      const tall = Math.max(0, Math.min(r.y + r.h, area.y + area.h) - Math.max(r.y, area.y));
+      const share = (wide * tall) / Math.min(r.w * r.h, area.w * area.h);
+      if (share > most) { most = share; best = key; }
+    }
+    return best;
+  }
   function takePrint(area) {
-    const print = { id: ++serial, w: Math.round(area.w), h: Math.round(area.h), date: Date.now(), portrait: snapshot(area) };
+    const print = { id: ++serial, w: Math.round(area.w), h: Math.round(area.h), date: Date.now(), portrait: snapshot(area), source: sourceOf(area) };
     everyPrint.set(print.id, print);
     return print;
   }
@@ -1135,12 +1195,13 @@ kbd {
 
   let clipboard = [];
   let copiedTimer = 0;
+  const conversa = $("#conversa");
+  const mensagens = $("#mensagens");
+  const campo = $("#campo");
   const colar = $("#colar");
-  const anexos = $("#anexos");
-  const anexosVazio = $("#anexos-vazio");
-  const anexosConta = $("#anexos-conta");
-  const chamado = $("#chamado");
-  if (!fine.matches) anexosVazio.textContent = "Copy in the drawer and tap Paste, or drag from the drawer.";
+  const dica = $("#campo-dica");
+  const idleHint = fine.matches ? dica.innerHTML : "Copy a screenshot from the drawer.";
+  dica.innerHTML = idleHint;
 
   function copy(ids) {
     const prints = drawer.prints.filter((p) => ids.includes(p.id));
@@ -1152,35 +1213,126 @@ kbd {
     copiedTimer = setTimeout(() => { drawer.copied.clear(); render(); }, 1200);
     colar.hidden = false;
     colar.textContent = prints.length > 1 ? `Paste ${prints.length} screenshots` : "Paste";
-    anexos.classList.add("com-copia");
+    campo.classList.add("com-copia");
+    if (!fine.matches) dica.textContent = prints.length > 1 ? `${prints.length} copied` : "Copied";
     guide.done("copiar");
-    announce(prints.length === 1 ? "Screenshot copied. Paste it into the ticket with ⌘V." : `${prints.length} screenshots copied. One ⌘V in the ticket pastes them all.`);
+    announce(prints.length === 1 ? "Screenshot copied. Paste it into the chat with ⌘V." : `${prints.length} screenshots copied. One ⌘V in the chat pastes them all.`);
   }
 
-  let attached = 0;
+  const scrollDown = () => { mensagens.scrollTop = mensagens.scrollHeight; };
+  // The chat opens on its latest messages, as a chat does; when the whole opener does not
+  // fit, on her accusation, which is the part that sets up the joke.
+  const openChat = () => {
+    const first = mensagens.querySelector(".bolha");
+    mensagens.scrollTop = Math.min(mensagens.scrollHeight - mensagens.clientHeight, first.offsetTop - mensagens.offsetTop - 10);
+  };
+  openChat();
+  addEventListener("load", openChat);
+  const WHO = { dela: "Emma: ", minha: "You: " };
+  function bubble(kind, content) {
+    const item = document.createElement("li");
+    item.className = `bolha ${kind} chegou`;
+    if (content instanceof Node) item.append(content);
+    else item.textContent = content;
+    const who = WHO[kind.split(" ")[0]];
+    if (who && !kind.includes("digitando")) item.insertAdjacentHTML("afterbegin", `<span class="aviso">${who}</span>`);
+    mensagens.append(item);
+    scrollDown();
+    return item;
+  }
+
+  let sent = 0;
   function attach(prints) {
     if (!prints.length) return;
-    activate(chamado);
-    anexosVazio.hidden = true;
-    const width = Math.max(56, (anexos.clientWidth - 16 - 16) / 3);
+    activate(conversa);
+    const most = Math.min(150, Math.round(mensagens.clientWidth * 0.62));
+    const room = Math.max(40, mensagens.clientHeight - 24);
     for (const print of prints) {
-      const figure = document.createElement("figure");
-      figure.className = "anexo chegou";
-      figure.append(picture(print, width, (width * 3) / 4, true));
-      anexos.insertBefore(figure, colar);
+      const tall = Math.round(clamp((most * print.h) / print.w, 40, Math.min(170, room)));
+      const wide = Math.round(clamp((tall * print.w) / print.h, 48, most));
+      const item = bubble("minha foto", picture(print, wide, tall, true));
+      item.style.width = `${wide}px`;
+      item.style.height = `${tall}px`;
+      item.insertAdjacentHTML("beforeend", '<span class="aviso">Screenshot</span>');
+      scrollDown();
     }
-    attached += prints.length;
-    anexosConta.textContent = `· ${attached}`;
-    anexos.scrollTop = anexos.scrollHeight;
+    sent += prints.length;
     guide.done("colar");
-    announce(prints.length === 1 ? "1 screenshot pasted into the ticket." : `${prints.length} screenshots pasted into the ticket, at once.`);
+    announce(prints.length === 1 ? "1 screenshot sent in the chat." : `${prints.length} screenshots sent in the chat, at once.`);
+    answer(prints);
   }
+
+  // She answers whatever screenshot comes, and after a couple of them asks how he is so quick.
+  const REPLIES = {
+    tela: ["That's your whole screen. Where's the chat with her?"],
+    loja: ["That's a checkout page, Jake.", "You were shopping instead of answering me?"],
+    conversa: ["You screenshotted our own chat??"],
+    codigo: ["That's code. It proves nothing."],
+    abertura: ["“Your screenshots, in a drawer”? What drawer, Jake?"],
+    outro: ["What even is that? It proves nothing."],
+  };
+  const AFTER = ["Already downloaded it. You're forgiven.", "Stop sending me screenshots, Jake. I'm trying it out."];
+  const repliesUsed = {};
+  let punchline = false;
+  let afterCount = 0;
+  let replying = Promise.resolve();
+  function answer(prints) {
+    const lines = [];
+    if (punchline) {
+      // after the link she is on the app's side; once that is said, she lets him be
+      if (afterCount < AFTER.length) lines.push(["dela", AFTER[afterCount++]]);
+      replying = replying.then(() => say(lines));
+      return;
+    }
+    if (prints.length > 1) {
+      lines.push(["dela", `${prints.length} screenshots at once?`]);
+    } else {
+      const key = prints[0].source || "outro";
+      const n = repliesUsed[key] || 0;
+      repliesUsed[key] = n + 1;
+      lines.push(["dela", REPLIES[key][n] ?? "Still proves nothing."]);
+    }
+    if (sent >= 2 || prints.length > 1) {
+      punchline = true;
+      lines.push(
+        ["dela", "Wait. How are you sending screenshots this fast?"],
+        ["minha", "It's Gaveta, babe."],
+        ["dela", "Send me the link."],
+        ["link", $(".botao").href.replace(/^https:\/\//, "")],
+      );
+      replying = replying.then(() => say(lines)).then(() => guide.done("piada"));
+      return;
+    }
+    if (sent === 1) lines.push(["dela", "Send another one.", () => sent === 1]);
+    replying = replying.then(() => say(lines));
+  }
+  async function say(lines) {
+    for (const [who, text, stillTrue] of lines) {
+      if (stillTrue && !stillTrue()) continue;
+      await wait(who === "dela" ? 450 : 700);
+      if (who === "dela") {
+        const dots = bubble("dela digitando", document.createRange().createContextualFragment("<i></i><i></i><i></i>"));
+        dots.setAttribute("aria-hidden", "true");
+        await wait(still.matches ? 300 : 800 + Math.min(900, text.length * 22));
+        dots.remove();
+        if (stillTrue && !stillTrue()) continue;
+      }
+      if (who === "link") {
+        const link = Object.assign(document.createElement("a"), { href: $(".botao").href, textContent: text });
+        bubble("minha", link);
+      } else {
+        bubble(who, text);
+      }
+    }
+  }
+
   function paste() {
     const prints = clipboard.map((id) => everyPrint.get(id)).filter(Boolean);
     if (!prints.length) return;
     clipboard = [];
     colar.hidden = true;
-    anexos.classList.remove("com-copia");
+    campo.classList.remove("com-copia");
+    dica.innerHTML = idleHint;
     if (drawer.open && !drawer.hovered) close();
     attach(prints);
   }
@@ -1192,7 +1344,7 @@ kbd {
     }
   });
 
-  // Dragging cards out of the drawer: onto the ticket they go in, as attachments.
+  // Dragging cards out of the drawer: dropped on the chat, they are sent in it.
   let dragging = false;
   pilha.addEventListener("pointerdown", (event) => {
     if (event.button !== 0 || event.pointerType !== "mouse" || event.metaKey || event.ctrlKey || event.shiftKey) return;
@@ -1228,15 +1380,15 @@ kbd {
         quedas.append(ghost);
       }
       ghost.style.transform = `translate(${e.clientX - 40}px, ${e.clientY - 24}px) rotate(-3deg)`;
-      const r = chamado.getBoundingClientRect();
-      over = shown(chamado) && e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
-      anexos.classList.toggle("alvo", over);
+      const r = conversa.getBoundingClientRect();
+      over = shown(conversa) && e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
+      conversa.classList.toggle("alvo", over);
     };
     const up = () => {
       removeEventListener("pointermove", move, true);
       removeEventListener("pointerup", up, true);
       removeEventListener("pointercancel", up, true);
-      anexos.classList.remove("alvo");
+      conversa.classList.remove("alvo");
       dragging = false;
       noSelecting(false);
       if (!ghost) return;
@@ -1645,11 +1797,11 @@ kbd {
         ? "Choose <b>Window</b> and click the shop."
         : "Tap <b>Window</b>, then the shop."],
       ["copiar", "copiar", "Copy or drag", fine.matches
-        ? "Click to copy, or drag it onto the ticket. <b>⌘-click</b> picks several."
+        ? "Click to copy, or drag it onto the chat. <b>⌘-click</b> picks several."
         : "Tap a screenshot to copy it, or the circles to pick several."],
-      ["colar", "colar", "Paste into the ticket", fine.matches
-        ? "One <b>⌘V</b> pastes them all into the ticket, at once."
-        : "Tap <b>Paste</b> in the ticket."],
+      ["colar", "colar", "Send it in the chat", fine.matches
+        ? "Paste into the chat with <b>⌘V</b>. She wants proof."
+        : "Tap <b>Paste</b> in the chat. She wants proof."],
     ];
     /** On a phone the drawer makes room for the tip, so it follows every change in the tip's size. */
     const reflow = () => { if (drawer.open && phone()) render(); };
@@ -1702,6 +1854,11 @@ kbd {
           : "Drag your finger over what you want. Let go and it lands in the drawer.", -1);
       }
       const index = STEPS.findIndex(([key]) => !done.has(key));
+      if (index < 0 && !done.has("piada")) {
+        return put("outro", "colar", "She wants another one", fine.matches
+          ? "Take another screenshot and paste it with <b>⌘V</b>. Or pick several in the drawer: one <b>⌘V</b> pastes them all."
+          : "Take another screenshot and tap <b>Paste</b>. Or pick several in the drawer and paste them all at once.", -1);
+      }
       if (index < 0) {
         // "Pronto" shows once; after that, the tip only comes back for the capture modes
         if (finished) return hide();

@@ -151,6 +151,23 @@
     copy.style.height = `${m.height}px`;
     copy.style.transform = `translate(${-area.x}px, ${-area.y}px)`;
     for (const child of mesa.children) if (shown(child)) copy.append(child.cloneNode(true));
+    // A print can show earlier prints (in the chat, say). Those keep their own picture but not
+    // the prints inside it, so a screenshot does not double in weight with every one sent.
+    for (const nested of copy.querySelectorAll(".foto-escala .foto-escala")) nested.replaceChildren();
+    // The chat keeps the slice of the conversation that was on screen, and only the prints in
+    // that slice keep their picture, so a screenshot stays about the weight of one desk.
+    const list = copy.querySelector(":scope > .j-conversa .conversa-mensagens");
+    if (list) {
+      const first = [...mensagens.children].findIndex((item) => item.getClientRects().length);
+      if (mensagens.scrollTop && first >= 0) list.children[first].style.marginTop = `${-mensagens.scrollTop}px`;
+      const view = onDesk(mensagens.getBoundingClientRect());
+      const meets = (p, q) => p.x < q.x + q.w && q.x < p.x + p.w && p.y < q.y + q.h && q.y < p.y + p.h;
+      const kept = list.querySelectorAll(":scope > .bolha.foto");
+      mensagens.querySelectorAll(":scope > .bolha.foto").forEach((item, i) => {
+        const r = onDesk(item.getBoundingClientRect());
+        if (!(meets(r, view) && meets(r, area))) kept[i]?.querySelector(".foto-escala")?.replaceChildren();
+      });
+    }
     // a scroll position is not cloned: the command keeps the slice that was on screen as an indent
     const line = copy.querySelector(".comando-texto");
     if (line && comando.scrollLeft) line.style.textIndent = `${-comando.scrollLeft}px`;
@@ -169,8 +186,24 @@
     frame.append(copy);
     return frame;
   }
+  /** What a screenshot mostly shows: the whole screen, one of the windows, the words, or none of them. */
+  function sourceOf(area) {
+    const m = mesaBox();
+    if (area.w * area.h > m.width * m.height * 0.6) return "tela";
+    let best = "outro";
+    let most = 0.3;
+    for (const [key, el] of [["loja", $("#loja")], ["conversa", $("#conversa")], ["codigo", $("#codigo")], ["abertura", $("#titulo")]]) {
+      if (!el || !shown(el)) continue;
+      const r = onDesk(el.getBoundingClientRect());
+      const wide = Math.max(0, Math.min(r.x + r.w, area.x + area.w) - Math.max(r.x, area.x));
+      const tall = Math.max(0, Math.min(r.y + r.h, area.y + area.h) - Math.max(r.y, area.y));
+      const share = (wide * tall) / Math.min(r.w * r.h, area.w * area.h);
+      if (share > most) { most = share; best = key; }
+    }
+    return best;
+  }
   function takePrint(area) {
-    const print = { id: ++serial, w: Math.round(area.w), h: Math.round(area.h), date: Date.now(), portrait: snapshot(area) };
+    const print = { id: ++serial, w: Math.round(area.w), h: Math.round(area.h), date: Date.now(), portrait: snapshot(area), source: sourceOf(area) };
     everyPrint.set(print.id, print);
     return print;
   }
@@ -505,12 +538,13 @@
 
   let clipboard = [];
   let copiedTimer = 0;
+  const conversa = $("#conversa");
+  const mensagens = $("#mensagens");
+  const campo = $("#campo");
   const colar = $("#colar");
-  const anexos = $("#anexos");
-  const anexosVazio = $("#anexos-vazio");
-  const anexosConta = $("#anexos-conta");
-  const chamado = $("#chamado");
-  if (!fine.matches) anexosVazio.textContent = "Copie na gaveta e toque em Colar, ou arraste da gaveta.";
+  const dica = $("#campo-dica");
+  const idleHint = fine.matches ? dica.innerHTML : "Copie um print na gaveta.";
+  dica.innerHTML = idleHint;
 
   function copy(ids) {
     const prints = drawer.prints.filter((p) => ids.includes(p.id));
@@ -522,35 +556,126 @@
     copiedTimer = setTimeout(() => { drawer.copied.clear(); render(); }, 1200);
     colar.hidden = false;
     colar.textContent = prints.length > 1 ? `Colar ${prints.length} prints` : "Colar";
-    anexos.classList.add("com-copia");
+    campo.classList.add("com-copia");
+    if (!fine.matches) dica.textContent = prints.length > 1 ? `${prints.length} prints copiados` : "Print copiado";
     guide.done("copiar");
-    announce(prints.length === 1 ? "Print copiado. Cole no chamado com ⌘V." : `${prints.length} prints copiados. Um ⌘V no chamado cola todos.`);
+    announce(prints.length === 1 ? "Print copiado. Cole na conversa com ⌘V." : `${prints.length} prints copiados. Um ⌘V na conversa cola todos.`);
   }
 
-  let attached = 0;
+  const scrollDown = () => { mensagens.scrollTop = mensagens.scrollHeight; };
+  // The chat opens on its latest messages, as a chat does; when the whole opener does not
+  // fit, on her accusation, which is the part that sets up the joke.
+  const openChat = () => {
+    const first = mensagens.querySelector(".bolha");
+    mensagens.scrollTop = Math.min(mensagens.scrollHeight - mensagens.clientHeight, first.offsetTop - mensagens.offsetTop - 10);
+  };
+  openChat();
+  addEventListener("load", openChat);
+  const WHO = { dela: "Bia: ", minha: "Você: " };
+  function bubble(kind, content) {
+    const item = document.createElement("li");
+    item.className = `bolha ${kind} chegou`;
+    if (content instanceof Node) item.append(content);
+    else item.textContent = content;
+    const who = WHO[kind.split(" ")[0]];
+    if (who && !kind.includes("digitando")) item.insertAdjacentHTML("afterbegin", `<span class="aviso">${who}</span>`);
+    mensagens.append(item);
+    scrollDown();
+    return item;
+  }
+
+  let sent = 0;
   function attach(prints) {
     if (!prints.length) return;
-    activate(chamado);
-    anexosVazio.hidden = true;
-    const width = Math.max(56, (anexos.clientWidth - 16 - 16) / 3);
+    activate(conversa);
+    const most = Math.min(150, Math.round(mensagens.clientWidth * 0.62));
+    const room = Math.max(40, mensagens.clientHeight - 24);
     for (const print of prints) {
-      const figure = document.createElement("figure");
-      figure.className = "anexo chegou";
-      figure.append(picture(print, width, (width * 3) / 4, true));
-      anexos.insertBefore(figure, colar);
+      const tall = Math.round(clamp((most * print.h) / print.w, 40, Math.min(170, room)));
+      const wide = Math.round(clamp((tall * print.w) / print.h, 48, most));
+      const item = bubble("minha foto", picture(print, wide, tall, true));
+      item.style.width = `${wide}px`;
+      item.style.height = `${tall}px`;
+      item.insertAdjacentHTML("beforeend", '<span class="aviso">Print</span>');
+      scrollDown();
     }
-    attached += prints.length;
-    anexosConta.textContent = `· ${attached}`;
-    anexos.scrollTop = anexos.scrollHeight;
+    sent += prints.length;
     guide.done("colar");
-    announce(prints.length === 1 ? "1 print colado no chamado." : `${prints.length} prints colados no chamado, de uma vez.`);
+    announce(prints.length === 1 ? "1 print enviado na conversa." : `${prints.length} prints enviados na conversa, de uma vez.`);
+    answer(prints);
   }
+
+  // She answers whatever screenshot comes, and after a couple of them asks how he is so quick.
+  const REPLIES = {
+    tela: ["Isso é a sua tela inteira. Cadê a conversa com ela?"],
+    loja: ["Isso é a tela de uma loja, Lucas.", "Você tava comprando tênis em vez de me responder?"],
+    conversa: ["Você mandou print da nossa própria conversa??"],
+    codigo: ["Isso é código. Não prova nada."],
+    abertura: ["“Seus prints, numa gaveta”? Que gaveta, Lucas?"],
+    outro: ["Que print é esse? Não prova nada."],
+  };
+  const AFTER = ["Já baixei. Tá perdoado.", "Para de me mandar print, Lucas. Tô testando aqui."];
+  const repliesUsed = {};
+  let punchline = false;
+  let afterCount = 0;
+  let replying = Promise.resolve();
+  function answer(prints) {
+    const lines = [];
+    if (punchline) {
+      // after the link she is on the app's side; once that is said, she lets him be
+      if (afterCount < AFTER.length) lines.push(["dela", AFTER[afterCount++]]);
+      replying = replying.then(() => say(lines));
+      return;
+    }
+    if (prints.length > 1) {
+      lines.push(["dela", `Mandou ${prints.length} prints de uma vez?`]);
+    } else {
+      const key = prints[0].source || "outro";
+      const n = repliesUsed[key] || 0;
+      repliesUsed[key] = n + 1;
+      lines.push(["dela", REPLIES[key][n] ?? "Continua não provando nada."]);
+    }
+    if (sent >= 2 || prints.length > 1) {
+      punchline = true;
+      lines.push(
+        ["dela", "Pera. Como você manda tanto print tão rápido?"],
+        ["minha", "É a Gaveta, amor."],
+        ["dela", "Me manda o link."],
+        ["link", $(".botao").href.replace(/^https:\/\//, "")],
+      );
+      replying = replying.then(() => say(lines)).then(() => guide.done("piada"));
+      return;
+    }
+    if (sent === 1) lines.push(["dela", "Manda outro.", () => sent === 1]);
+    replying = replying.then(() => say(lines));
+  }
+  async function say(lines) {
+    for (const [who, text, stillTrue] of lines) {
+      if (stillTrue && !stillTrue()) continue;
+      await wait(who === "dela" ? 450 : 700);
+      if (who === "dela") {
+        const dots = bubble("dela digitando", document.createRange().createContextualFragment("<i></i><i></i><i></i>"));
+        dots.setAttribute("aria-hidden", "true");
+        await wait(still.matches ? 300 : 800 + Math.min(900, text.length * 22));
+        dots.remove();
+        if (stillTrue && !stillTrue()) continue;
+      }
+      if (who === "link") {
+        const link = Object.assign(document.createElement("a"), { href: $(".botao").href, textContent: text });
+        bubble("minha", link);
+      } else {
+        bubble(who, text);
+      }
+    }
+  }
+
   function paste() {
     const prints = clipboard.map((id) => everyPrint.get(id)).filter(Boolean);
     if (!prints.length) return;
     clipboard = [];
     colar.hidden = true;
-    anexos.classList.remove("com-copia");
+    campo.classList.remove("com-copia");
+    dica.innerHTML = idleHint;
     if (drawer.open && !drawer.hovered) close();
     attach(prints);
   }
@@ -562,7 +687,7 @@
     }
   });
 
-  // Dragging cards out of the drawer: onto the ticket they go in, as attachments.
+  // Dragging cards out of the drawer: dropped on the chat, they are sent in it.
   let dragging = false;
   pilha.addEventListener("pointerdown", (event) => {
     if (event.button !== 0 || event.pointerType !== "mouse" || event.metaKey || event.ctrlKey || event.shiftKey) return;
@@ -598,15 +723,15 @@
         quedas.append(ghost);
       }
       ghost.style.transform = `translate(${e.clientX - 40}px, ${e.clientY - 24}px) rotate(-3deg)`;
-      const r = chamado.getBoundingClientRect();
-      over = shown(chamado) && e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
-      anexos.classList.toggle("alvo", over);
+      const r = conversa.getBoundingClientRect();
+      over = shown(conversa) && e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
+      conversa.classList.toggle("alvo", over);
     };
     const up = () => {
       removeEventListener("pointermove", move, true);
       removeEventListener("pointerup", up, true);
       removeEventListener("pointercancel", up, true);
-      anexos.classList.remove("alvo");
+      conversa.classList.remove("alvo");
       dragging = false;
       noSelecting(false);
       if (!ghost) return;
@@ -1015,11 +1140,11 @@
         ? "Escolha <b>Janela</b> e clique em qualquer janela."
         : "Toque em <b>Janela</b> e depois em qualquer janela."],
       ["copiar", "copiar", "Copie ou arraste", fine.matches
-        ? "Clique para copiar, ou arraste até o chamado. <b>⌘-clique</b> escolhe vários."
+        ? "Clique para copiar, ou arraste até a conversa. <b>⌘-clique</b> escolhe vários."
         : "Toque no print para copiar, ou nos círculos para escolher vários."],
-      ["colar", "colar", "Cole no chamado", fine.matches
-        ? "Um <b>⌘V</b> cola tudo no chamado, de uma vez."
-        : "Toque em <b>Colar</b> no chamado."],
+      ["colar", "colar", "Mande na conversa", fine.matches
+        ? "Cole na conversa com <b>⌘V</b>. Ela quer provas."
+        : "Toque em <b>Colar</b> na conversa. Ela quer provas."],
     ];
     /** On a phone the drawer makes room for the tip, so it follows every change in the tip's size. */
     const reflow = () => { if (drawer.open && phone()) render(); };
@@ -1072,6 +1197,11 @@
           : "Arraste o dedo sobre o que quer no print. Ao soltar, ele cai na gaveta.", -1);
       }
       const index = STEPS.findIndex(([key]) => !done.has(key));
+      if (index < 0 && !done.has("piada")) {
+        return put("outro", "colar", "Ela quer outro print", fine.matches
+          ? "Tire outro print e cole com <b>⌘V</b>. Ou escolha vários na gaveta: um <b>⌘V</b> cola todos."
+          : "Tire outro print e toque em <b>Colar</b>. Ou escolha vários na gaveta e cole todos de uma vez.", -1);
+      }
       if (index < 0) {
         // "Pronto" shows once; after that, the tip only comes back for the capture modes
         if (finished) return hide();

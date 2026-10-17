@@ -49,20 +49,26 @@
     </div>
   </article>
 
-  <article class="janela j-chamado" id="chamado" data-app="Chamados" aria-label="Chamados: o chamado #482">
+  <article class="janela j-conversa" id="conversa" data-app="Mensagens" aria-label="Mensagens: conversa com a Bia">
     <div class="janela-barra">
       <span class="semaforo" aria-hidden="true"><i></i><i></i><i></i></span>
-      <span class="janela-nome">Chamados</span>
+      <span class="janela-nome">Mensagens</span>
     </div>
-    <div class="chamado">
-      <p class="chamado-cabeca"><span>#482</span><span class="chamado-estado">Aberto</span></p>
-      <p class="chamado-titulo">O checkout não finaliza a compra</p>
-      <p class="chamado-texto">Ao clicar em Pagar, aparece um erro e o pedido some. Prints abaixo.</p>
-      <p class="chamado-rotulo">Anexos <span id="anexos-conta"></span></p>
-      <div class="anexos" id="anexos">
-        <p class="anexos-vazio" id="anexos-vazio">Cole aqui com <kbd>⌘V</kbd>, ou arraste da gaveta.</p>
-        <button class="colar" id="colar" type="button" hidden>Colar</button>
-      </div>
+    <div class="conversa-contato">
+      <span class="conversa-avatar" aria-hidden="true">B</span>
+      <span class="conversa-nome">Bia</span>
+    </div>
+    <ol class="conversa-mensagens" id="mensagens" role="log" aria-label="Conversa com a Bia">
+      <li class="conversa-hora">Hoje 03:12</li>
+      <li class="bolha dela"><span class="aviso">Bia: </span>Por que você curtiu a foto da Camila às 3&nbsp;da manhã?</li>
+      <li class="bolha dela"><span class="aviso">Bia: </span>E ainda mandou mensagem pra ela??</li>
+      <li class="bolha minha"><span class="aviso">Você: </span>Amor, eu não mandei mensagem pra ela</li>
+      <li class="bolha minha"><span class="aviso">Você: </span>Posso provar. Vou te mandar um print</li>
+      <li class="bolha dela"><span class="aviso">Bia: </span>Manda.</li>
+    </ol>
+    <div class="conversa-campo" id="campo">
+      <span class="conversa-dica" id="campo-dica">Cole o print com <kbd>⌘V</kbd></span>
+      <button class="colar" id="colar" type="button" hidden>Colar</button>
     </div>
   </article>
 
