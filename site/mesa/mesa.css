@@ -320,6 +320,42 @@ button { font: inherit; color: inherit; }
 .lixo .papeis { opacity: 0; transition: opacity 200ms ease; }
 .lixo.cheio .papeis { opacity: 1; }
 
+/* the Trash, opened from the Dock: what was thrown away, ready to go back */
+.lixeira { width: min(440px, calc(100vw - 40px)); }
+.lixeira-esvaziar {
+  margin-left: auto; height: 24px; padding: 0 12px; border: 0; border-radius: 6px;
+  background: #fff; color: var(--tinta); font: 500 12px/24px var(--sans);
+  box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.2), 0 1px 1.5px rgba(0, 0, 0, 0.1);
+}
+.lixeira-esvaziar:active:not(:disabled) { background: #eceae4; }
+.lixeira-esvaziar:disabled { color: rgba(27, 27, 25, 0.35); box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.12); }
+.lixeira .janela-conteudo { background: #fff; max-height: min(320px, 46vh); overflow-y: auto; overscroll-behavior: contain; }
+.lixeira-lista { list-style: none; margin: 0; padding: 6px 0; }
+.lixeira-lista li {
+  display: flex; align-items: center; gap: 12px; padding: 6px 14px 6px 12px;
+  transition: opacity 200ms ease, transform 240ms var(--sai);
+}
+.lixeira-lista li:nth-child(even) { background: #f6f5f2; }
+.lixeira-lista li.saindo { opacity: 0; transform: translateX(16px); }
+.lixeira-lista .foto { position: relative; flex: none; border-radius: 3px; background: #fff; overflow: hidden; box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.18), 0 1px 3px rgba(0, 0, 0, 0.12); }
+.lixeira-nome { flex: 1; min-width: 0; font-size: 13px; color: var(--tinta); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lixeira-nome small { display: block; font-size: 11px; color: var(--grafite); }
+.lixeira-devolver {
+  flex: none; height: 26px; padding: 0 12px; border: 0; border-radius: 999px;
+  background: var(--feltro); color: #fff; font: 600 12px/26px var(--sans); cursor: pointer;
+  transition: background-color 160ms ease, transform 120ms ease;
+}
+.lixeira-devolver:hover { background: var(--feltro-fundo); }
+.lixeira-devolver:active { transform: scale(0.96); }
+.lixeira-vazia { margin: 0; padding: 30px 32px 32px; text-align: center; font-size: 13px; line-height: 1.5; color: var(--grafite); text-wrap: pretty; }
+.lixeira-lista:empty { display: none; }
+.lixeira-rodape:empty { display: none; }
+.lixeira-lista:not(:empty) + .lixeira-vazia { display: none; }
+.lixeira-rodape {
+  margin: 0; padding: 6px 12px; font-size: 11px; color: var(--grafite); text-align: center;
+  background: #f6f5f2; box-shadow: 0 -0.5px 0 rgba(0, 0, 0, 0.12);
+}
+
 /* the small print at the foot of the desk */
 .mesa-rodape {
   position: absolute; z-index: 2; left: 16px; right: 16px; bottom: 12px; display: flex; justify-content: space-between; gap: 16px;
@@ -646,5 +682,5 @@ button { font: inherit; color: inherit; }
   .ficha, .ficha .foto { transition-duration: 0.15s; transition-timing-function: ease; }
   .anexo, .solto.chegando, .realce { animation: none; }
   .solto.voltando, .solto.saindo { transition: none; }
-  .dock-app, .botao, .como-instalar { transition: none; }
+  .dock-app, .botao, .como-instalar, .lixeira-lista li { transition: none; }
 }

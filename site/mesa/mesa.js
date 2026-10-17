@@ -949,16 +949,87 @@
     ids.forEach((id, order) => {
       const print = printOf(id);
       if (!print) return;
+      trash.unshift(print);
       if (thrown && order < 6 && !still.matches) toss(print, order * 0.05);
       drawer.prints = drawer.prints.filter((p) => p.id !== id);
       drawer.selection.delete(id);
       drawer.copied.delete(id);
       if (drawer.hovered === id) drawer.hovered = null;
     });
-    lixo.classList.add("cheio");
     render();
+    renderTrash();
     announce(ids.length === 1 ? "Print jogado no Lixo." : `${ids.length} prints jogados no Lixo.`);
   }
+
+  // The Trash keeps what was thrown away, as the Mac's does: a print can go back, until it is emptied.
+  const trash = [];
+  const lixeira = $("#lixeira");
+  const lixeiraLista = $("#lixeira-lista");
+  const lixeiraRodape = $("#lixeira-rodape");
+  const esvaziar = $("#esvaziar");
+
+  function renderTrash() {
+    lixo.classList.toggle("cheio", trash.length > 0);
+    lixo.setAttribute("aria-label", trash.length ? `Lixo, ${trash.length === 1 ? "1 print" : `${trash.length} prints`}` : "Lixo, vazio");
+    esvaziar.disabled = trash.length === 0;
+    lixeiraRodape.textContent = trash.length === 0 ? "" : trash.length === 1 ? "1 item" : `${trash.length} itens`;
+    const rows = new Map([...lixeiraLista.children].map((row) => [Number(row.dataset.id), row]));
+    for (const [id, row] of rows) if (!trash.some((p) => p.id === id) && !row.classList.contains("saindo")) row.remove();
+    trash.forEach((print, index) => {
+      let row = rows.get(print.id);
+      if (!row) {
+        row = document.createElement("li");
+        row.dataset.id = String(print.id);
+        const name = document.createElement("span");
+        name.className = "lixeira-nome";
+        name.textContent = `${print.name}.png`;
+        const size = document.createElement("small");
+        size.textContent = `${print.pixels[0]} × ${print.pixels[1]}`;
+        name.append(size);
+        const back = document.createElement("button");
+        back.type = "button";
+        back.className = "lixeira-devolver";
+        back.textContent = "Devolver";
+        back.setAttribute("aria-label", `Devolver ${print.name}.png para a gaveta`);
+        back.addEventListener("click", () => putBack(print, row));
+        row.append(photo(print, 56, 40, true), name, back);
+      }
+      if (lixeiraLista.children[index] !== row) lixeiraLista.insertBefore(row, lixeiraLista.children[index] || null);
+    });
+  }
+
+  /** Back from the Trash into the drawer, in its place by date, and the drawer peeks to show it arrived. */
+  function putBack(print, row) {
+    const at = trash.indexOf(print);
+    if (at < 0) return;
+    trash.splice(at, 1);
+    const next = row.nextElementSibling?.querySelector(".lixeira-devolver") || row.previousElementSibling?.querySelector(".lixeira-devolver");
+    const leave = () => { row.remove(); renderTrash(); };
+    if (still.matches) leave();
+    else {
+      row.classList.add("saindo");
+      setTimeout(leave, 240);
+    }
+    if (row.contains(document.activeElement)) (next || esvaziar).focus({ preventScroll: true });
+    drawer.prints.push(print);
+    drawer.prints.sort((a, b) => b.date - a.date);
+    if (!drawer.open) peek();
+    render();
+    if (!drawer.open) endPeekSoon();
+    announce("Print de volta na gaveta.");
+    guide.update();
+    renderTrash();
+  }
+
+  esvaziar.addEventListener("click", () => {
+    if (!trash.length) return;
+    const count = trash.length;
+    trash.length = 0;
+    for (const row of lixeiraLista.children) row.classList.add("saindo");
+    setTimeout(() => { lixeiraLista.replaceChildren(); renderTrash(); }, still.matches ? 0 : 240);
+    renderTrash();
+    announce(count === 1 ? "Lixo esvaziado: 1 print apagado." : `Lixo esvaziado: ${count} prints apagados.`);
+  });
 
   /** A card standing whole, for the flights: its paper, shadow, picture and words, each on its own layer. */
   function cardFace(print) {
@@ -1482,7 +1553,8 @@
     onDeskNow.delete(print.id);
     entry.item.classList.add("saindo");
     setTimeout(() => entry.item.remove(), 260);
-    lixo.classList.add("cheio");
+    trash.unshift(print);
+    renderTrash();
     announce("Print jogado no Lixo.");
     guide.update();
   }

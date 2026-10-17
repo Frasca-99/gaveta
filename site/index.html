@@ -450,6 +450,42 @@ button { font: inherit; color: inherit; }
 .lixo .papeis { opacity: 0; transition: opacity 200ms ease; }
 .lixo.cheio .papeis { opacity: 1; }
 
+/* the Trash, opened from the Dock: what was thrown away, ready to go back */
+.lixeira { width: min(440px, calc(100vw - 40px)); }
+.lixeira-esvaziar {
+  margin-left: auto; height: 24px; padding: 0 12px; border: 0; border-radius: 6px;
+  background: #fff; color: var(--tinta); font: 500 12px/24px var(--sans);
+  box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.2), 0 1px 1.5px rgba(0, 0, 0, 0.1);
+}
+.lixeira-esvaziar:active:not(:disabled) { background: #eceae4; }
+.lixeira-esvaziar:disabled { color: rgba(27, 27, 25, 0.35); box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.12); }
+.lixeira .janela-conteudo { background: #fff; max-height: min(320px, 46vh); overflow-y: auto; overscroll-behavior: contain; }
+.lixeira-lista { list-style: none; margin: 0; padding: 6px 0; }
+.lixeira-lista li {
+  display: flex; align-items: center; gap: 12px; padding: 6px 14px 6px 12px;
+  transition: opacity 200ms ease, transform 240ms var(--sai);
+}
+.lixeira-lista li:nth-child(even) { background: #f6f5f2; }
+.lixeira-lista li.saindo { opacity: 0; transform: translateX(16px); }
+.lixeira-lista .foto { position: relative; flex: none; border-radius: 3px; background: #fff; overflow: hidden; box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.18), 0 1px 3px rgba(0, 0, 0, 0.12); }
+.lixeira-nome { flex: 1; min-width: 0; font-size: 13px; color: var(--tinta); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lixeira-nome small { display: block; font-size: 11px; color: var(--grafite); }
+.lixeira-devolver {
+  flex: none; height: 26px; padding: 0 12px; border: 0; border-radius: 999px;
+  background: var(--feltro); color: #fff; font: 600 12px/26px var(--sans); cursor: pointer;
+  transition: background-color 160ms ease, transform 120ms ease;
+}
+.lixeira-devolver:hover { background: var(--feltro-fundo); }
+.lixeira-devolver:active { transform: scale(0.96); }
+.lixeira-vazia { margin: 0; padding: 30px 32px 32px; text-align: center; font-size: 13px; line-height: 1.5; color: var(--grafite); text-wrap: pretty; }
+.lixeira-lista:empty { display: none; }
+.lixeira-rodape:empty { display: none; }
+.lixeira-lista:not(:empty) + .lixeira-vazia { display: none; }
+.lixeira-rodape {
+  margin: 0; padding: 6px 12px; font-size: 11px; color: var(--grafite); text-align: center;
+  background: #f6f5f2; box-shadow: 0 -0.5px 0 rgba(0, 0, 0, 0.12);
+}
+
 /* the small print at the foot of the desk */
 .mesa-rodape {
   position: absolute; z-index: 2; left: 16px; right: 16px; bottom: 12px; display: flex; justify-content: space-between; gap: 16px;
@@ -776,7 +812,7 @@ button { font: inherit; color: inherit; }
   .ficha, .ficha .foto { transition-duration: 0.15s; transition-timing-function: ease; }
   .anexo, .solto.chegando, .realce { animation: none; }
   .solto.voltando, .solto.saindo { transition: none; }
-  .dock-app, .botao, .como-instalar { transition: none; }
+  .dock-app, .botao, .como-instalar, .lixeira-lista li { transition: none; }
 }
 </style>
 </head>
@@ -874,6 +910,19 @@ button { font: inherit; color: inherit; }
       <div class="janela-conteudo" id="previa-print-conteudo"></div>
     </div>
 
+    <div class="janela previa lixeira" id="lixeira" data-app="Finder" role="group" aria-label="Lixo" hidden>
+      <div class="janela-barra">
+        <span class="semaforo"><button type="button" data-fecha aria-label="Fechar o Lixo"></button><i></i><i></i></span>
+        <span class="janela-titulo">Lixo</span>
+        <button class="lixeira-esvaziar" type="button" id="esvaziar" disabled>Esvaziar</button>
+      </div>
+      <div class="janela-conteudo">
+        <ul class="lixeira-lista" id="lixeira-lista" aria-label="Prints no Lixo"></ul>
+        <p class="lixeira-vazia" id="lixeira-vazia">O Lixo está vazio. O X de cada ficha manda o print para cá, e daqui ele pode voltar para a gaveta.</p>
+      </div>
+      <p class="lixeira-rodape" id="lixeira-rodape" aria-live="polite"></p>
+    </div>
+
     <nav class="dock" aria-label="Dock">
       <button class="dock-app" type="button" data-abre="navegador" aria-label="Navegador">
         <svg viewBox="0 0 50 50" aria-hidden="true"><defs><linearGradient id="d-nav" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5fb4ff"/><stop offset="1" stop-color="#1f6fe0"/></linearGradient></defs><rect width="50" height="50" rx="12" fill="url(#d-nav)"/><circle cx="25" cy="25" r="14" fill="none" stroke="#fff" stroke-width="2.2"/><ellipse cx="25" cy="25" rx="6.2" ry="14" fill="none" stroke="#fff" stroke-width="1.8"/><path d="M11.5 20.5h27M11.5 29.5h27" stroke="#fff" stroke-width="1.8"/></svg>
@@ -885,9 +934,9 @@ button { font: inherit; color: inherit; }
         <svg viewBox="0 0 50 50" aria-hidden="true"><rect width="50" height="50" rx="12" fill="#f4efe3"/><rect x="10" y="12" width="30" height="26" rx="3" fill="#1f4a3a"/><circle cx="31" cy="20" r="3.2" fill="#f1d891"/><path d="M10 34l9-10 7 7 4-4 10 9v2a3 3 0 0 1-3 3H13a3 3 0 0 1-3-3z" fill="#c8925a"/><rect x="10" y="12" width="30" height="26" rx="3" fill="none" stroke="#183b2e" stroke-width="1"/></svg>
       </button>
       <span class="dock-divisoria" aria-hidden="true"></span>
-      <div class="dock-app lixo" id="lixo" role="img" aria-label="Lixo">
+      <button class="dock-app lixo" type="button" id="lixo" data-abre="lixeira" aria-label="Lixo">
         <svg viewBox="0 0 50 50" aria-hidden="true"><path d="M14 15h22l-2 27a3 3 0 0 1-3 3H19a3 3 0 0 1-3-3z" fill="rgba(255,255,255,.55)" stroke="rgba(0,0,0,.28)" stroke-width="1"/><g class="papeis"><path d="M17 15l3-6 8 3-2 3z" fill="#fbf8f1" stroke="rgba(0,0,0,.25)" stroke-width=".8"/><path d="M24 15l6-7 5 5-3 2z" fill="#f7eed7" stroke="rgba(0,0,0,.25)" stroke-width=".8"/></g><path d="M12 15h26" stroke="rgba(0,0,0,.3)" stroke-width="1.6" stroke-linecap="round"/><path d="M20 20v20M25 20v20M30 20v20" stroke="rgba(0,0,0,.18)" stroke-width="1.2"/></svg>
-      </div>
+      </button>
     </nav>
   </main>
 
@@ -3739,16 +3788,87 @@ draw(performance.now());
     ids.forEach((id, order) => {
       const print = printOf(id);
       if (!print) return;
+      trash.unshift(print);
       if (thrown && order < 6 && !still.matches) toss(print, order * 0.05);
       drawer.prints = drawer.prints.filter((p) => p.id !== id);
       drawer.selection.delete(id);
       drawer.copied.delete(id);
       if (drawer.hovered === id) drawer.hovered = null;
     });
-    lixo.classList.add("cheio");
     render();
+    renderTrash();
     announce(ids.length === 1 ? "Print jogado no Lixo." : `${ids.length} prints jogados no Lixo.`);
   }
+
+  // The Trash keeps what was thrown away, as the Mac's does: a print can go back, until it is emptied.
+  const trash = [];
+  const lixeira = $("#lixeira");
+  const lixeiraLista = $("#lixeira-lista");
+  const lixeiraRodape = $("#lixeira-rodape");
+  const esvaziar = $("#esvaziar");
+
+  function renderTrash() {
+    lixo.classList.toggle("cheio", trash.length > 0);
+    lixo.setAttribute("aria-label", trash.length ? `Lixo, ${trash.length === 1 ? "1 print" : `${trash.length} prints`}` : "Lixo, vazio");
+    esvaziar.disabled = trash.length === 0;
+    lixeiraRodape.textContent = trash.length === 0 ? "" : trash.length === 1 ? "1 item" : `${trash.length} itens`;
+    const rows = new Map([...lixeiraLista.children].map((row) => [Number(row.dataset.id), row]));
+    for (const [id, row] of rows) if (!trash.some((p) => p.id === id) && !row.classList.contains("saindo")) row.remove();
+    trash.forEach((print, index) => {
+      let row = rows.get(print.id);
+      if (!row) {
+        row = document.createElement("li");
+        row.dataset.id = String(print.id);
+        const name = document.createElement("span");
+        name.className = "lixeira-nome";
+        name.textContent = `${print.name}.png`;
+        const size = document.createElement("small");
+        size.textContent = `${print.pixels[0]} × ${print.pixels[1]}`;
+        name.append(size);
+        const back = document.createElement("button");
+        back.type = "button";
+        back.className = "lixeira-devolver";
+        back.textContent = "Devolver";
+        back.setAttribute("aria-label", `Devolver ${print.name}.png para a gaveta`);
+        back.addEventListener("click", () => putBack(print, row));
+        row.append(photo(print, 56, 40, true), name, back);
+      }
+      if (lixeiraLista.children[index] !== row) lixeiraLista.insertBefore(row, lixeiraLista.children[index] || null);
+    });
+  }
+
+  /** Back from the Trash into the drawer, in its place by date, and the drawer peeks to show it arrived. */
+  function putBack(print, row) {
+    const at = trash.indexOf(print);
+    if (at < 0) return;
+    trash.splice(at, 1);
+    const next = row.nextElementSibling?.querySelector(".lixeira-devolver") || row.previousElementSibling?.querySelector(".lixeira-devolver");
+    const leave = () => { row.remove(); renderTrash(); };
+    if (still.matches) leave();
+    else {
+      row.classList.add("saindo");
+      setTimeout(leave, 240);
+    }
+    if (row.contains(document.activeElement)) (next || esvaziar).focus({ preventScroll: true });
+    drawer.prints.push(print);
+    drawer.prints.sort((a, b) => b.date - a.date);
+    if (!drawer.open) peek();
+    render();
+    if (!drawer.open) endPeekSoon();
+    announce("Print de volta na gaveta.");
+    guide.update();
+    renderTrash();
+  }
+
+  esvaziar.addEventListener("click", () => {
+    if (!trash.length) return;
+    const count = trash.length;
+    trash.length = 0;
+    for (const row of lixeiraLista.children) row.classList.add("saindo");
+    setTimeout(() => { lixeiraLista.replaceChildren(); renderTrash(); }, still.matches ? 0 : 240);
+    renderTrash();
+    announce(count === 1 ? "Lixo esvaziado: 1 print apagado." : `Lixo esvaziado: ${count} prints apagados.`);
+  });
 
   /** A card standing whole, for the flights: its paper, shadow, picture and words, each on its own layer. */
   function cardFace(print) {
@@ -4272,7 +4392,8 @@ draw(performance.now());
     onDeskNow.delete(print.id);
     entry.item.classList.add("saindo");
     setTimeout(() => entry.item.remove(), 260);
-    lixo.classList.add("cheio");
+    trash.unshift(print);
+    renderTrash();
     announce("Print jogado no Lixo.");
     guide.update();
   }
