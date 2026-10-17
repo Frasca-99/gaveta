@@ -10,8 +10,8 @@ export const head = {
   lang: "en",
   locale: "en_US",
   title: "Gaveta: your screenshots in a drawer, on the Mac",
-  description: "Every screenshot you take lands in a drawer at the edge of your Mac's screen. Pick several and paste them all at once. Free and open source.",
-  ogDescription: "Every screenshot you take lands in a drawer at the edge of the screen. Pick several and paste them all at once.",
+  description: "Stop hunting for your screenshots. On your Mac, they wait in a drawer at the edge of the screen, ready to paste: one or several at once. Free and open source.",
+  ogDescription: "Stop hunting for your screenshots. They wait in a drawer at the edge of the screen, ready to paste: one or several at once.",
   imageAlt: "A Mac desk with Gaveta's glass drawer open at the right edge, full of screenshots.",
 };
 
@@ -22,8 +22,8 @@ export const pagina = [
   ["qui 14:32", "Thu 2:32 PM"],
 
   ['<h1 class="titulo" id="titulo">Seus prints,<br><span>numa gaveta.</span></h1>', '<h1 class="titulo" id="titulo">Your screenshots,<br><span>in a drawer.</span></h1>'],
-  ["Cada print que você tira cai numa gaveta na borda da tela. Escolha vários e cole todos de uma vez.",
-    "Every screenshot you take lands in a drawer at the edge of the screen. Pick several and paste them all at once."],
+  ["Pare de procurar seus prints.</span> Eles ficam numa gaveta na borda da tela, prontos para colar: um ou vários de uma vez.",
+    "Stop hunting for your screenshots.</span> They wait in a drawer at the edge of the screen, ready to paste: one or several at once."],
   ["Grátis · macOS 14+", "Free · macOS 14+"],
 
   // the shop
