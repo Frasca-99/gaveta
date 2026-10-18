@@ -6,7 +6,8 @@ import { AbsoluteFill, Easing, Freeze, interpolate, OffthreadVideo, staticFile, 
  * Mac in one take, sits in a card on a light page, with small mono labels in
  * the card's corners (the figure, what it shows, what to do, a live readout)
  * and the link below it. Emma wants proof at 3 am; Jake takes two
- * screenshots, picks both in the drawer and drags them into the chat.
+ * screenshots (Chloe's photo is of Chloe and Emma, and his chat with Chloe is
+ * empty), picks both in the drawer and drags them into the chat.
  *
  * The take is public/ingles/traicao.mp4 (video/gravacao, cenas/traicao.json,
  * PALCO_CENARIO=traicao on a Mac in English): 1470 × 956 points at 2×. Times
@@ -20,8 +21,8 @@ const PLACA = { x: 16, y: 50, w: 1488, h: 837, raio: 8 };
 /** The screen in points; the menu bar and the Dock stay out of the shot. */
 const SCREEN = { w: 1470, h: 956, top: 36, bottom: 886 };
 const INICIO = 1.2;
-const FIM_DO_TAKE = 37.2;
-const FIM = 40.4;
+const FIM_DO_TAKE = 39.2;
+const FIM = 42.2;
 const TROCA = 0.35;
 
 const SANS = '-apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif';
@@ -33,9 +34,11 @@ const suave = Easing.inOut(Easing.cubic);
 // ── the camera, in the take's seconds and the screen's points ────────────
 
 type Cam = { t: number; cx: number; cy: number; w: number };
-const CENA = { cx: 550, cy: 440, w: 1070 };
+const CENA = { cx: 567, cy: 421, w: 1134 };
 const CHAT = { cx: 770, cy: 398, w: 680 };
-const LOJA = { cx: 360, cy: 345, w: 720 };
+/** The photo app with the proof: the whole window for Chloe's post, then closer on Jake's empty chat with her. */
+const POST = { cx: 409, cy: 340, w: 818 };
+const VAZIA = { cx: 360, cy: 420, w: 700 };
 const VOO = { cx: 800, cy: 450, w: 1340 };
 const GAVETA = { cx: 1008, cy: 622, w: 925 };
 const CARTOES = { cx: 1070, cy: 661, w: 800 };
@@ -49,12 +52,12 @@ const CAMERA: Cam[] = [
   { t: 6.9, ...CHAT },
   { t: 8.2, ...CENA },
   { t: 9.5, ...CENA },
-  { t: 10.3, ...LOJA },
-  { t: 11.2, ...LOJA },
+  { t: 10.3, ...POST },
+  { t: 11.2, ...POST },
   { t: 11.9, ...VOO },
   { t: 12.7, ...VOO },
-  { t: 13.7, ...LOJA },
-  { t: 15.2, ...LOJA },
+  { t: 13.7, ...VAZIA },
+  { t: 15.2, ...VAZIA },
   { t: 15.9, ...VOO },
   { t: 17.5, ...VOO },
   { t: 18.6, ...GAVETA },
@@ -66,8 +69,8 @@ const CAMERA: Cam[] = [
   { t: 27.3, ...ARRASTE },
   { t: 29.6, ...ARRASTE },
   { t: 30.8, ...RESPOSTA },
-  { t: 36.5, ...RESPOSTA },
-  { t: 38.4, ...CENA },
+  { t: 38.0, ...RESPOSTA },
+  { t: 39.9, ...CENA },
 ];
 
 function camera(t: number): Cam {
@@ -116,9 +119,9 @@ const GESTO: Marca[] = [
 /** A live readout, like an instrument's: what the drawer holds, picks, files. */
 const LEITURA: Marca[] = [
   [0, "drawer 3"], [12.3, "drawer 4"], [16.4, "drawer 5"],
-  [20.3, "0 of 5"], [20.75, "1 of 5"], [22.3, "2 of 5"],
-  [23.3, "rest"], [25.55, "open"], [26.5, "rest"],
-  [27.7, "2 files"], [30.3, "sent 2"], [32.3, "alibi weak"],
+  [20.3, "0 of 5"], [20.8, "1 of 5"], [22.3, "2 of 5"],
+  [23.3, "rest"], [25.55, "open"], [26.7, "rest"],
+  [27.7, "2 files"], [30.3, "sent 2"], [32.4, "alibi solid"],
 ];
 
 // ── pieces ───────────────────────────────────────────────────────────────
@@ -219,8 +222,8 @@ const GRATIS = 130;
 /** The link below the card; at the end it makes room and "Use it for free" comes in front of it. */
 function Link() {
   const t = useT();
-  const k = suave(interpolate(t, [37.8, 38.45], [0, 1], clamp));
-  const aparece = suave(interpolate(t, [38.3, 38.85], [0, 1], clamp));
+  const k = suave(interpolate(t, [39.4, 40.05], [0, 1], clamp));
+  const aparece = suave(interpolate(t, [39.9, 40.45], [0, 1], clamp));
   return (
     <div style={{ position: "absolute", left: 0, right: 0, top: CARD.y + CARD.h + 18, display: "flex", justifyContent: "center" }}>
       <div style={{

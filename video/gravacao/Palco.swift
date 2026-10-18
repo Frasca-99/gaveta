@@ -9,9 +9,10 @@
 //   uso  everyday use: Rafa from support asks for screenshots of a failed
 //        payment; the shop fails once Pagar is clicked, and the chat starts
 //        when the distributed notification local.gaveta.palco.comecar comes
-//   traicao  the same joke as the reel, in English: Emma asks why Jake liked
-//        Chloe's photo, and he proves it with screenshots of a checkout page;
-//        the chat starts with local.gaveta.palco.comecar
+//   traicao  the joke in English, with real proof: Emma asks why Jake liked
+//        Chloe's photo; the photo is of Chloe and Emma, and his chat with Chloe
+//        is empty. The photo comes from $PALCO_FOTO; the chat starts with
+//        local.gaveta.palco.comecar
 import AppKit
 import SwiftUI
 
@@ -160,6 +161,63 @@ struct Loja: View {
     }
 }
 
+// MARK: the proof (English joke)
+
+/// A photo app with Chloe's post (a photo of Chloe and Emma, liked by Jake) and his chat
+/// with Chloe, which has nothing in it: the two screenshots that clear him.
+struct Momentos: View {
+    let foto = env["PALCO_FOTO"].flatMap { NSImage(contentsOfFile: $0) }
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            VStack(alignment: .leading, spacing: 0) {
+                HStack(spacing: 8) {
+                    avatar("C", [Color(red: 1.0, green: 0.78, blue: 0.45), Color(red: 0.96, green: 0.48, blue: 0.36)])
+                    Text("chloe.m").font(.system(size: 13, weight: .semibold))
+                    Text("· 3:01 AM").font(.system(size: 12)).foregroundStyle(.secondary)
+                    Spacer()
+                }
+                .padding(.bottom, 10)
+                Group {
+                    if let foto { Image(nsImage: foto).resizable().aspectRatio(contentMode: .fill) }
+                    else { LinearGradient(colors: [.orange, .pink], startPoint: .top, endPoint: .bottom) }
+                }
+                .frame(width: 336, height: 210).clipped()
+                .clipShape(RoundedRectangle(cornerRadius: 10))
+                HStack(spacing: 6) {
+                    Image(systemName: "heart.fill").foregroundStyle(Color(red: 0.98, green: 0.22, blue: 0.33))
+                    Text("Liked by ").foregroundStyle(.secondary) + Text("jake").fontWeight(.semibold) + Text(" and 23 others").foregroundStyle(.secondary)
+                }
+                .font(.system(size: 13)).padding(.top, 10)
+                (Text("chloe.m ").fontWeight(.semibold) + Text("girls' night with ") + Text("@emma").foregroundStyle(Color(red: 0.04, green: 0.42, blue: 0.85)) + Text(" 💕"))
+                    .font(.system(size: 13)).padding(.top, 4).padding(.bottom, 2)
+            }
+            .marca("prova.post")
+            HStack(spacing: 10) {
+                avatar("C", [Color(red: 1.0, green: 0.78, blue: 0.45), Color(red: 0.96, green: 0.48, blue: 0.36)])
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Chloe").font(.system(size: 13, weight: .semibold))
+                    Text("No messages yet").font(.system(size: 12)).foregroundStyle(.secondary)
+                }
+                Spacer()
+                Image(systemName: "bubble.left").foregroundStyle(.tertiary)
+            }
+            .padding(12)
+            .background(Color(white: 0.96), in: RoundedRectangle(cornerRadius: 10))
+            .padding(.top, 14)
+            .marca("prova.conversa")
+        }
+        .padding(22)
+        .frame(width: 380)
+        .background(.white)
+        .marca("prova")
+    }
+    func avatar(_ letra: String, _ cores: [Color]) -> some View {
+        Circle().fill(LinearGradient(colors: cores, startPoint: .top, endPoint: .bottom))
+            .frame(width: 26, height: 26)
+            .overlay(Text(letra).font(.system(size: 12, weight: .semibold)).foregroundStyle(.white))
+    }
+}
+
 // MARK: the chat
 
 final class Conversa: ObservableObject {
@@ -206,9 +264,10 @@ final class Conversa: ObservableObject {
         envios += 1
         if traicao {
             if envios == 1 {
-                responder([(true, "That's a checkout page, Jake."),
-                           (true, "Wait. How are you sending screenshots this fast?"),
-                           (false, "It's Gaveta, babe.")], depois: 0.8)
+                responder([(true, "Ok… you're right."),
+                           (true, "But how did you send them so fast?"),
+                           (false, "Simple, babe. I'm using Gaveta."),
+                           (true, "Nice. I'm trying it too.")], depois: 0.9)
             }
             return
         }
@@ -257,7 +316,7 @@ struct Bolha: View {
                 foto(img).frame(maxWidth: 190, maxHeight: 190)
             } else if !msg.imagens.isEmpty {
                 VStack(alignment: .trailing, spacing: 4) {
-                    ForEach(Array(msg.imagens.enumerated()), id: \.offset) { _, img in foto(img).frame(maxWidth: 230, maxHeight: 150) }
+                    ForEach(Array(msg.imagens.enumerated()), id: \.offset) { _, img in foto(img).frame(maxWidth: 230, maxHeight: traicao ? 200 : 150) }
                 }
             } else if let texto = msg.texto {
                 Text(texto).font(.system(size: 14))
@@ -397,7 +456,11 @@ final class Delegate: NSObject, NSApplicationDelegate {
         let py = Double(env["PALCO_LOJA_TOP"] ?? "") ?? 190
         let cx = Double(env["PALCO_CHAT_X"] ?? "") ?? 590
         let cy = Double(env["PALCO_CHAT_TOP"] ?? "") ?? 250
-        _ = janela(L("Loja Exemplo", "Example Shop"), x: px, top: py, Loja(pagamento: pagamento))
+        if traicao {
+            _ = janela("Moments", x: px, top: Double(env["PALCO_LOJA_TOP"] ?? "") ?? 150, Momentos())
+        } else {
+            _ = janela(L("Loja Exemplo", "Example Shop"), x: px, top: py, Loja(pagamento: pagamento))
+        }
         let chat = janela(uso ? "Suporte" : traicao ? "Chat" : "Conversa", x: cx, top: cy, Chat(conversa: conversa))
         chat.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)

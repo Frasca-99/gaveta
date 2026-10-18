@@ -31,7 +31,7 @@
  },
  {
   "op": "mover",
-  "alvo": "loja.pedido",
+  "alvo": "prova.post",
   "fx": 0,
   "fy": 0,
   "dx": -8,
@@ -47,7 +47,7 @@
  },
  {
   "op": "arrastar",
-  "alvo": "loja.pedido",
+  "alvo": "prova.post",
   "fx": 1,
   "fy": 1,
   "dx": 8,
@@ -87,11 +87,11 @@
  },
  {
   "op": "mover",
-  "alvo": "loja.erro",
+  "alvo": "prova.conversa",
   "fx": 0,
   "fy": 0,
   "dx": -8,
-  "dy": 4,
+  "dy": 6,
   "ms": 700
  },
  {
@@ -103,7 +103,7 @@
  },
  {
   "op": "arrastar",
-  "alvo": "loja.erro",
+  "alvo": "prova.conversa",
   "fx": 1,
   "fy": 1,
   "dx": 8,
@@ -275,7 +275,7 @@
  },
  {
   "op": "esperar",
-  "ms": 6200
+  "ms": 8200
  },
  {
   "op": "marca",

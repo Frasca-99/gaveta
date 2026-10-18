@@ -60,7 +60,7 @@ defaults write com.neto.Gaveta pinPaths -array \
 defaults write com.neto.Gaveta glassWidth -float 300
 open -a Gaveta
 sleep 2.5
-PALCO_CENARIO="${PALCO_CENARIO:-bia}" PALCO_MAPA="$B/palco.json" "$B/Palco.app/Contents/MacOS/Palco" >/dev/null 2>&1 &
+PALCO_CENARIO="${PALCO_CENARIO:-bia}" PALCO_FOTO="$G/midia/festa.jpg" PALCO_MAPA="$B/palco.json" "$B/Palco.app/Contents/MacOS/Palco" >/dev/null 2>&1 &
 echo $! > "$B/palco.pid"
 sleep 3
 echo "Palco pronto (${PALCO_CENARIO:-bia}). Grave com: video/gravacao/grava.sh cena1 (até cena5), grava.sh uso ou grava.sh traicao"
