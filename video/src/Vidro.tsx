@@ -1,7 +1,7 @@
 import type { CSSProperties, ReactNode } from "react";
 import { Fragment, useEffect, useMemo, useState } from "react";
 import {
-  AbsoluteFill, continueRender, delayRender, Easing, Img, interpolate, spring, staticFile, useCurrentFrame,
+  AbsoluteFill, Audio, continueRender, delayRender, Easing, Img, interpolate, spring, staticFile, useCurrentFrame,
 } from "remotion";
 
 /**
@@ -810,6 +810,8 @@ function Fim() {
 export function Vidro2() {
   return (
     <AbsoluteFill style={{ background: "#050508" }}>
+      {/* the soundtrack, composed to these times by video/trilha/compor.mjs */}
+      <Audio src={staticFile("vidro/trilha.m4a")} />
       <Ambiente />
       <Mundo />
       <Teclas inicio={T.teclas1} aperta={T.aperta1} teclas={["⌘", "⇧", "4"]} />
