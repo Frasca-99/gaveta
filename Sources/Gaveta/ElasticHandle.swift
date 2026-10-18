@@ -80,7 +80,7 @@ struct ResizeGrip: View {
             ))
             .animation(.spring(response: 0.22, dampingFraction: 0.4), value: bend)
             .animation(.easeOut(duration: 0.15), value: lit)
-            .help("Arraste para alargar a gaveta. Clique duplo volta ao normal.")
+            .help(tr("Arraste para alargar a gaveta. Clique duplo volta ao normal.", "Drag to widen the drawer. Double-click to reset it."))
             .accessibilityHidden(true)
     }
 }

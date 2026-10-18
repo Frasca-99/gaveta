@@ -112,7 +112,7 @@ final class Flights {
         flyer.addSublayer(caption)
 
         // On a glass card the age stands at the right of the words, not on a tab.
-        let age = Self.text("agora", font: .systemFont(ofSize: 11), color: meta, scale: scale)
+        let age = Self.text(tr("agora", "now"), font: .systemFont(ofSize: 11), color: meta, scale: scale)
         age.alignmentMode = .right
         age.frame = CGRect(x: CardStack.border, y: captionY, width: CardStack.photoWidth - 2, height: 14)
         age.isHidden = !glass
@@ -123,7 +123,7 @@ final class Flights {
         tab.backgroundColor = Self.paper
         tab.cornerRadius = 5
         tab.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
-        let label = Self.text("agora", font: NSFont(name: "American Typewriter", size: 11) ?? .systemFont(ofSize: 11),
+        let label = Self.text(tr("agora", "now"), font: NSFont(name: "American Typewriter", size: 11) ?? .systemFont(ofSize: 11),
                               color: Self.ink, scale: scale)
         label.alignmentMode = .center
         label.frame = tab.bounds.insetBy(dx: 0, dy: 2)

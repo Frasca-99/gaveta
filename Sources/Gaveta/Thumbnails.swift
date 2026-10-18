@@ -26,7 +26,7 @@ enum Thumbnails {
               let props = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [CFString: Any],
               let width = props[kCGImagePropertyPixelWidth] as? Int,
               let height = props[kCGImagePropertyPixelHeight] as? Int
-        else { return "Imagem" }
+        else { return tr("Imagem", "Image") }
         return "\(width) × \(height)"
     }
 }

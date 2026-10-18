@@ -44,7 +44,7 @@ struct Shortcut: Equatable {
         if flags.contains(.command) { modifiers |= cmdKey }
         let key: String
         switch Int(event.keyCode) {
-        case kVK_Space: key = "Espaço"
+        case kVK_Space: key = tr("Espaço", "Space")
         case kVK_Return: key = "↩"
         case kVK_LeftArrow: key = "←"
         case kVK_RightArrow: key = "→"
@@ -85,16 +85,16 @@ final class ShortcutRecorder: NSObject, NSWindowDelegate {
         self.done = done
         let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 340, height: 130),
                               styleMask: [.titled, .closable], backing: .buffered, defer: false)
-        window.title = "Atalho da Gaveta"
+        window.title = tr("Atalho da Gaveta", "Gaveta Shortcut")
         window.isReleasedWhenClosed = false
         window.delegate = self
         window.level = .modalPanel
 
-        let title = NSTextField(labelWithString: "Pressione o novo atalho")
+        let title = NSTextField(labelWithString: tr("Pressione o novo atalho", "Press the new shortcut"))
         title.font = .systemFont(ofSize: 15, weight: .semibold)
-        let now = NSTextField(labelWithString: current.map { "Atual: \($0.label)" } ?? "Sem atalho")
+        let now = NSTextField(labelWithString: current.map { tr("Atual: \($0.label)", "Current: \($0.label)") } ?? tr("Sem atalho", "No shortcut"))
         now.textColor = .secondaryLabelColor
-        let hint = NSTextField(labelWithString: "Use ⌘, ⌃ ou ⌥. Esc cancela, Delete remove o atalho.")
+        let hint = NSTextField(labelWithString: tr("Use ⌘, ⌃ ou ⌥. Esc cancela, Delete remove o atalho.", "Use ⌘, ⌃ or ⌥. Esc cancels, Delete removes the shortcut."))
         hint.font = .systemFont(ofSize: 11)
         hint.textColor = .secondaryLabelColor
         let stack = NSStackView(views: [title, now, hint])

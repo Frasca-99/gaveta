@@ -154,26 +154,26 @@ struct DrawerView: View {
         return HStack(spacing: 7) {
             if count == 0 {
                 if total > 1 {
-                    BarButton(title: "Selecionar todos", systemImage: "checkmark.circle") { drawer.selectAll() }
+                    BarButton(title: tr("Selecionar todos", "Select all"), systemImage: "checkmark.circle") { drawer.selectAll() }
                     Spacer()
-                    Text("ou use a bolinha").font(.system(size: 11)).lineLimit(1).opacity(0.6)
+                    Text(tr("ou use a bolinha", "or use the circle")).font(.system(size: 11)).lineLimit(1).opacity(0.6)
                 } else {
-                    Text("Clique para copiar").font(.system(size: 11)).opacity(0.6)
+                    Text(tr("Clique para copiar", "Click to copy")).font(.system(size: 11)).opacity(0.6)
                     Spacer()
                 }
             } else {
-                Text("\(count) de \(total)")
+                Text(tr("\(count) de \(total)", "\(count) of \(total)"))
                     .font(.system(size: 12, weight: .semibold))
                     .monospacedDigit()
                 Spacer()
                 if count < total {
-                    BarButton(title: "Todos", systemImage: "checkmark.circle") { drawer.selectAll() }
+                    BarButton(title: tr("Todos", "All"), systemImage: "checkmark.circle") { drawer.selectAll() }
                 }
-                BarButton(title: count == 1 ? "Copiar" : "Copiar todos", systemImage: "doc.on.doc", main: true) {
+                BarButton(title: count == 1 ? tr("Copiar", "Copy") : tr("Copiar todos", "Copy all"), systemImage: "doc.on.doc", main: true) {
                     drawer.copySelection()
                 }
                 BarButton(title: nil, systemImage: "xmark") { drawer.clearSelection() }
-                    .help("Limpar seleção")
+                    .help(tr("Limpar seleção", "Clear selection"))
             }
         }
         .foregroundStyle(Palette.onFelt)
@@ -185,8 +185,8 @@ struct DrawerView: View {
 
     private var emptyState: some View {
         VStack(spacing: 6) {
-            Text("Gaveta vazia").font(Typewriter.font(16))
-            Text("Tire um print com ⌘⇧4 e ele cai aqui.")
+            Text(tr("Gaveta vazia", "Empty drawer")).font(Typewriter.font(16))
+            Text(tr("Tire um print com ⌘⇧4 e ele cai aqui.", "Take a screenshot with ⌘⇧4 and it lands here."))
                 .font(.system(size: 12))
                 .opacity(0.8)
         }
@@ -228,7 +228,7 @@ struct DrawerFront: View {
 
     /// Typed on a card behind a brass frame, read from bottom to top.
     private var label: some View {
-        Text("PRINTS")
+        Text(tr("PRINTS", "SHOTS"))
             .font(Typewriter.font(15))
             .tracking(4.8)
             .foregroundStyle(Palette.ink)
