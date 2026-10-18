@@ -10,6 +10,8 @@ python3 -c 'import time; print(time.time())' > "$B/marcas/$c.inicio"
 ffmpeg -hide_banner -loglevel error -f avfoundation -capture_cursor 1 -framerate 60 -pixel_format nv12 -i "${tela:-1}:none" \
   -c:v h264_videotoolbox -b:v 45M -realtime 1 -y "$B/$c.mov" > "$B/marcas/$c.ffmpeg.log" 2>&1 &
 sleep 1.5
+# the everyday-use story starts with the chat; the reel's ignores this
+"$B/apoio" aviso local.gaveta.palco.comecar >/dev/null
 open -W --env PALCO_MAPA="$B/palco.json" "$HOME/Applications/Roteiro.app" --args "$G/cenas/$c.json" "$B/marcas/$c.json"
 sleep 1.2
 pkill -INT -x ffmpeg

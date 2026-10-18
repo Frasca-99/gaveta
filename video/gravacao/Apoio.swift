@@ -2,10 +2,11 @@
 //   apoio prancheta-salvar <arquivo>     keeps every item on the clipboard, every type
 //   apoio prancheta-restaurar <arquivo>  puts it back as it was
 //   apoio data <arquivo> <minutos-atras>  sets a file's creation date
+//   apoio aviso <nome>                    posts a distributed notification (the stage listens)
 import AppKit
 
 let args = CommandLine.arguments
-guard args.count >= 3 else { print("uso: apoio prancheta-salvar|prancheta-restaurar|data …"); exit(1) }
+guard args.count >= 3 else { print("uso: apoio prancheta-salvar|prancheta-restaurar|data|aviso …"); exit(1) }
 
 switch args[1] {
 case "prancheta-salvar":
@@ -34,6 +35,9 @@ case "data":
     let date = Date().addingTimeInterval(-minutes * 60)
     try FileManager.default.setAttributes([.creationDate: date, .modificationDate: date], ofItemAtPath: args[2])
     print("data:", args[2], date)
+case "aviso":
+    DistributedNotificationCenter.default().postNotificationName(Notification.Name(args[2]), object: nil, userInfo: nil, deliverImmediately: true)
+    print("aviso:", args[2])
 default:
     print("comando desconhecido")
 }

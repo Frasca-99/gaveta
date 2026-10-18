@@ -1,10 +1,12 @@
 {
   "name": "gaveta-video",
   "private": true,
-  "description": "Gaveta em ação: o app de verdade gravado num Mac (gravacao/), montado com Remotion.",
+  "description": "Os vídeos da Gaveta: o app de verdade gravado num Mac (gravacao/), montados com Remotion.",
   "scripts": {
     "estudio": "remotion studio src/index.ts",
-    "render": "remotion render src/index.ts Filme out/gaveta-app.mp4 --crf 16 --jpeg-quality 95"
+    "render": "npm run render:reel && npm run render:uso",
+    "render:reel": "remotion render src/index.ts Reel out/gaveta-reel.mp4 --crf 16 --jpeg-quality 95",
+    "render:uso": "remotion render src/index.ts NaPratica out/gaveta-na-pratica.mp4 --crf 16 --jpeg-quality 95"
   },
   "dependencies": {
     "@remotion/cli": "4.0.536",

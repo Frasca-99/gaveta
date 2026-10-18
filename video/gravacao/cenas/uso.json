@@ -1,0 +1,258 @@
+[
+ {
+  "op": "mover",
+  "x": 760,
+  "y": 700,
+  "ms": 10
+ },
+ {
+  "op": "marca",
+  "nome": "inicio"
+ },
+ {
+  "op": "esperar",
+  "ms": 4400
+ },
+ {
+  "op": "marca",
+  "nome": "pagar"
+ },
+ {
+  "op": "mover",
+  "alvo": "loja.pagar",
+  "fx": 0.5,
+  "fy": 0.5,
+  "ms": 1000
+ },
+ {
+  "op": "esperar",
+  "ms": 250
+ },
+ {
+  "op": "clicar"
+ },
+ {
+  "op": "esperar",
+  "ms": 1500
+ },
+ {
+  "op": "marca",
+  "nome": "print1"
+ },
+ {
+  "op": "tecla",
+  "tecla": "4",
+  "mods": [
+   "cmd",
+   "shift"
+  ]
+ },
+ {
+  "op": "esperar",
+  "ms": 550
+ },
+ {
+  "op": "mover",
+  "alvo": "loja.erro",
+  "fx": 0,
+  "fy": 0,
+  "dx": -8,
+  "dy": 4,
+  "ms": 700
+ },
+ {
+  "op": "esperar",
+  "ms": 150
+ },
+ {
+  "op": "apertar"
+ },
+ {
+  "op": "arrastar",
+  "alvo": "loja.erro",
+  "fx": 1,
+  "fy": 1,
+  "dx": 8,
+  "dy": 8,
+  "ms": 800
+ },
+ {
+  "op": "esperar",
+  "ms": 120
+ },
+ {
+  "op": "soltar"
+ },
+ {
+  "op": "marca",
+  "nome": "voou1"
+ },
+ {
+  "op": "esperar",
+  "ms": 1500
+ },
+ {
+  "op": "marca",
+  "nome": "print2"
+ },
+ {
+  "op": "tecla",
+  "tecla": "4",
+  "mods": [
+   "cmd",
+   "shift"
+  ]
+ },
+ {
+  "op": "esperar",
+  "ms": 550
+ },
+ {
+  "op": "mover",
+  "alvo": "loja.pedido",
+  "fx": 0,
+  "fy": 0,
+  "dx": -8,
+  "dy": -8,
+  "ms": 700
+ },
+ {
+  "op": "esperar",
+  "ms": 150
+ },
+ {
+  "op": "apertar"
+ },
+ {
+  "op": "arrastar",
+  "alvo": "loja.pedido",
+  "fx": 1,
+  "fy": 1,
+  "dx": 8,
+  "dy": 8,
+  "ms": 850
+ },
+ {
+  "op": "esperar",
+  "ms": 120
+ },
+ {
+  "op": "soltar"
+ },
+ {
+  "op": "marca",
+  "nome": "voou2"
+ },
+ {
+  "op": "esperar",
+  "ms": 1600
+ },
+ {
+  "op": "marca",
+  "nome": "borda"
+ },
+ {
+  "op": "mover",
+  "x": 1469,
+  "y": 480,
+  "ms": 1000,
+  "arco": 0.04
+ },
+ {
+  "op": "esperar",
+  "ms": 1400
+ },
+ {
+  "op": "marca",
+  "nome": "escolher"
+ },
+ {
+  "op": "mover",
+  "x": 1330,
+  "y": 552,
+  "ms": 750
+ },
+ {
+  "op": "esperar",
+  "ms": 450
+ },
+ {
+  "op": "clicar",
+  "mods": [
+   "cmd"
+  ]
+ },
+ {
+  "op": "esperar",
+  "ms": 400
+ },
+ {
+  "op": "mover",
+  "x": 1330,
+  "y": 738,
+  "ms": 450
+ },
+ {
+  "op": "esperar",
+  "ms": 400
+ },
+ {
+  "op": "clicar",
+  "mods": [
+   "cmd"
+  ]
+ },
+ {
+  "op": "esperar",
+  "ms": 550
+ },
+ {
+  "op": "marca",
+  "nome": "arrastar"
+ },
+ {
+  "op": "apertar"
+ },
+ {
+  "op": "esperar",
+  "ms": 160
+ },
+ {
+  "op": "arrastar",
+  "x": 1312,
+  "y": 728,
+  "ms": 120,
+  "arco": 0
+ },
+ {
+  "op": "esperar",
+  "ms": 120
+ },
+ {
+  "op": "arrastar",
+  "alvo": "conversa.mensagens",
+  "fx": 0.55,
+  "fy": 0.55,
+  "ms": 1150,
+  "arco": 0.05
+ },
+ {
+  "op": "esperar",
+  "ms": 350
+ },
+ {
+  "op": "marca",
+  "nome": "solta"
+ },
+ {
+  "op": "soltar"
+ },
+ {
+  "op": "esperar",
+  "ms": 5000
+ },
+ {
+  "op": "marca",
+  "nome": "fim"
+ }
+]

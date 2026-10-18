@@ -13,4 +13,5 @@ find "$HOME/Library/Application Support/Gaveta/Capturas" -type f -newer "$B/inic
 defaults import com.neto.Gaveta "$B/gaveta-antes.plist"
 open -a Gaveta
 "$B/apoio" prancheta-restaurar "$B/prancheta.plist" >/dev/null
+rm -f "$B/sessao" "$B/palco.pid"
 echo "Mac devolvido. Prints jogados fora com o X durante a gravação ficam na Lixeira."
