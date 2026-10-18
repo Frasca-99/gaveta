@@ -9,12 +9,18 @@
 //   uso  everyday use: Rafa from support asks for screenshots of a failed
 //        payment; the shop fails once Pagar is clicked, and the chat starts
 //        when the distributed notification local.gaveta.palco.comecar comes
+//   traicao  the same joke as the reel, in English: Emma asks why Jake liked
+//        Chloe's photo, and he proves it with screenshots of a checkout page;
+//        the chat starts with local.gaveta.palco.comecar
 import AppKit
 import SwiftUI
 
 let env = ProcessInfo.processInfo.environment
 let cenario = env["PALCO_CENARIO"] ?? "bia"
 let uso = cenario == "uso"
+let traicao = cenario == "traicao"
+/// The stage's words: Portuguese, or English for the English joke.
+func L(_ pt: String, _ en: String) -> String { traicao ? en : pt }
 let mapPath = env["PALCO_MAPA"] ?? "/tmp/palco.json"
 var mapa: [String: [String: Double]] = [:]
 func report(_ name: String, _ rect: CGRect, in window: NSWindow?) {
@@ -89,8 +95,8 @@ struct Erro: View {
         HStack(alignment: .top, spacing: 8) {
             Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(Color(red: 0.85, green: 0.18, blue: 0.13))
             VStack(alignment: .leading, spacing: 2) {
-                Text("Não foi possível concluir o pagamento.")
-                Text("Erro 500").fontWeight(.bold)
+                Text(L("Não foi possível concluir o pagamento.", "The payment could not go through."))
+                Text(L("Erro 500", "Error 500")).fontWeight(.bold)
             }
             .foregroundStyle(Color(red: 0.70, green: 0.14, blue: 0.10))
         }
@@ -106,13 +112,13 @@ struct Loja: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             VStack(alignment: .leading, spacing: 0) {
-                Text("LOJA EXEMPLO").font(.system(size: 11, weight: .semibold, design: .monospaced)).tracking(1).foregroundStyle(.secondary)
-                Text("Finalizar compra").font(.system(size: 22, weight: .semibold)).padding(.top, 4).padding(.bottom, 10)
-                linha("Tênis de corrida", "R$ 399,90")
+                Text(L("LOJA EXEMPLO", "EXAMPLE SHOP")).font(.system(size: 11, weight: .semibold, design: .monospaced)).tracking(1).foregroundStyle(.secondary)
+                Text(L("Finalizar compra", "Checkout")).font(.system(size: 22, weight: .semibold)).padding(.top, 4).padding(.bottom, 10)
+                linha(L("Tênis de corrida", "Running shoes"), L("R$ 399,90", "$79.90"))
                 Divider()
-                linha("Meias, 3 pares", "R$ 59,90")
+                linha(L("Meias, 3 pares", "Socks, 3 pairs"), L("R$ 59,90", "$12.00"))
                 Divider()
-                linha("Total", "R$ 459,80").fontWeight(.semibold)
+                linha("Total", L("R$ 459,80", "$91.90")).fontWeight(.semibold)
             }
             .marca("loja.pedido")
             if !uso {
@@ -122,9 +128,9 @@ struct Loja: View {
                 HStack(spacing: 8) {
                     if pagamento.processando {
                         ProgressView().controlSize(.small).tint(.white)
-                        Text("Processando…")
+                        Text(L("Processando…", "Processing…"))
                     } else {
-                        Text("Pagar R$ 459,80")
+                        Text(L("Pagar R$ 459,80", "Pay $91.90"))
                     }
                 }
                 .font(.system(size: 15, weight: .semibold)).foregroundStyle(.white)
@@ -158,7 +164,7 @@ struct Loja: View {
 
 final class Conversa: ObservableObject {
     struct Msg: Identifiable { let id = UUID(); let dela: Bool; var texto: String? = nil; var imagens: [NSImage] = [] }
-    @Published var msgs: [Msg] = uso ? [] : [
+    @Published var msgs: [Msg] = (uso || traicao) ? [] : [
         Msg(dela: true, texto: "Por que você curtiu a foto da Camila às 3 da manhã?"),
         Msg(dela: true, texto: "E ainda mandou mensagem pra ela??"),
         Msg(dela: false, texto: "Amor, eu não mandei mensagem pra ela"),
@@ -171,8 +177,16 @@ final class Conversa: ObservableObject {
 
     /// Everyday use: support writes first, once the recording is rolling.
     func comecar() {
-        guard uso, !comecou else { return }
+        guard uso || traicao, !comecou else { return }
         comecou = true
+        if traicao {
+            responder([(true, "Why did you like Chloe's photo at 3 am?"),
+                       (true, "And you texted her??"),
+                       (false, "Babe, I never texted her"),
+                       (false, "I can prove it. Sending screenshots"),
+                       (true, "Go on.")], depois: 0.3)
+            return
+        }
         responder([(true, "Oi! Um cliente disse que o pagamento não passou."),
                    (true, "Consegue me mandar print do erro e do pedido?")], depois: 0.3)
     }
@@ -183,13 +197,21 @@ final class Conversa: ObservableObject {
         let imagens = urls.compactMap { NSImage(contentsOf: $0) }
         guard !imagens.isEmpty else { return }
         withAnimation(.spring(response: 0.45, dampingFraction: 0.78)) {
-            if uso {
+            if uso || traicao {
                 msgs.append(Msg(dela: false, imagens: imagens))
             } else {
                 for img in imagens { msgs.append(Msg(dela: false, imagens: [img])) }
             }
         }
         envios += 1
+        if traicao {
+            if envios == 1 {
+                responder([(true, "That's a checkout page, Jake."),
+                           (true, "Wait. How are you sending screenshots this fast?"),
+                           (false, "It's Gaveta, babe.")], depois: 0.8)
+            }
+            return
+        }
         if uso {
             if envios == 1 {
                 responder([(true, imagens.count > 1 ? "Valeu! Com esses dois já achei o problema." : "Valeu!")], depois: 0.8)
@@ -284,9 +306,9 @@ struct Chat: View {
                         ? [Color(red: 0.36, green: 0.82, blue: 0.75), Color(red: 0.10, green: 0.55, blue: 0.58)]
                         : [Color(red: 0.97, green: 0.66, blue: 0.77), Color(red: 0.87, green: 0.39, blue: 0.6)],
                         startPoint: .top, endPoint: .bottom))
-                    .frame(width: 26, height: 26).overlay(Text(uso ? "R" : "B").font(.system(size: 12, weight: .semibold)).foregroundStyle(.white))
+                    .frame(width: 26, height: 26).overlay(Text(uso ? "R" : traicao ? "E" : "B").font(.system(size: 12, weight: .semibold)).foregroundStyle(.white))
                 VStack(alignment: .leading, spacing: 0) {
-                    Text(uso ? "Rafa" : "Bia").font(.system(size: 14, weight: .semibold))
+                    Text(uso ? "Rafa" : traicao ? "Emma" : "Bia").font(.system(size: 14, weight: .semibold))
                     if uso { Text("Suporte").font(.system(size: 11)).foregroundStyle(.secondary) }
                 }
             }
@@ -295,7 +317,7 @@ struct Chat: View {
             ScrollViewReader { leitor in
                 ScrollView {
                     VStack(spacing: 5) {
-                        Text(uso ? "Hoje 14:32" : "Hoje 03:12").font(.system(size: 11, weight: .medium)).foregroundStyle(.secondary).padding(.bottom, 4)
+                        Text(uso ? "Hoje 14:32" : traicao ? "Today 3:12 AM" : "Hoje 03:12").font(.system(size: 11, weight: .medium)).foregroundStyle(.secondary).padding(.bottom, 4)
                         ForEach(conversa.msgs) { Bolha(msg: $0).id($0.id) }
                         if conversa.digitando { Digitando().id("digitando") }
                         Color.clear.frame(height: 1).id("fim")
@@ -309,7 +331,7 @@ struct Chat: View {
             .background(alvo ? Color.accentColor.opacity(0.07) : .clear)
             .marca("conversa.mensagens")
             HStack {
-                Text("Mensagem").foregroundStyle(.tertiary)
+                Text(L("Mensagem", "Message")).foregroundStyle(.tertiary)
                 Spacer()
             }
             .font(.system(size: 13))
@@ -375,8 +397,8 @@ final class Delegate: NSObject, NSApplicationDelegate {
         let py = Double(env["PALCO_LOJA_TOP"] ?? "") ?? 190
         let cx = Double(env["PALCO_CHAT_X"] ?? "") ?? 590
         let cy = Double(env["PALCO_CHAT_TOP"] ?? "") ?? 250
-        _ = janela("Loja Exemplo", x: px, top: py, Loja(pagamento: pagamento))
-        let chat = janela(uso ? "Suporte" : "Conversa", x: cx, top: cy, Chat(conversa: conversa))
+        _ = janela(L("Loja Exemplo", "Example Shop"), x: px, top: py, Loja(pagamento: pagamento))
+        let chat = janela(uso ? "Suporte" : traicao ? "Chat" : "Conversa", x: cx, top: cy, Chat(conversa: conversa))
         chat.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
 

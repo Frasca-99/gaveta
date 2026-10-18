@@ -1,8 +1,9 @@
 #!/bin/bash
 # Sets the stage for recording: builds the stage and the cursor player, keeps the clipboard and
 # Gaveta's settings, puts three sample prints in the drawer, and opens the stage over everything.
-# PALCO_CENARIO=uso sets the everyday-use story; the reel's is the default. Run it again between
-# takes to start over. desfazer.sh puts it all back. See video/LEIA.md.
+# PALCO_CENARIO=uso sets the everyday-use story, PALCO_CENARIO=traicao the English joke; the
+# reel's is the default. Run it again between takes to start over. desfazer.sh puts it all back.
+# See video/LEIA.md.
 set -uo pipefail
 G="$(cd "$(dirname "$0")" && pwd)"
 B="$G/.build"
@@ -62,4 +63,4 @@ sleep 2.5
 PALCO_CENARIO="${PALCO_CENARIO:-bia}" PALCO_MAPA="$B/palco.json" "$B/Palco.app/Contents/MacOS/Palco" >/dev/null 2>&1 &
 echo $! > "$B/palco.pid"
 sleep 3
-echo "Palco pronto (${PALCO_CENARIO:-bia}). Grave com: video/gravacao/grava.sh cena1 (até cena5), ou grava.sh uso"
+echo "Palco pronto (${PALCO_CENARIO:-bia}). Grave com: video/gravacao/grava.sh cena1 (até cena5), grava.sh uso ou grava.sh traicao"
