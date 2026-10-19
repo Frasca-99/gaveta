@@ -121,7 +121,7 @@ kbd {
   position: absolute; z-index: 2; margin: 0; overflow: hidden; border-radius: 12px; background: var(--branco);
   box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.16), 0 20px 44px -18px rgba(0, 0, 0, 0.24), 0 4px 10px -4px rgba(0, 0, 0, 0.08);
 }
-.j-loja { left: 20px; top: calc(var(--menus) + 18px); width: var(--janela); }
+.j-prova { left: 20px; top: calc(var(--menus) + 18px); width: var(--janela); }
 .j-conversa { left: 20px; bottom: 18px; display: flex; flex-direction: column; width: var(--janela); height: clamp(250px, calc(100svh - 430px), 360px); }
 @media (min-width: 761px) and (max-height: 800px) { .conversa-hora { display: none; } }
 .j-codigo { right: 22px; top: 20%; width: clamp(320px, 30vw, 460px); border-radius: 10px; cursor: grab; touch-action: none; }
@@ -138,22 +138,27 @@ kbd {
 .endereco { flex: 1; display: grid; place-items: center; height: 22px; border-radius: 6px; background: #f3f3f3; font-size: 11.5px; color: #555; }
 .janela-nome { flex: 1; margin-right: 45px; text-align: center; font: 600 12.5px var(--sans); color: #333; }
 
-.loja { padding: 14px 18px 18px; }
-.loja-marca { margin: 0; font: 500 10.5px/1.6 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: #9a9a9a; }
-.loja-titulo { margin: 2px 0 8px; font-size: 19px; font-weight: 600; letter-spacing: -0.02em; }
-.loja-itens { margin: 0; padding: 0; list-style: none; font-size: 13.5px; }
-.loja-itens li { display: flex; justify-content: space-between; gap: 12px; padding: 7px 0; border-bottom: 1px solid #f1f1f1; font-variant-numeric: tabular-nums; }
-.loja-itens .total { border-bottom: 0; font-weight: 600; }
-.loja-erro { display: flex; gap: 8px; margin: 8px 0 12px; padding: 9px 11px; border-radius: 8px; background: #fdeeec; color: #b42318; font-size: 12.5px; line-height: 1.45; }
-.loja-erro b { white-space: nowrap; }
-.loja-erro svg { flex: none; width: 14px; height: 14px; margin-top: 2px; color: #d92d20; }
-.loja-erro.de-novo { animation: tremor 360ms var(--sai); }
-@keyframes tremor { 20%, 60% { transform: translateX(-4px); } 40%, 80% { transform: translateX(4px); } }
-.loja-pagar {
-  width: 100%; height: 38px; border: 0; border-radius: 8px; background: #111; color: #fff; font: 600 13.5px var(--sans); cursor: pointer;
-  transition: transform 120ms var(--sai);
+/* the proof: her photo with Camila, which he liked, and his chat with Camila, empty */
+.prova { padding: 11px 14px 14px; }
+.prova-autor { display: flex; align-items: center; gap: 7px; margin: 0 0 8px; font-size: 12.5px; }
+.prova-hora { color: #8a8a8a; }
+.prova-avatar {
+  flex: none; display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%;
+  background: linear-gradient(180deg, #ffc773, #f5795c); color: #fff; font: 600 11px var(--sans);
 }
-.loja-pagar:active { transform: scale(0.97); }
+.prova-foto {
+  display: block; width: 100%; height: auto; border-radius: 8px; pointer-events: none; user-select: none; -webkit-user-drag: none;
+  outline: 1px solid rgba(0, 0, 0, 0.1); outline-offset: -1px;
+}
+.prova-curtidas { display: flex; align-items: center; gap: 5px; margin: 9px 0 2px; font-size: 12.5px; color: #6b6b6b; }
+.prova-curtidas b { color: #111; }
+.prova-curtidas svg { flex: none; width: 14px; height: 14px; color: #ff3b4e; }
+.prova-legenda { margin: 0; font-size: 12.5px; line-height: 1.45; text-wrap: pretty; }
+.mencao { color: #0a66d8; }
+.prova-vazia { display: flex; align-items: center; gap: 9px; margin-top: 11px; padding: 9px 11px; border-radius: 9px; background: #f4f4f5; }
+.prova-dm { flex: 1; display: flex; flex-direction: column; font-size: 12.5px; line-height: 1.35; }
+.prova-dm span { font-size: 12px; color: #8a8a8a; }
+.prova-vazia svg { flex: none; width: 16px; height: 16px; color: #b5b5b8; }
 
 /* the chat: she wants proof, and gets whatever screenshot comes */
 .conversa-contato { display: flex; align-items: center; justify-content: center; gap: 7px; padding: 6px 0; border-bottom: 1px solid #f0f0f0; }

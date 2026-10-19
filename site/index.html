@@ -147,7 +147,7 @@ kbd {
   position: absolute; z-index: 2; margin: 0; overflow: hidden; border-radius: 12px; background: var(--branco);
   box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.16), 0 20px 44px -18px rgba(0, 0, 0, 0.24), 0 4px 10px -4px rgba(0, 0, 0, 0.08);
 }
-.j-loja { left: 20px; top: calc(var(--menus) + 18px); width: var(--janela); }
+.j-prova { left: 20px; top: calc(var(--menus) + 18px); width: var(--janela); }
 .j-conversa { left: 20px; bottom: 18px; display: flex; flex-direction: column; width: var(--janela); height: clamp(250px, calc(100svh - 430px), 360px); }
 @media (min-width: 761px) and (max-height: 800px) { .conversa-hora { display: none; } }
 .j-codigo { right: 22px; top: 20%; width: clamp(320px, 30vw, 460px); border-radius: 10px; cursor: grab; touch-action: none; }
@@ -164,22 +164,27 @@ kbd {
 .endereco { flex: 1; display: grid; place-items: center; height: 22px; border-radius: 6px; background: #f3f3f3; font-size: 11.5px; color: #555; }
 .janela-nome { flex: 1; margin-right: 45px; text-align: center; font: 600 12.5px var(--sans); color: #333; }
 
-.loja { padding: 14px 18px 18px; }
-.loja-marca { margin: 0; font: 500 10.5px/1.6 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: #9a9a9a; }
-.loja-titulo { margin: 2px 0 8px; font-size: 19px; font-weight: 600; letter-spacing: -0.02em; }
-.loja-itens { margin: 0; padding: 0; list-style: none; font-size: 13.5px; }
-.loja-itens li { display: flex; justify-content: space-between; gap: 12px; padding: 7px 0; border-bottom: 1px solid #f1f1f1; font-variant-numeric: tabular-nums; }
-.loja-itens .total { border-bottom: 0; font-weight: 600; }
-.loja-erro { display: flex; gap: 8px; margin: 8px 0 12px; padding: 9px 11px; border-radius: 8px; background: #fdeeec; color: #b42318; font-size: 12.5px; line-height: 1.45; }
-.loja-erro b { white-space: nowrap; }
-.loja-erro svg { flex: none; width: 14px; height: 14px; margin-top: 2px; color: #d92d20; }
-.loja-erro.de-novo { animation: tremor 360ms var(--sai); }
-@keyframes tremor { 20%, 60% { transform: translateX(-4px); } 40%, 80% { transform: translateX(4px); } }
-.loja-pagar {
-  width: 100%; height: 38px; border: 0; border-radius: 8px; background: #111; color: #fff; font: 600 13.5px var(--sans); cursor: pointer;
-  transition: transform 120ms var(--sai);
+/* the proof: her photo with Camila, which he liked, and his chat with Camila, empty */
+.prova { padding: 11px 14px 14px; }
+.prova-autor { display: flex; align-items: center; gap: 7px; margin: 0 0 8px; font-size: 12.5px; }
+.prova-hora { color: #8a8a8a; }
+.prova-avatar {
+  flex: none; display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%;
+  background: linear-gradient(180deg, #ffc773, #f5795c); color: #fff; font: 600 11px var(--sans);
 }
-.loja-pagar:active { transform: scale(0.97); }
+.prova-foto {
+  display: block; width: 100%; height: auto; border-radius: 8px; pointer-events: none; user-select: none; -webkit-user-drag: none;
+  outline: 1px solid rgba(0, 0, 0, 0.1); outline-offset: -1px;
+}
+.prova-curtidas { display: flex; align-items: center; gap: 5px; margin: 9px 0 2px; font-size: 12.5px; color: #6b6b6b; }
+.prova-curtidas b { color: #111; }
+.prova-curtidas svg { flex: none; width: 14px; height: 14px; color: #ff3b4e; }
+.prova-legenda { margin: 0; font-size: 12.5px; line-height: 1.45; text-wrap: pretty; }
+.mencao { color: #0a66d8; }
+.prova-vazia { display: flex; align-items: center; gap: 9px; margin-top: 11px; padding: 9px 11px; border-radius: 9px; background: #f4f4f5; }
+.prova-dm { flex: 1; display: flex; flex-direction: column; font-size: 12.5px; line-height: 1.35; }
+.prova-dm span { font-size: 12px; color: #8a8a8a; }
+.prova-vazia svg { flex: none; width: 16px; height: 16px; color: #b5b5b8; }
 
 /* the chat: she wants proof, and gets whatever screenshot comes */
 .conversa-contato { display: flex; align-items: center; justify-content: center; gap: 7px; padding: 6px 0; border-bottom: 1px solid #f0f0f0; }
@@ -558,21 +563,23 @@ kbd {
     <p class="nota">Grátis · macOS 14+</p>
   </section>
 
-  <article class="janela j-loja" id="loja" data-app="Navegador" aria-label="Navegador: a loja deu erro no pagamento">
+  <article class="janela j-prova" id="prova" data-app="Momentos" aria-label="Momentos: a foto da Camila com a Bia, e a conversa dele com a Camila, vazia">
     <div class="janela-barra">
       <span class="semaforo" aria-hidden="true"><i></i><i></i><i></i></span>
-      <span class="endereco">loja.exemplo/checkout</span>
+      <span class="janela-nome">Momentos</span>
     </div>
-    <div class="loja">
-      <p class="loja-marca">Loja Exemplo</p>
-      <p class="loja-titulo">Finalizar compra</p>
-      <ul class="loja-itens">
-        <li><span>Tênis de corrida</span><span>R$&nbsp;399,90</span></li>
-        <li><span>Meias, 3 pares</span><span>R$&nbsp;59,90</span></li>
-        <li class="total"><span>Total</span><span>R$&nbsp;459,80</span></li>
-      </ul>
-      <p class="loja-erro" id="loja-erro"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.8 15 14H1z" fill="currentColor"/><path d="M8 6.2v3.6M8 11.6v.1" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg><span>Não foi possível concluir o pagamento. <b>Erro 500</b></span></p>
-      <button class="loja-pagar" id="loja-pagar" type="button">Pagar R$&nbsp;459,80</button>
+    <div class="prova">
+      <div class="prova-post" id="prova-post">
+        <p class="prova-autor"><span class="prova-avatar" aria-hidden="true">C</span><b>camila.m</b><span class="prova-hora">· 3:01</span></p>
+        <img class="prova-foto" src="assets/festa.jpg" alt="A Camila e a Bia rindo juntas numa festa, com luzinhas ao fundo" width="760" height="346" draggable="false">
+        <p class="prova-curtidas"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 14.2S1.6 10.3 1.6 5.9A3.3 3.3 0 0 1 8 4.4a3.3 3.3 0 0 1 6.4 1.5C14.4 10.3 8 14.2 8 14.2z" fill="currentColor"/></svg><span>Curtido por <b>lucas</b> e mais 23</span></p>
+        <p class="prova-legenda"><b>camila.m</b> noite das meninas com <span class="mencao">@bia</span> 💕</p>
+      </div>
+      <div class="prova-vazia" id="prova-vazia">
+        <span class="prova-avatar" aria-hidden="true">C</span>
+        <span class="prova-dm"><b>Camila</b><span>Nenhuma mensagem ainda</span></span>
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 3.5h11a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H6l-3 2.5v-2.5h-.5a1 1 0 0 1-1-1v-6a1 1 0 0 1 1-1z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+      </div>
     </div>
   </article>
 
@@ -776,15 +783,7 @@ kbd {
       handle.addEventListener("pointercancel", up);
     });
   }
-  activate($("#loja"));
-
-  // The shop still fails, every time.
-  const lojaErro = $("#loja-erro");
-  $("#loja-pagar").addEventListener("click", () => {
-    lojaErro.classList.remove("de-novo");
-    void lojaErro.offsetWidth;
-    lojaErro.classList.add("de-novo");
-  });
+  activate($("#prova"));
 
   // ── prints ──────────────────────────────────────────────────────────────
 
@@ -854,7 +853,7 @@ kbd {
     if (area.w * area.h > m.width * m.height * 0.6) return "tela";
     let best = "outro";
     let most = 0.3;
-    for (const [key, el] of [["loja", $("#loja")], ["conversa", $("#conversa")], ["codigo", $("#codigo")], ["abertura", $("#titulo")]]) {
+    for (const [key, el] of [["prova", $("#prova")], ["conversa", $("#conversa")], ["codigo", $("#codigo")], ["abertura", $("#titulo")]]) {
       if (!el || !shown(el)) continue;
       const r = onDesk(el.getBoundingClientRect());
       const wide = Math.max(0, Math.min(r.x + r.w, area.x + area.w) - Math.max(r.x, area.x));
@@ -864,8 +863,20 @@ kbd {
     }
     return best;
   }
+  /** Which parts of the proof a screenshot shows well: her photo with Camila, his empty chat with Camila. */
+  function proofIn(area) {
+    const parts = [];
+    for (const [key, el] of [["post", $("#prova-post")], ["vazia", $("#prova-vazia")]]) {
+      if (!shown(el)) continue;
+      const r = onDesk(el.getBoundingClientRect());
+      const wide = Math.max(0, Math.min(r.x + r.w, area.x + area.w) - Math.max(r.x, area.x));
+      const tall = Math.max(0, Math.min(r.y + r.h, area.y + area.h) - Math.max(r.y, area.y));
+      if (wide * tall >= r.w * r.h * 0.55) parts.push(key);
+    }
+    return parts;
+  }
   function takePrint(area) {
-    const print = { id: ++serial, w: Math.round(area.w), h: Math.round(area.h), date: Date.now(), portrait: snapshot(area), source: sourceOf(area) };
+    const print = { id: ++serial, w: Math.round(area.w), h: Math.round(area.h), date: Date.now(), portrait: snapshot(area), source: sourceOf(area), proof: proofIn(area) };
     everyPrint.set(print.id, print);
     return print;
   }
@@ -1267,10 +1278,14 @@ kbd {
     answer(prints);
   }
 
-  // She answers whatever screenshot comes, and after a couple of them asks how he is so quick.
+  // She answers whatever screenshot comes. The proof wins her over: the photo he liked is of
+  // her with Camila, and his chat with Camila is empty. Half of it makes her ask for the rest;
+  // anything else proves nothing, and after a couple of those she asks how he is so quick.
   const REPLIES = {
-    tela: ["Isso é a sua tela inteira. Cadê a conversa com ela?"],
-    loja: ["Isso é a tela de uma loja, Lucas.", "Você tava comprando tênis em vez de me responder?"],
+    tela: ["Isso é a sua tela inteira. Me manda só a prova."],
+    post: ["Tá, a foto é comigo… mas e a mensagem?", "Essa foto você já mandou. E a mensagem?"],
+    vazia: ["Ok, não mandou mensagem. E a curtida?", "Essa conversa você já mandou. E a curtida?"],
+    prova: ["Que print é esse? Não prova nada."],
     conversa: ["Você mandou print da nossa própria conversa??"],
     codigo: ["Isso é código. Não prova nada."],
     abertura: ["“Seus prints, numa gaveta”? Que gaveta, Lucas?"],
@@ -1278,32 +1293,52 @@ kbd {
   };
   const AFTER = ["Já baixei. Tá perdoado.", "Para de me mandar print, Lucas. Tô testando aqui."];
   const repliesUsed = {};
+  const proven = new Set();
   let punchline = false;
   let afterCount = 0;
   let replying = Promise.resolve();
+  const reply = (key) => {
+    const n = repliesUsed[key] || 0;
+    repliesUsed[key] = n + 1;
+    return REPLIES[key][Math.min(n, REPLIES[key].length - 1)] ?? "Continua não provando nada.";
+  };
   function answer(prints) {
     const lines = [];
+    const link = ["link", $(".botao").href.replace(/^https:\/\//, "")];
     if (punchline) {
       // after the link she is on the app's side; once that is said, she lets him be
       if (afterCount < AFTER.length) lines.push(["dela", AFTER[afterCount++]]);
       replying = replying.then(() => say(lines));
       return;
     }
-    if (prints.length > 1) {
-      lines.push(["dela", `Mandou ${prints.length} prints de uma vez?`]);
-    } else {
-      const key = prints[0].source || "outro";
-      const n = repliesUsed[key] || 0;
-      repliesUsed[key] = n + 1;
-      lines.push(["dela", REPLIES[key][n] ?? "Continua não provando nada."]);
+    const parts = prints.flatMap((print) => print.proof);
+    parts.forEach((part) => proven.add(part));
+    if (proven.size === 2) {
+      punchline = true;
+      lines.push(
+        ["dela", "Ok… você tem razão."],
+        ["dela", "Mas como você mandou o print tão rápido?"],
+        ["minha", "Simples, amor. Tô usando a Gaveta."],
+        ["dela", "Legal. Me manda o link, vou usar também."],
+        link,
+      );
+      replying = replying.then(() => say(lines)).then(() => guide.done("piada"));
+      return;
     }
+    if (parts.length) {
+      lines.push(["dela", reply(parts[0])]);
+      replying = replying.then(() => say(lines));
+      return;
+    }
+    if (prints.length > 1) lines.push(["dela", `Mandou ${prints.length} prints de uma vez?`]);
+    else lines.push(["dela", reply(prints[0].source || "outro")]);
     if (sent >= 2 || prints.length > 1) {
       punchline = true;
       lines.push(
         ["dela", "Pera. Como você manda tanto print tão rápido?"],
         ["minha", "É a Gaveta, amor."],
         ["dela", "Me manda o link."],
-        ["link", $(".botao").href.replace(/^https:\/\//, "")],
+        link,
       );
       replying = replying.then(() => say(lines)).then(() => guide.done("piada"));
       return;

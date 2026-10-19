@@ -27,16 +27,14 @@ export const pagina = [
   ["Grátis · macOS 14+", "Free · macOS 14+"],
   ['aria-label="Copiar o comando de instalação"', 'aria-label="Copy the install command"'],
 
-  // the shop
-  ['data-app="Navegador" aria-label="Navegador: a loja deu erro no pagamento"', 'data-app="Browser" aria-label="Browser: the shop failed to take the payment"'],
-  ["loja.exemplo/checkout", "shop.example/checkout"],
-  [">Loja Exemplo<", ">Example Shop<"],
-  [">Finalizar compra<", ">Checkout<"],
-  ["<li><span>Tênis de corrida</span><span>R$&nbsp;399,90</span></li>", "<li><span>Running shoes</span><span>$79.90</span></li>"],
-  ["<li><span>Meias, 3 pares</span><span>R$&nbsp;59,90</span></li>", "<li><span>Socks, 3 pairs</span><span>$12.00</span></li>"],
-  ['<li class="total"><span>Total</span><span>R$&nbsp;459,80</span></li>', '<li class="total"><span>Total</span><span>$91.90</span></li>'],
-  ["Não foi possível concluir o pagamento. <b>Erro 500</b>", "The payment could not go through. <b>Error 500</b>"],
-  [">Pagar R$&nbsp;459,80<", ">Pay $91.90<"],
+  // the proof
+  ['data-app="Momentos" aria-label="Momentos: a foto da Camila com a Bia, e a conversa dele com a Camila, vazia"', 'data-app="Moments" aria-label="Moments: Chloe\'s photo with Emma, and his chat with Chloe, empty"'],
+  ['<span class="janela-nome">Momentos</span>', '<span class="janela-nome">Moments</span>'],
+  ["<b>camila.m</b>", "<b>chloe.m</b>"],
+  ['alt="A Camila e a Bia rindo juntas numa festa, com luzinhas ao fundo"', 'alt="Chloe and Emma laughing together at a party, string lights behind them"'],
+  ["<span>Curtido por <b>lucas</b> e mais 23</span>", "<span>Liked by <b>jake</b> and 23 others</span>"],
+  ['noite das meninas com <span class="mencao">@bia</span>', 'girls\' night with <span class="mencao">@emma</span>'],
+  ["<b>Camila</b><span>Nenhuma mensagem ainda</span>", "<b>Chloe</b><span>No messages yet</span>"],
 
   // the chat
   ["data-app=\"Mensagens\" aria-label=\"Mensagens: conversa com a Bia\"", "data-app=\"Messages\" aria-label=\"Messages: chat with Emma\""],
@@ -57,7 +55,7 @@ export const pagina = [
 
   // the guide and the bar
   ['<p class="guia-titulo" id="guia-titulo">Tire um print</p>', '<p class="guia-titulo" id="guia-titulo">Take a screenshot</p>'],
-  ['<p class="guia-texto" id="guia-texto">Escolha <b>Janela</b> e clique em qualquer janela.</p>', '<p class="guia-texto" id="guia-texto">Choose <b>Window</b> and click the shop.</p>'],
+  ['<p class="guia-texto" id="guia-texto">Escolha <b>Janela</b> e clique em qualquer janela.</p>', '<p class="guia-texto" id="guia-texto">Choose <b>Window</b> and click any window.</p>'],
   ['<span class="so-leitor">Passo 1 de 3</span>', '<span class="so-leitor">Step 1 of 3</span>'],
   ['aria-label="Fechar as dicas"', 'aria-label="Close the tips"'],
   ['role="toolbar" aria-label="Tirar print"', 'role="toolbar" aria-label="Take a screenshot"'],
@@ -110,9 +108,15 @@ export const vidro = [
   ["\"1 print enviado na conversa.\"", "\"1 screenshot sent in the chat.\""],
   ["`${prints.length} prints enviados na conversa, de uma vez.`", "`${prints.length} screenshots sent in the chat, at once.`"],
   ["<span class=\"aviso\">Print</span>", "<span class=\"aviso\">Screenshot</span>"],
-  ["\"Isso é a sua tela inteira. Cadê a conversa com ela?\"", "\"That's your whole screen. Where's the chat with her?\""],
-  ["\"Isso é a tela de uma loja, Lucas.\"", "\"That's a checkout page, Jake.\""],
-  ["\"Você tava comprando tênis em vez de me responder?\"", "\"You were shopping instead of answering me?\""],
+  ["\"Isso é a sua tela inteira. Me manda só a prova.\"", "\"That's your whole screen. Just send me the proof.\""],
+  ["\"Tá, a foto é comigo… mas e a mensagem?\"", "\"Ok, the photo is of me… but what about the texting?\""],
+  ["\"Essa foto você já mandou. E a mensagem?\"", "\"You already sent that photo. What about the texting?\""],
+  ["\"Ok, não mandou mensagem. E a curtida?\"", "\"Ok, you never texted her. What about the like?\""],
+  ["\"Essa conversa você já mandou. E a curtida?\"", "\"You already sent that chat. What about the like?\""],
+  ["\"Ok… você tem razão.\"", "\"Ok… you're right.\""],
+  ["\"Mas como você mandou o print tão rápido?\"", "\"But how did you send it so fast?\""],
+  ["\"Simples, amor. Tô usando a Gaveta.\"", "\"Simple, babe. I'm using Gaveta.\""],
+  ["\"Legal. Me manda o link, vou usar também.\"", "\"Nice. Send me the link, I'm trying it too.\""],
   ["\"Você mandou print da nossa própria conversa??\"", "\"You screenshotted our own chat??\""],
   ["\"Isso é código. Não prova nada.\"", "\"That's code. It proves nothing.\""],
   ["\"“Seus prints, numa gaveta”? Que gaveta, Lucas?\"", "\"“Your screenshots, in a drawer”? What drawer, Jake?\""],
@@ -132,8 +136,8 @@ export const vidro = [
   ["\"Toque em <b>Colar</b> na conversa. Ela quer provas.\"", "\"Tap <b>Paste</b> in the chat. She wants proof.\""],
   // the guide
   ['"Tire um print", fine.matches', '"Take a screenshot", fine.matches'],
-  ['"Escolha <b>Janela</b> e clique em qualquer janela."', '"Choose <b>Window</b> and click the shop."'],
-  ['"Toque em <b>Janela</b> e depois em qualquer janela."', '"Tap <b>Window</b>, then the shop."'],
+  ['"Escolha <b>Janela</b> e clique em qualquer janela."', '"Choose <b>Window</b> and click any window."'],
+  ['"Toque em <b>Janela</b> e depois em qualquer janela."', '"Tap <b>Window</b>, then any window."'],
   ['"Copie ou arraste"', '"Copy or drag"'],
   ['"Toque no print para copiar, ou nos círculos para escolher vários."', '"Tap a screenshot to copy it, or the circles to pick several."'],
   ["`Passo ${step + 1} de ${STEPS.length}`", "`Step ${step + 1} of ${STEPS.length}`"],

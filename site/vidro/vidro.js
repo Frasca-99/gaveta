@@ -114,15 +114,7 @@
       handle.addEventListener("pointercancel", up);
     });
   }
-  activate($("#loja"));
-
-  // The shop still fails, every time.
-  const lojaErro = $("#loja-erro");
-  $("#loja-pagar").addEventListener("click", () => {
-    lojaErro.classList.remove("de-novo");
-    void lojaErro.offsetWidth;
-    lojaErro.classList.add("de-novo");
-  });
+  activate($("#prova"));
 
   // ── prints ──────────────────────────────────────────────────────────────
 
@@ -192,7 +184,7 @@
     if (area.w * area.h > m.width * m.height * 0.6) return "tela";
     let best = "outro";
     let most = 0.3;
-    for (const [key, el] of [["loja", $("#loja")], ["conversa", $("#conversa")], ["codigo", $("#codigo")], ["abertura", $("#titulo")]]) {
+    for (const [key, el] of [["prova", $("#prova")], ["conversa", $("#conversa")], ["codigo", $("#codigo")], ["abertura", $("#titulo")]]) {
       if (!el || !shown(el)) continue;
       const r = onDesk(el.getBoundingClientRect());
       const wide = Math.max(0, Math.min(r.x + r.w, area.x + area.w) - Math.max(r.x, area.x));
@@ -202,8 +194,20 @@
     }
     return best;
   }
+  /** Which parts of the proof a screenshot shows well: her photo with Camila, his empty chat with Camila. */
+  function proofIn(area) {
+    const parts = [];
+    for (const [key, el] of [["post", $("#prova-post")], ["vazia", $("#prova-vazia")]]) {
+      if (!shown(el)) continue;
+      const r = onDesk(el.getBoundingClientRect());
+      const wide = Math.max(0, Math.min(r.x + r.w, area.x + area.w) - Math.max(r.x, area.x));
+      const tall = Math.max(0, Math.min(r.y + r.h, area.y + area.h) - Math.max(r.y, area.y));
+      if (wide * tall >= r.w * r.h * 0.55) parts.push(key);
+    }
+    return parts;
+  }
   function takePrint(area) {
-    const print = { id: ++serial, w: Math.round(area.w), h: Math.round(area.h), date: Date.now(), portrait: snapshot(area), source: sourceOf(area) };
+    const print = { id: ++serial, w: Math.round(area.w), h: Math.round(area.h), date: Date.now(), portrait: snapshot(area), source: sourceOf(area), proof: proofIn(area) };
     everyPrint.set(print.id, print);
     return print;
   }
@@ -605,10 +609,14 @@
     answer(prints);
   }
 
-  // She answers whatever screenshot comes, and after a couple of them asks how he is so quick.
+  // She answers whatever screenshot comes. The proof wins her over: the photo he liked is of
+  // her with Camila, and his chat with Camila is empty. Half of it makes her ask for the rest;
+  // anything else proves nothing, and after a couple of those she asks how he is so quick.
   const REPLIES = {
-    tela: ["Isso é a sua tela inteira. Cadê a conversa com ela?"],
-    loja: ["Isso é a tela de uma loja, Lucas.", "Você tava comprando tênis em vez de me responder?"],
+    tela: ["Isso é a sua tela inteira. Me manda só a prova."],
+    post: ["Tá, a foto é comigo… mas e a mensagem?", "Essa foto você já mandou. E a mensagem?"],
+    vazia: ["Ok, não mandou mensagem. E a curtida?", "Essa conversa você já mandou. E a curtida?"],
+    prova: ["Que print é esse? Não prova nada."],
     conversa: ["Você mandou print da nossa própria conversa??"],
     codigo: ["Isso é código. Não prova nada."],
     abertura: ["“Seus prints, numa gaveta”? Que gaveta, Lucas?"],
@@ -616,32 +624,52 @@
   };
   const AFTER = ["Já baixei. Tá perdoado.", "Para de me mandar print, Lucas. Tô testando aqui."];
   const repliesUsed = {};
+  const proven = new Set();
   let punchline = false;
   let afterCount = 0;
   let replying = Promise.resolve();
+  const reply = (key) => {
+    const n = repliesUsed[key] || 0;
+    repliesUsed[key] = n + 1;
+    return REPLIES[key][Math.min(n, REPLIES[key].length - 1)] ?? "Continua não provando nada.";
+  };
   function answer(prints) {
     const lines = [];
+    const link = ["link", $(".botao").href.replace(/^https:\/\//, "")];
     if (punchline) {
       // after the link she is on the app's side; once that is said, she lets him be
       if (afterCount < AFTER.length) lines.push(["dela", AFTER[afterCount++]]);
       replying = replying.then(() => say(lines));
       return;
     }
-    if (prints.length > 1) {
-      lines.push(["dela", `Mandou ${prints.length} prints de uma vez?`]);
-    } else {
-      const key = prints[0].source || "outro";
-      const n = repliesUsed[key] || 0;
-      repliesUsed[key] = n + 1;
-      lines.push(["dela", REPLIES[key][n] ?? "Continua não provando nada."]);
+    const parts = prints.flatMap((print) => print.proof);
+    parts.forEach((part) => proven.add(part));
+    if (proven.size === 2) {
+      punchline = true;
+      lines.push(
+        ["dela", "Ok… você tem razão."],
+        ["dela", "Mas como você mandou o print tão rápido?"],
+        ["minha", "Simples, amor. Tô usando a Gaveta."],
+        ["dela", "Legal. Me manda o link, vou usar também."],
+        link,
+      );
+      replying = replying.then(() => say(lines)).then(() => guide.done("piada"));
+      return;
     }
+    if (parts.length) {
+      lines.push(["dela", reply(parts[0])]);
+      replying = replying.then(() => say(lines));
+      return;
+    }
+    if (prints.length > 1) lines.push(["dela", `Mandou ${prints.length} prints de uma vez?`]);
+    else lines.push(["dela", reply(prints[0].source || "outro")]);
     if (sent >= 2 || prints.length > 1) {
       punchline = true;
       lines.push(
         ["dela", "Pera. Como você manda tanto print tão rápido?"],
         ["minha", "É a Gaveta, amor."],
         ["dela", "Me manda o link."],
-        ["link", $(".botao").href.replace(/^https:\/\//, "")],
+        link,
       );
       replying = replying.then(() => say(lines)).then(() => guide.done("piada"));
       return;
