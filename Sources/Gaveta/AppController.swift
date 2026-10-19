@@ -284,6 +284,18 @@ final class AppController: NSObject, NSApplicationDelegate, NSMenuDelegate {
         look.submenu = styles
         menu.addItem(look)
 
+        // Each language is named in itself, so it can be found from either one.
+        let languages = NSMenu()
+        for (title, language) in [(tr("Automático (idioma do Mac)", "Automatic (Mac's language)"), Language.automatic),
+                                  ("Português", Language.portuguese), ("English", Language.english)] {
+            let item = ActionMenuItem(title) { Language.choice = language }
+            item.state = Language.choice == language ? .on : .off
+            languages.addItem(item)
+        }
+        let language = NSMenuItem(title: tr("Idioma", "Language"), action: nil, keyEquivalent: "")
+        language.submenu = languages
+        menu.addItem(language)
+
         menu.addItem(ActionMenuItem(tr("Abrir pasta de capturas", "Open the captures folder")) {
             let folder = Prefs.takeOverCaptures ? CaptureTakeover.folder : CaptureTakeover.screenshotFolder()
             NSWorkspace.shared.open(folder)

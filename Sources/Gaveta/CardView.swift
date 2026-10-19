@@ -205,12 +205,14 @@ extension AnyTransition {
 /// "agora", "há 5 min", "há 2 h", "ontem", "14 de out"; in English "now", "5 min ago", "2 h ago",
 /// "yesterday", "Oct 14".
 enum RelativeTime {
-    private static let dayFormat: DateFormatter = {
+    private static let dayFormats: [Bool: DateFormatter] = [true: format(portuguese: true), false: format(portuguese: false)]
+    private static var dayFormat: DateFormatter { dayFormats[Language.isPortuguese]! }
+    private static func format(portuguese: Bool) -> DateFormatter {
         let formatter = DateFormatter()
-        formatter.locale = Language.locale
-        formatter.dateFormat = Language.isPortuguese ? "d 'de' MMM" : "MMM d"
+        formatter.locale = Locale(identifier: portuguese ? "pt_BR" : "en_US")
+        formatter.dateFormat = portuguese ? "d 'de' MMM" : "MMM d"
         return formatter
-    }()
+    }
 
     static func string(for date: Date, now: Date) -> String {
         let seconds = now.timeIntervalSince(date)

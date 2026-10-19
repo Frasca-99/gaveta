@@ -65,12 +65,17 @@ enum DrawerLayout {
 /// captures standing in it as index cards, the newest in front.
 struct DrawerView: View {
     @ObservedObject var drawer: Drawer
+    /// Picking a language in the menu rebuilds the drawer in it.
+    @AppStorage(Language.key) private var language = Language.automatic.rawValue
 
     var body: some View {
-        switch drawer.style {
-        case .catalog: catalog
-        case .glass: GlassDrawerView(drawer: drawer)
+        Group {
+            switch drawer.style {
+            case .catalog: catalog
+            case .glass: GlassDrawerView(drawer: drawer)
+            }
         }
+        .id(language)
     }
 
     private var catalog: some View {
