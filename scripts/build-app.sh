@@ -7,7 +7,7 @@ cd "$(dirname "$0")/.."
 
 CONFIG="${1:-release}"
 APP="build/Gaveta.app"
-VERSION="0.1.3"
+VERSION="0.1.4"
 
 ARCHS=()
 if [ "${UNIVERSAL:-0}" = 1 ]; then ARCHS=(--arch arm64 --arch x86_64); fi
@@ -42,7 +42,7 @@ cat > "$APP/Contents/Info.plist" <<PLIST
   <key>CFBundleIconFile</key><string>Gaveta</string>
   <key>CFBundlePackageType</key><string>APPL</string>
   <key>CFBundleShortVersionString</key><string>${VERSION}</string>
-  <key>CFBundleVersion</key><string>4</string>
+  <key>CFBundleVersion</key><string>5</string>
   <key>CFBundleDevelopmentRegion</key><string>pt-BR</string>
   <key>CFBundleLocalizations</key><array><string>pt-BR</string><string>en</string></array>
   <key>LSMinimumSystemVersion</key><string>14.0</string>
