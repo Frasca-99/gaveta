@@ -235,6 +235,9 @@ final class AppController: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     private func setUpStatusItem() {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
+        // A name of its own keeps where the user put the icon across updates; without one, an
+        // icon with no saved place starts at the far left, where a notch can hide it.
+        statusItem.autosaveName = "Gaveta"
         statusItem.button?.image = StatusIcon.image
         statusItem.button?.toolTip = "Gaveta"
         let menu = NSMenu()
