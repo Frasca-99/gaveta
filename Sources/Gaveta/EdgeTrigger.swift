@@ -144,7 +144,8 @@ final class EdgeTrigger {
         }
 
         guard drawer.isOpen else {
-            guard !drawer.pins.isEmpty, let screen = Self.screenUnderPointer(), Self.isOnRightEdge(mouse, of: screen) else {
+            guard !drawer.pins.isEmpty, let screen = Self.screenUnderPointer(), Self.isOnRightEdge(mouse, of: screen),
+                  !Self.isBusyElsewhere() else {
                 if dwellSince != nil { handle.letGo() }
                 dwellSince = nil
                 pushed = 0
@@ -192,6 +193,12 @@ final class EdgeTrigger {
             return
         }
         open(on: Self.screenUnderPointer())
+    }
+
+    /// Someone in the middle of something at the edge: dragging a screenshot's area (or a
+    /// window) into it. The drawer waits; the screenshot still flies into it once taken.
+    static func isBusyElsewhere() -> Bool {
+        NSEvent.pressedMouseButtons != 0
     }
 
     // MARK: Screens
