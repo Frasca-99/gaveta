@@ -148,26 +148,26 @@ struct GlassDrawerView: View {
         return HStack(spacing: 7) {
             if count == 0 {
                 if total > 1 {
-                    GlassBarButton(title: "Selecionar todos", systemImage: "checkmark.circle") { drawer.selectAll() }
+                    GlassBarButton(title: tr("Selecionar todos", "Select all"), systemImage: "checkmark.circle") { drawer.selectAll() }
                     Spacer()
-                    Text("ou ⌘-clique").font(.system(size: 11)).lineLimit(1).foregroundStyle(.secondary)
+                    Text(tr("ou ⌘-clique", "or ⌘-click")).font(.system(size: 11)).lineLimit(1).foregroundStyle(.secondary)
                 } else {
-                    Text("Clique para copiar").font(.system(size: 11)).foregroundStyle(.secondary)
+                    Text(tr("Clique para copiar", "Click to copy")).font(.system(size: 11)).foregroundStyle(.secondary)
                     Spacer()
                 }
             } else {
-                Text("\(count) de \(total)")
+                Text(tr("\(count) de \(total)", "\(count) of \(total)"))
                     .font(.system(size: 12, weight: .semibold))
                     .monospacedDigit()
                 Spacer()
                 if count < total {
-                    GlassBarButton(title: "Todos", systemImage: "checkmark.circle") { drawer.selectAll() }
+                    GlassBarButton(title: tr("Todos", "All"), systemImage: "checkmark.circle") { drawer.selectAll() }
                 }
-                GlassBarButton(title: count == 1 ? "Copiar" : "Copiar todos", systemImage: "doc.on.doc", main: true) {
+                GlassBarButton(title: count == 1 ? tr("Copiar", "Copy") : tr("Copiar todos", "Copy all"), systemImage: "doc.on.doc", main: true) {
                     drawer.copySelection()
                 }
                 GlassBarButton(title: nil, systemImage: "xmark") { drawer.clearSelection() }
-                    .help("Limpar seleção")
+                    .help(tr("Limpar seleção", "Clear selection"))
             }
         }
         .padding(.leading, 16)
@@ -183,8 +183,8 @@ struct GlassDrawerView: View {
             Image(systemName: "tray")
                 .font(.system(size: 26, weight: .light))
                 .foregroundStyle(.secondary)
-            Text("Gaveta vazia").font(.system(size: 14, weight: .semibold))
-            Text("Tire um print com ⌘⇧4 e ele cai aqui.")
+            Text(tr("Gaveta vazia", "Empty drawer")).font(.system(size: 14, weight: .semibold))
+            Text(tr("Tire um print com ⌘⇧4 e ele cai aqui.", "Take a screenshot with ⌘⇧4 and it lands here."))
                 .font(.system(size: 12))
                 .foregroundStyle(.secondary)
         }
@@ -323,7 +323,7 @@ struct GlassCardView: View {
 /// Pressed on a card that was just copied.
 struct CopiedBadge: View {
     var body: some View {
-        Label("Copiado", systemImage: "checkmark")
+        Label(tr("Copiado", "Copied"), systemImage: "checkmark")
             .font(.system(size: 12, weight: .semibold))
             .foregroundStyle(.white)
             .padding(.horizontal, 12)

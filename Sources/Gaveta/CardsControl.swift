@@ -243,33 +243,33 @@ final class CardsControlView: NSView, NSDraggingSource {
         let menu = NSMenu()
         let count = drawer.selection.count
         if count > 1, drawer.selection.contains(pin.id) {
-            menu.addItem(ActionMenuItem("Copiar \(count) prints") { drawer.copySelection() })
-            menu.addItem(ActionMenuItem("Tirar \(count) prints da gaveta") { drawer.discardSelection(thrown: true) })
+            menu.addItem(ActionMenuItem(tr("Copiar \(count) prints", "Copy \(count) screenshots")) { drawer.copySelection() })
+            menu.addItem(ActionMenuItem(tr("Tirar \(count) prints da gaveta", "Take \(count) screenshots out of the drawer")) { drawer.discardSelection(thrown: true) })
             menu.addItem(.separator())
             if count < drawer.pins.count {
                 menu.addItem(ActionMenuItem("Selecionar todos") { drawer.selectAll() })
             }
-            menu.addItem(ActionMenuItem("Limpar seleção") { drawer.clearSelection() })
+            menu.addItem(ActionMenuItem(tr("Limpar seleção", "Clear selection")) { drawer.clearSelection() })
             return menu
         }
-        menu.addItem(ActionMenuItem("Copiar") { drawer.copy(pin.id) })
-        menu.addItem(ActionMenuItem("Abrir") { drawer.open(pin.id) })
+        menu.addItem(ActionMenuItem(tr("Copiar", "Copy")) { drawer.copy(pin.id) })
+        menu.addItem(ActionMenuItem(tr("Abrir", "Open")) { drawer.open(pin.id) })
         if !pin.isVideo {
-            menu.addItem(ActionMenuItem("Marcação") { drawer.markup(pin.id) })
+            menu.addItem(ActionMenuItem(tr("Marcação", "Markup")) { drawer.markup(pin.id) })
         }
-        menu.addItem(ActionMenuItem("Visualização Rápida") { drawer.quickLook(pin.id) })
-        menu.addItem(ActionMenuItem("Mostrar no Finder") { drawer.showInFinder(pin.id) })
+        menu.addItem(ActionMenuItem(tr("Visualização Rápida", "Quick Look")) { drawer.quickLook(pin.id) })
+        menu.addItem(ActionMenuItem(tr("Mostrar no Finder", "Show in Finder")) { drawer.showInFinder(pin.id) })
         if drawer.isInGavetaFolder(pin) {
-            menu.addItem(ActionMenuItem("Guardar na Mesa") { drawer.keepOnDesktop(pin.id) })
+            menu.addItem(ActionMenuItem(tr("Guardar na Mesa", "Save to Desktop")) { drawer.keepOnDesktop(pin.id) })
         }
         menu.addItem(.separator())
-        menu.addItem(ActionMenuItem(drawer.selection.contains(pin.id) ? "Tirar da seleção" : "Selecionar") {
+        menu.addItem(ActionMenuItem(drawer.selection.contains(pin.id) ? tr("Tirar da seleção", "Deselect") : tr("Selecionar", "Select")) {
             drawer.toggleSelection(pin.id)
         })
         if drawer.pins.count > 1 {
             menu.addItem(ActionMenuItem("Selecionar todos") { drawer.selectAll() })
         }
-        menu.addItem(ActionMenuItem("Tirar da gaveta") { drawer.discard(pin.id, thrown: true) })
+        menu.addItem(ActionMenuItem(tr("Tirar da gaveta", "Take out of the drawer")) { drawer.discard(pin.id, thrown: true) })
         return menu
     }
 

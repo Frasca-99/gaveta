@@ -166,8 +166,8 @@ final class AppController: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 Prefs.shortcut = previous
                 self.registerShortcut()
                 let alert = NSAlert()
-                alert.messageText = "Esse atalho já está em uso"
-                alert.informativeText = "Outro app já usa essa combinação. Tente outra."
+                alert.messageText = tr("Esse atalho já está em uso", "That shortcut is already in use")
+                alert.informativeText = tr("Outro app já usa essa combinação. Tente outra.", "Another app already uses this combination. Try a different one.")
                 NSApp.activate(ignoringOtherApps: true)
                 alert.runModal()
             }
@@ -177,8 +177,8 @@ final class AppController: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private func offerTakeover() {
         Prefs.askedAboutTakeover = true
         let alert = NSAlert()
-        alert.messageText = "Mostrar os prints na gaveta na hora?"
-        alert.informativeText = """
+        alert.messageText = tr("Mostrar os prints na gaveta na hora?", "Show screenshots in the drawer right away?")
+        alert.informativeText = tr("""
             A Gaveta desliga a miniatura do canto e guarda os prints numa pasta própria. Assim, \
             cada print aparece na gaveta no mesmo instante, e a Mesa não fica cheia. Para guardar um, \
             arraste para uma pasta; o X manda para o Lixo.
@@ -187,9 +187,18 @@ final class AppController: NSObject, NSApplicationDelegate, NSMenuDelegate {
             e os prints aparecem na gaveta alguns segundos depois.
 
             Dá para mudar quando quiser no ícone da Gaveta, na barra de menus.
-            """
-        alert.addButton(withTitle: "Mostrar na hora (recomendado)")
-        alert.addButton(withTitle: "Manter como está")
+            """, """
+            Gaveta turns off the corner thumbnail and keeps screenshots in a folder of its own. That way \
+            each screenshot shows up in the drawer the moment you take it, and your Desktop stays clear. \
+            To keep one, drag it to a folder; the X sends it to the Trash.
+
+            If you'd rather not change this, your Mac keeps saving to the Desktop with the thumbnail, \
+            and screenshots show up in the drawer a few seconds later.
+
+            You can change it anytime from Gaveta's icon in the menu bar.
+            """)
+        alert.addButton(withTitle: tr("Mostrar na hora (recomendado)", "Show right away (recommended)"))
+        alert.addButton(withTitle: tr("Manter como está", "Keep as it is"))
         if let icon = NSApp.applicationIconImage { alert.icon = icon }
         // A menu bar app has no window in front, so the alert is raised above
         // everything or it may open behind other apps.
@@ -239,26 +248,26 @@ final class AppController: NSObject, NSApplicationDelegate, NSMenuDelegate {
         menu.removeAllItems()
 
         let shortcut = Prefs.shortcut
-        let toggle = ActionMenuItem(drawer.isOpen ? "Fechar a gaveta" : "Abrir a gaveta",
+        let toggle = ActionMenuItem(drawer.isOpen ? tr("Fechar a gaveta", "Close the drawer") : tr("Abrir a gaveta", "Open the drawer"),
                                     key: shortcut?.menuKey ?? "") { [weak self] in
             self?.trigger.toggle()
         }
         toggle.keyEquivalentModifierMask = shortcut?.menuModifiers ?? []
         menu.addItem(toggle)
 
-        let clear = ActionMenuItem("Esvaziar a gaveta") { [weak self] in self?.drawer.discardAll() }
+        let clear = ActionMenuItem(tr("Esvaziar a gaveta", "Empty the drawer")) { [weak self] in self?.drawer.discardAll() }
         clear.isEnabled = !drawer.pins.isEmpty
         menu.addItem(clear)
 
         menu.addItem(.separator())
 
-        let takeover = ActionMenuItem("Prints direto na gaveta") { [weak self] in
+        let takeover = ActionMenuItem(tr("Prints direto na gaveta", "Screenshots straight to the drawer")) { [weak self] in
             self?.setTakeover(!Prefs.takeOverCaptures)
         }
         takeover.state = Prefs.takeOverCaptures ? .on : .off
         menu.addItem(takeover)
 
-        let copied = ActionMenuItem("Imagens copiadas também") { [weak self] in
+        let copied = ActionMenuItem(tr("Imagens copiadas também", "Copied images too")) { [weak self] in
             self?.setCopiedImages(!Prefs.copiedImages)
         }
         copied.state = Prefs.copiedImages ? .on : .off
@@ -266,32 +275,32 @@ final class AppController: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
         // The look of the drawer; it works the same either way.
         let styles = NSMenu()
-        for (title, style) in [("Fichário", DrawerStyle.catalog), ("Vidro", DrawerStyle.glass)] {
+        for (title, style) in [(tr("Fichário", "Card catalog"), DrawerStyle.catalog), (tr("Vidro", "Glass"), DrawerStyle.glass)] {
             let item = ActionMenuItem(title) { [weak self] in self?.drawer.style = style }
             item.state = drawer.style == style ? .on : .off
             styles.addItem(item)
         }
-        let look = NSMenuItem(title: "Estilo da gaveta", action: nil, keyEquivalent: "")
+        let look = NSMenuItem(title: tr("Estilo da gaveta", "Drawer style"), action: nil, keyEquivalent: "")
         look.submenu = styles
         menu.addItem(look)
 
-        menu.addItem(ActionMenuItem("Abrir pasta de capturas") {
+        menu.addItem(ActionMenuItem(tr("Abrir pasta de capturas", "Open the captures folder")) {
             let folder = Prefs.takeOverCaptures ? CaptureTakeover.folder : CaptureTakeover.screenshotFolder()
             NSWorkspace.shared.open(folder)
         })
 
         menu.addItem(.separator())
 
-        menu.addItem(ActionMenuItem("Atalho: \(shortcut?.label ?? "nenhum")…") { [weak self] in
+        menu.addItem(ActionMenuItem(tr("Atalho: \(shortcut?.label ?? "nenhum")…", "Shortcut: \(shortcut?.label ?? "none")…")) { [weak self] in
             self?.changeShortcut()
         })
 
-        let login = ActionMenuItem("Abrir ao iniciar sessão") { [weak self] in self?.toggleOpenAtLogin() }
+        let login = ActionMenuItem(tr("Abrir ao iniciar sessão", "Open at login")) { [weak self] in self?.toggleOpenAtLogin() }
         login.state = SMAppService.mainApp.status == .enabled ? .on : .off
         menu.addItem(login)
 
         menu.addItem(.separator())
-        menu.addItem(ActionMenuItem("Encerrar a Gaveta", key: "q") { NSApp.terminate(nil) })
+        menu.addItem(ActionMenuItem(tr("Encerrar a Gaveta", "Quit Gaveta"), key: "q") { NSApp.terminate(nil) })
     }
 
     // MARK: Quick Look
@@ -318,8 +327,8 @@ final class AppController: NSObject, NSApplicationDelegate, NSMenuDelegate {
             }
         } catch {
             let alert = NSAlert()
-            alert.messageText = "Não foi possível mudar a abertura ao iniciar sessão"
-            alert.informativeText = "Mova a Gaveta para a pasta Aplicativos e tente de novo."
+            alert.messageText = tr("Não foi possível mudar a abertura ao iniciar sessão", "Couldn’t change Open at login")
+            alert.informativeText = tr("Mova a Gaveta para a pasta Aplicativos e tente de novo.", "Move Gaveta to the Applications folder and try again.")
             NSApp.activate(ignoringOtherApps: true)
             alert.runModal()
         }

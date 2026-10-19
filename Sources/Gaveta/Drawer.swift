@@ -13,9 +13,9 @@ struct Pin: Identifiable, Equatable {
 
     /// What the card says it is, under its picture.
     var kind: String {
-        if isVideo { return "Gravação" }
-        if url.lastPathComponent.hasPrefix("Imagem copiada") { return "Imagem copiada" }
-        return "Print"
+        if isVideo { return tr("Gravação", "Recording") }
+        if PasteboardWatcher.isCopiedImage(url) { return tr("Imagem copiada", "Copied image") }
+        return tr("Print", "Screenshot")
     }
 
     static func load(_ url: URL) async -> Pin? {

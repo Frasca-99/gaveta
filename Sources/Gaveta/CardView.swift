@@ -167,7 +167,7 @@ struct CloseMark: View {
 /// A rubber stamp pressed on a card that was just copied.
 struct Stamp: View {
     var body: some View {
-        Text("COPIADO")
+        Text(tr("COPIADO", "COPIED"))
             .font(Typewriter.font(20))
             .tracking(2.4)
             .foregroundStyle(Palette.stamp)
@@ -202,21 +202,22 @@ extension AnyTransition {
     }
 }
 
-/// "agora", "há 5 min", "há 2 h", "ontem", "14 de out".
+/// "agora", "há 5 min", "há 2 h", "ontem", "14 de out"; in English "now", "5 min ago", "2 h ago",
+/// "yesterday", "Oct 14".
 enum RelativeTime {
     private static let dayFormat: DateFormatter = {
         let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "pt_BR")
-        formatter.dateFormat = "d 'de' MMM"
+        formatter.locale = Language.locale
+        formatter.dateFormat = Language.isPortuguese ? "d 'de' MMM" : "MMM d"
         return formatter
     }()
 
     static func string(for date: Date, now: Date) -> String {
         let seconds = now.timeIntervalSince(date)
-        if seconds < 60 { return "agora" }
-        if seconds < 3600 { return "há \(Int(seconds / 60)) min" }
-        if Calendar.current.isDate(date, inSameDayAs: now) { return "há \(Int(seconds / 3600)) h" }
-        if Calendar.current.isDateInYesterday(date) { return "ontem" }
+        if seconds < 60 { return tr("agora", "now") }
+        if seconds < 3600 { return tr("há \(Int(seconds / 60)) min", "\(Int(seconds / 60)) min ago") }
+        if Calendar.current.isDate(date, inSameDayAs: now) { return tr("há \(Int(seconds / 3600)) h", "\(Int(seconds / 3600)) h ago") }
+        if Calendar.current.isDateInYesterday(date) { return tr("ontem", "yesterday") }
         return dayFormat.string(from: date).replacingOccurrences(of: ".", with: "")
     }
 }

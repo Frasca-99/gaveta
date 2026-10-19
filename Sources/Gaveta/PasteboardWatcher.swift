@@ -82,11 +82,17 @@ final class PasteboardWatcher {
         }
     }
 
+    /// An image the watcher saved from the clipboard, in either language.
+    nonisolated static func isCopiedImage(_ url: URL) -> Bool {
+        let name = url.lastPathComponent
+        return name.hasPrefix("Imagem copiada") || name.hasPrefix("Copied image")
+    }
+
     private static func uniqueURL(in folder: URL) -> URL {
         let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "pt_BR")
-        formatter.dateFormat = "yyyy-MM-dd 'às' HH.mm.ss"
-        let base = "Imagem copiada \(formatter.string(from: Date()))"
+        formatter.locale = Language.locale
+        formatter.dateFormat = Language.isPortuguese ? "yyyy-MM-dd 'às' HH.mm.ss" : "yyyy-MM-dd 'at' HH.mm.ss"
+        let base = "\(tr("Imagem copiada", "Copied image")) \(formatter.string(from: Date()))"
         var url = folder.appendingPathComponent(base).appendingPathExtension("png")
         var n = 2
         while FileManager.default.fileExists(atPath: url.path) {
